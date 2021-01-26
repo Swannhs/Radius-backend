@@ -136,7 +136,7 @@ class UserStatsController extends AppController {
 
         //Prime the days
         $slot_start = "$start_day 00:00:00";
-        $slot_end   = "$start_day 59:59:59";
+        $slot_end   = "$start_day 23:59:59";
         $days       = ["Monday", "Tuesday", "Wednesday", "Thusday", "Friday", "Saturday", "Sunday"];
         $count      = 1;
 
@@ -169,7 +169,7 @@ class UserStatsController extends AppController {
             $pieces     = explode('-',$start_day);
             $start_day  = date('Y-m-d',strtotime('+1 day', mktime(0, 0, 0, $pieces[1],$pieces[2], $pieces[0])));
             $slot_start = "$start_day 00:00:00";
-            $slot_end   = "$start_day 59:59:59";
+            $slot_end   = "$start_day 23:59:59";
             $count++;
         }
         return(['items' => $items, 'total_in' => $total_in, 'total_out' => $total_out, 'total_in_out' => $total_in_out]);
