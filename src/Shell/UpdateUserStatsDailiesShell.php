@@ -40,6 +40,7 @@ class UpdateUserStatsDailiesShell extends Shell{
         $this->loadModel('UserStatsDailies');
         $this->loadModel('UserSettings');
         $this->loadModel('DynamicClients');
+        $this->loadModel('Timezones');
     }
     
     public function main(){
@@ -227,14 +228,11 @@ class UpdateUserStatsDailiesShell extends Shell{
             ->first();
             
         if($e_dc){
-            if($e_dc !== ''){
-                Configure::load('MESHdesk','default'); 
-                $d_tz = Configure::read('MESHdesk.timezones'); //Read the defaults
-                foreach($d_tz as $z){
-                    if($z['id'] == $e_dc->timezone){
-                        $time_zone = $z['name'];
-                        break;
-                    }
+            if($e_dc !== ''){    
+                $tz_id  = $e_dc->timezone;
+                $ent    = $this->{'Timezones'}->find()->where(['Timezones.id' => $tz_id])->first();
+                if($ent){
+                    $time_zone = $ent->name;
                 }
             } 
         }

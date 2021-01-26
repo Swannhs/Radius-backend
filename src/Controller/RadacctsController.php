@@ -16,6 +16,7 @@ class RadacctsController extends AppController {
         $this->loadModel($this->main_model);
         $this->loadModel('Users');
         $this->loadModel('PermanentUsers');
+        $this->loadModel('Timezones');
         $this->loadComponent('Aa');
         $this->loadComponent('Kicker');
         $this->loadComponent('Counters');
@@ -244,16 +245,15 @@ class RadacctsController extends AppController {
         
         //==== TIMEZONE ======
         $tz = 'UTC';
+        
         if($this->request->getQuery('timezone_id') != null){
-            Configure::load('MESHdesk');
-            $tz_list   = Configure::read('MESHdesk.timezones');
-            foreach($tz_list as $i){
-                 if($this->request->getQuery('timezone_id') == $i['id']){
-                    $tz = $i['name'];
-                 }
+            $tz_id = $this->request->getQuery('timezone_id');
+            $ent = $this->{'Timezones'}->find()->where(['Timezones.id' => $tz_id])->first();
+            if($ent){
+                $tz = $ent->name;
             }
         }
-
+        
         //===== PAGING (MUST BE LAST) ======
         $limit  = 50;   //Defaults
         $page   = 1;

@@ -25,7 +25,7 @@ class RdClientsController extends AppController {
         $this->loadModel('DynamicClients');
         $this->loadModel('UserStats');
         $this->loadModel('Realms');
-
+        $this->loadModel('Timezones');
         
         $this->loadComponent('Counters');
         $this->loadComponent('GridFilter');
@@ -606,18 +606,13 @@ class RdClientsController extends AppController {
                             ->first();
             if($e_dc){
                 if($e_dc !== ''){
-                    Configure::load('MESHdesk','default'); 
-                    $d_tz = Configure::read('MESHdesk.timezones'); //Read the defaults
-                    foreach($d_tz as $z){
-                        if($z['id'] == $e_dc->timezone){
-                            $this->time_zone = $z['name'];
-                            break;
-                        }
+                    $tz_id  = $e_dc->timezone;
+                    $ent    = $this->{'Timezones'}->find()->where(['Timezones.id' => $tz_id])->first();
+                    if($ent){
+                        $time_zone = $ent->name;
                     }
                 } 
             }
         }
     }
-
-
 }
