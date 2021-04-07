@@ -5,7 +5,7 @@
     "type": "project",
     "license": "MIT",
     "require": {
-        "php": ">=5.6",
+        "php": ">=7.0",
         "cakephp/acl": "0.6.0",
         "cakephp/cakephp": "3.9.*",
         "cakephp/migrations": "^2.0.0",

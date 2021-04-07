@@ -44,8 +44,8 @@ return [
              * the following line and set the port accordingly
              */
             //'port' => 'non_standard_port_number',
-            'username' => 'rd',
-            'password' => 'rd',
+            'username' => 'root',
+            'password' => '',
             'database' => 'rd',
             'log' => true,
             'url' => env('DATABASE_URL', null),
