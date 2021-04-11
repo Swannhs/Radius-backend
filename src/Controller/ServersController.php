@@ -31,6 +31,7 @@ class ServersController extends AppController
      *
      * @return \Cake\Http\Response|null
      */
+
     public function index()
     {
         $this->request->allowMethod('get');
@@ -39,14 +40,14 @@ class ServersController extends AppController
 
             $this->set([
                 'server' => $server,
-                'status' => true,
-                '_serialize' => ['status', 'server']
+                'success' => true,
+                '_serialize' => ['success', 'server']
             ]);
         }else{
             $this->set([
                 'message' => 'Invalid user account',
-                'status' => false,
-                '_serialize' => ['status', 'message']
+                'success' => false,
+                '_serialize' => ['success', 'message']
             ]);
         }
     }
@@ -57,25 +58,35 @@ class ServersController extends AppController
         $this->request->allowMethod('post');
         if ($this->checkToken() == 44){
         $server = $this->Servers->newEntity();
-            $server = $this->Servers->patchEntity($server, $this->request->getData());
+            $server->set([
+                'type'=> $this->request->getData('type'),
+                'ssl_port'=> $this->request->getData('sslPort'),
+                'note'=> $this->request->getData('note'),
+                'name'=> $this->request->getData('name'),
+                'ip'=> $this->request->getData('ip'),
+                'cc'=> $this->request->getData('cc'),
+                'api_server_port'=> $this->request->getData('apiServerPort'),
+                'proxy_port'=> $this->request->getData('proxyPort'),
+            ]);
+
             if ($this->Servers->save($server)) {
                 $this->set([
                     'message' => 'Server generated successful',
-                    'status' => true,
-                    '_serialize' => ['status', 'message']
+                    'success' => true,
+                    '_serialize' => ['success', 'message']
                 ]);
             }else{
                 $this->set([
                     'message' => 'Failed to generate server',
-                    'status' => false,
-                    '_serialize' => ['status', 'message']
+                    'success' => false,
+                    '_serialize' => ['success', 'message']
                 ]);
             }
         }else{
             $this->set([
                 'message' => 'Invalid user account',
-                'status' => false,
-                '_serialize' => ['status', 'message']
+                'success' => false,
+                '_serialize' => ['success', 'message']
             ]);
         }
     }

@@ -43,16 +43,20 @@
             <td><?= $this->Number->format($balanceTransactionDetail->id) ?></td>
         </tr>
         <tr>
-            <th scope="row"><?= __('Sender User Id') ?></th>
-            <td><?= $this->Number->format($balanceTransactionDetail->sender_user_id) ?></td>
+            <th scope="row"><?= __('Receiver User Id') ?></th>
+            <td><?= $this->Number->format($balanceTransactionDetail->receiver_user_id) ?></td>
         </tr>
         <tr>
-            <th scope="row"><?= __('Payable') ?></th>
-            <td><?= $this->Number->format($balanceTransactionDetail->payable) ?></td>
+            <th scope="row"><?= __('Vouchers') ?></th>
+            <td><?= $this->Number->format($balanceTransactionDetail->vouchers) ?></td>
         </tr>
         <tr>
-            <th scope="row"><?= __('Receivable') ?></th>
-            <td><?= $this->Number->format($balanceTransactionDetail->receivable) ?></td>
+            <th scope="row"><?= __('Quantity Rate') ?></th>
+            <td><?= $this->Number->format($balanceTransactionDetail->quantity_rate) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Total') ?></th>
+            <td><?= $this->Number->format($balanceTransactionDetail->total) ?></td>
         </tr>
         <tr>
             <th scope="row"><?= __('Created') ?></th>

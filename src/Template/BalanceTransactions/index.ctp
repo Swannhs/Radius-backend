@@ -21,6 +21,7 @@
                 <th scope="col"><?= $this->Paginator->sort('user_id') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('payable') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('receivable') ?></th>
+                <th scope="col"><?= $this->Paginator->sort('received') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('created') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('modified') ?></th>
                 <th scope="col" class="actions"><?= __('Actions') ?></th>
@@ -33,6 +34,7 @@
                 <td><?= $balanceTransaction->has('user') ? $this->Html->link($balanceTransaction->user->name, ['controller' => 'Users', 'action' => 'view', $balanceTransaction->user->id]) : '' ?></td>
                 <td><?= $this->Number->format($balanceTransaction->payable) ?></td>
                 <td><?= $this->Number->format($balanceTransaction->receivable) ?></td>
+                <td><?= $this->Number->format($balanceTransaction->received) ?></td>
                 <td><?= h($balanceTransaction->created) ?></td>
                 <td><?= h($balanceTransaction->modified) ?></td>
                 <td class="actions">

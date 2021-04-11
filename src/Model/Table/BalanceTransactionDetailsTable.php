@@ -75,12 +75,16 @@ class BalanceTransactionDetailsTable extends Table
             ->notEmptyString('transaction');
 
         $validator
-            ->integer('payable')
-            ->allowEmptyString('payable');
+            ->integer('vouchers')
+            ->allowEmptyString('vouchers');
 
         $validator
-            ->integer('receivable')
-            ->allowEmptyString('receivable');
+            ->integer('quantity_rate')
+            ->allowEmptyString('quantity_rate');
+
+        $validator
+            ->integer('total')
+            ->allowEmptyString('total');
 
         return $validator;
     }

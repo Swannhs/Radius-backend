@@ -21,39 +21,39 @@ class UsersTable extends Table
         $this->addBehavior('Timestamp');
         $this->addBehavior('Tree');
         $this->addBehavior('Acl.Acl', ['type' => 'requester']);
-          
+
         $this->belongsTo('Groups');
         $this->belongsTo('Languages');
         $this->belongsTo('Countries');
-        
+
         $this->belongsTo('Owners', [
             'className'     => 'Users',
             'foreignKey'    => 'parent_id'
         ]);
-        
+
         $this->hasMany('UserNotes');
         $this->hasMany('UserSettings');
         $this->hasMany('TopUps',['dependent' => true,'cascadeCallbacks' =>true]);
-        $this->hasMany('TopUpTransactions',['dependent' => true,'cascadeCallbacks' =>true]); 
-        
-        $this->hasMany('FirmwareKeys');    
+        $this->hasMany('TopUpTransactions',['dependent' => true,'cascadeCallbacks' =>true]);
+
+        $this->hasMany('FirmwareKeys');
     }
-      
+
     public function find_access_provider_children($id){
 
-        $ap_name = Configure::read('group.ap'); 
+        $ap_name = Configure::read('group.ap');
         $descendants = $this->find('children', ['for' => $id]);
 
         foreach ($descendants as $c) {
             array_push($this->ap_children,array('id' => $c->id, 'username' => $c->username));
         }
-        return $this->ap_children;      
-    } 
-      
+        return $this->ap_children;
+    }
+
     public function find_parents($id){
 
         if(is_null($id)) { return __("orphaned"); }
-        
+
         //Test if the $id actually exists
         $query = $this->find('all')->where(['Users.id' => $id]);
         $row = $query->first();
@@ -81,9 +81,9 @@ class UsersTable extends Table
             return __("orphaned");
         }
     }
-    
+
     public function is_sibling_of($parent_id,$user_id){
-    
+
         //--If the owner is gone ---
         $query = $this->find('all')->where(['Users.id' => $user_id]);
         $row = $query->first();
@@ -91,7 +91,7 @@ class UsersTable extends Table
             return true; //We return true to allow the delete of orphan items
         }
         //--If the owner is gone ---
-    
+
         $q_r = $this->find('path',['for' => $user_id]);
         foreach($q_r as $i){
             $id = $i->id;
@@ -100,21 +100,21 @@ class UsersTable extends Table
             }
         }
         //No match
-        return false; 
+        return false;
     }
-    
+
     public function validationDefault(Validator $validator){
         $validator = new Validator();
         $validator
-            ->notEmpty('username', 'A usrname is required')
-            ->add('username', [ 
+            ->notEmpty('username', 'A username is required')
+            ->add('username', [
                 'usernameUnique' => [
                     'message' => 'The username you provided is already taken. Please provide another one.',
-                    'rule' => 'validateUnique', 
+                    'rule' => 'validateUnique',
                     'provider' => 'table'
                 ]
             ]);
         return $validator;
     }
-    
+
 }

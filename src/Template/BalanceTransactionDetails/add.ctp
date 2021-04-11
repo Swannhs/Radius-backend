@@ -22,12 +22,13 @@
         <legend><?= __('Add Balance Transaction Detail') ?></legend>
         <?php
             echo $this->Form->control('transaction');
-            echo $this->Form->control('sender_user_id');
+            echo $this->Form->control('receiver_user_id');
             echo $this->Form->control('user_id', ['options' => $users]);
             echo $this->Form->control('realm_id', ['options' => $realms]);
             echo $this->Form->control('profile_id', ['options' => $profiles]);
-            echo $this->Form->control('payable');
-            echo $this->Form->control('receivable');
+            echo $this->Form->control('vouchers');
+            echo $this->Form->control('quantity_rate');
+            echo $this->Form->control('total');
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

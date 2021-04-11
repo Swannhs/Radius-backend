@@ -24,7 +24,7 @@ class BalanceTransactionDetailsTableTest extends TestCase
      */
     public $fixtures = [
         'app.BalanceTransactionDetails',
-        'app.SenderUsers',
+        'app.ReceiverUsers',
         'app.Users',
         'app.Realms',
         'app.Profiles',

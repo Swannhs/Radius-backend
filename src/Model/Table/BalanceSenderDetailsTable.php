@@ -9,7 +9,6 @@ use Cake\Validation\Validator;
 /**
  * BalanceSenderDetails Model
  *
- * @property \App\Model\Table\SenderUsersTable&\Cake\ORM\Association\BelongsTo $SenderUsers
  * @property \App\Model\Table\UsersTable&\Cake\ORM\Association\BelongsTo $Users
  * @property \App\Model\Table\RealmsTable&\Cake\ORM\Association\BelongsTo $Realms
  * @property \App\Model\Table\ProfilesTable&\Cake\ORM\Association\BelongsTo $Profiles
@@ -43,10 +42,6 @@ class BalanceSenderDetailsTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->belongsTo('SenderUsers', [
-            'foreignKey' => 'sender_user_id',
-            'joinType' => 'INNER',
-        ]);
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
             'joinType' => 'INNER',
@@ -115,7 +110,6 @@ class BalanceSenderDetailsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->existsIn(['sender_user_id'], 'SenderUsers'));
         $rules->add($rules->existsIn(['user_id'], 'Users'));
         $rules->add($rules->existsIn(['realm_id'], 'Realms'));
         $rules->add($rules->existsIn(['profile_id'], 'Profiles'));

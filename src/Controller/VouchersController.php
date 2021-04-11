@@ -55,20 +55,6 @@ class VouchersController extends AppController
         return $user['id'];
     }
 
-    public function test()
-    {
-        $transactionsId = $this->VoucherTransactions->find()->where(['user_id' => $this->checkToken()])->select('id');
-        foreach ($transactionsId as $row) {
-            $id = $row->id;
-        }
-
-        $transaction = $this->VoucherTransactions->get($id);
-
-        $this->set([
-            'data' => $transaction->get('balance') - $this->request->getData('quantity'),
-            '_serialize' => 'data'
-        ]);
-    }
 
     public function exportCsv()
     {
@@ -612,10 +598,60 @@ class VouchersController extends AppController
                     '_serialize' => ['success', 'message']
                 ]);
             }
-        }else{
+        } else {
             $this->set([
                 'success' => false,
                 'message' => 'You have not enough balance',
+                '_serialize' => ['success', 'message']
+            ]);
+        }
+    }
+
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+
+
+    public function voucherReset()
+    {
+        $check = $this->Vouchers->find()
+            ->where(['id' => $this->request->getData('reset')])
+            ->where(['user_id' => $this->checkToken()]);
+
+        if ($check) {
+            $reset = $this->Vouchers->get($this->request->getData('reset'));
+            $password = bin2hex(random_bytes(3));
+            $reset->set([
+                'password' => $password,
+                'extra_name' => '',
+                'extra_value' => '',
+                'time_valid' => $reset->get('time_valid')
+            ]);
+            if ($this->Vouchers->save($reset)) {
+                $this->set([
+                    'message' => 'Operation successful',
+                    'success' => true,
+                    '_serialize' => ['success', 'message']
+                ]);
+            } else {
+                $this->set([
+                    'message' => 'Something is went wrong in our system',
+                    'success' => false,
+                    '_serialize' => ['success', 'message']
+                ]);
+            }
+        } else {
+            $this->set([
+                'message' => 'You are denied to do this operation',
+                'success' => false,
                 '_serialize' => ['success', 'message']
             ]);
         }

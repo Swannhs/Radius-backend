@@ -20,7 +20,7 @@ class BalanceTransactionDetailsController extends AppController
     public function index()
     {
         $this->paginate = [
-            'contain' => ['SenderUsers', 'Users', 'Realms', 'Profiles'],
+            'contain' => ['ReceiverUsers', 'Users', 'Realms', 'Profiles'],
         ];
         $balanceTransactionDetails = $this->paginate($this->BalanceTransactionDetails);
 
@@ -37,7 +37,7 @@ class BalanceTransactionDetailsController extends AppController
     public function view($id = null)
     {
         $balanceTransactionDetail = $this->BalanceTransactionDetails->get($id, [
-            'contain' => ['SenderUsers', 'Users', 'Realms', 'Profiles'],
+            'contain' => ['ReceiverUsers', 'Users', 'Realms', 'Profiles'],
         ]);
 
         $this->set('balanceTransactionDetail', $balanceTransactionDetail);
@@ -60,11 +60,11 @@ class BalanceTransactionDetailsController extends AppController
             }
             $this->Flash->error(__('The balance transaction detail could not be saved. Please, try again.'));
         }
-        $senderUsers = $this->BalanceTransactionDetails->SenderUsers->find('list', ['limit' => 200]);
+        $receiverUsers = $this->BalanceTransactionDetails->ReceiverUsers->find('list', ['limit' => 200]);
         $users = $this->BalanceTransactionDetails->Users->find('list', ['limit' => 200]);
         $realms = $this->BalanceTransactionDetails->Realms->find('list', ['limit' => 200]);
         $profiles = $this->BalanceTransactionDetails->Profiles->find('list', ['limit' => 200]);
-        $this->set(compact('balanceTransactionDetail', 'senderUsers', 'users', 'realms', 'profiles'));
+        $this->set(compact('balanceTransactionDetail', 'receiverUsers', 'users', 'realms', 'profiles'));
     }
 
     /**
@@ -88,11 +88,11 @@ class BalanceTransactionDetailsController extends AppController
             }
             $this->Flash->error(__('The balance transaction detail could not be saved. Please, try again.'));
         }
-        $senderUsers = $this->BalanceTransactionDetails->SenderUsers->find('list', ['limit' => 200]);
+        $receiverUsers = $this->BalanceTransactionDetails->ReceiverUsers->find('list', ['limit' => 200]);
         $users = $this->BalanceTransactionDetails->Users->find('list', ['limit' => 200]);
         $realms = $this->BalanceTransactionDetails->Realms->find('list', ['limit' => 200]);
         $profiles = $this->BalanceTransactionDetails->Profiles->find('list', ['limit' => 200]);
-        $this->set(compact('balanceTransactionDetail', 'senderUsers', 'users', 'realms', 'profiles'));
+        $this->set(compact('balanceTransactionDetail', 'receiverUsers', 'users', 'realms', 'profiles'));
     }
 
     /**

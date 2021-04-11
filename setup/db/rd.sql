@@ -20,7 +20,7 @@
 --
 DROP TABLE IF EXISTS `servers`;
 CREATE TABLE `servers`
-    (
+(
     `id`         INT         NOT NULL AUTO_INCREMENT,
     `type`       VARCHAR(50) NOT NULL,
     `name`       VARCHAR(50) NOT NULL,
@@ -31,22 +31,22 @@ CREATE TABLE `servers`
     `api_server_port`       VARCHAR(50) NOT NULL,
     `note`       VARCHAR(50) NOT NULL,
     PRIMARY KEY (`id`)
-    )ENGINE = InnoDB
+)ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
 DROP TABLE IF EXISTS `server_realms`;
 CREATE TABLE `server_realms`
-    (
+(
     `id`         INT         NOT NULL AUTO_INCREMENT,
     `server_id`    INT NOT NULL,
     `realm_id`    INT NOT NULL,
     PRIMARY KEY (`id`)
-    )ENGINE = InnoDB
+)ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
 DROP TABLE IF EXISTS `tweaks`;
 CREATE TABLE `tweaks`
-    (
+(
     `id`         INT         NOT NULL AUTO_INCREMENT,
     `vendor`       VARCHAR(50) NOT NULL,
     `name`       VARCHAR(50) NOT NULL,
@@ -55,17 +55,17 @@ CREATE TABLE `tweaks`
     `payload`       VARCHAR(50) NOT NULL,
     `note`       VARCHAR(50) NOT NULL,
     PRIMARY KEY (`id`)
-    )ENGINE = InnoDB
+)ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
 DROP TABLE IF EXISTS `tweak_realms`;
 CREATE TABLE `tweak_realms`
-    (
+(
     `id`         INT         NOT NULL AUTO_INCREMENT,
     `tweak_id`    INT NOT NULL,
     `realm_id`    INT NOT NULL,
     PRIMARY KEY (`id`)
-    )ENGINE = InnoDB
+)ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
 DROP TABLE IF EXISTS `balance_transactions`;
@@ -75,25 +75,27 @@ CREATE TABLE `balance_transactions`
     `user_id`    INT         NOT NULL,
     `payable`    INT NULL,
     `receivable` INT NULL,
+    `received`   INT NULL,
     `created`    DATETIME NULL,
     `modified`   DATETIME NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 insert into balance_transactions
-values (1, 44, 0, 0, CURRENT_DATE, CURRENT_DATE);
+values (1, 44, 0, 0, 0, CURRENT_DATE, CURRENT_DATE);
 
 DROP TABLE IF EXISTS `balance_transaction_details`;
 CREATE TABLE `balance_transaction_details`
 (
     `id`         INT         NOT NULL AUTO_INCREMENT,
-    `transaction`       VARCHAR(50) NOT NULL,
-    `sender_user_id`    INT         NOT NULL,
+    `transaction`            VARCHAR(50) NOT NULL,
+    `receiver_user_id`    INT         NOT NULL,
     `user_id`    INT         NOT NULL,
     `realm_id`   INT         NOT NULL,
     `profile_id` INT         NOT NULL,
-    `payable`    INT NULL,
-    `receivable` INT NULL,
+    `vouchers`    INT NULL,
+    `quantity_rate` INT NULL,
+    `total` INT NULL,
     `created`    DATETIME NULL,
     `modified`   DATETIME NULL,
     PRIMARY KEY (`id`)
@@ -112,7 +114,6 @@ CREATE TABLE `balance_sender_details`
     `profile_id`        INT         NOT NULL,
     `payable`           INT NULL,
     `receivable`        INT NULL,
-    `received`          INT NULL,
     `sent`              INT NULL,
     `status`            BOOLEAN,
     `reference`         INT NULL,
@@ -134,7 +135,6 @@ CREATE TABLE `balance_receiver_details`
     `payable`           INT NULL,
     `receivable`        INT NULL,
     `received`          INT NULL,
-    `sent`              INT NULL,
     `status`            BOOLEAN,
     `reference`         INT NULL,
     `created`           DATETIME NULL,
@@ -2846,7 +2846,7 @@ LOCK TABLES `dynamic_pages` WRITE;
 INSERT INTO `dynamic_pages`
 VALUES (7, 3, 'Welcome to Struisbaai',
         '<font color=\"0000FF\"><font size=\"3\">You are in a High Speed Internet Zone!<br></font></font><ul><li>Thanks to the vibrant community, you can now enjoy being connected 24/7 @ speeds of up to 10Mb/s</li><li>Ideal for watching HD movies over the Internet</li><li>Budget connectivity is also available <br></li></ul><p><br></p>',
-        '2013-05-23 10:30:58', '2013-05-28 21:45:59');
+           '2013-05-23 10:30:58', '2013-05-28 21:45:59');
 /*!40000 ALTER TABLE `dynamic_pages`
     ENABLE KEYS */;
 UNLOCK TABLES;
@@ -7312,7 +7312,7 @@ CREATE TABLE `vouchers`
     `profile`             varchar(50)  NOT NULL                    DEFAULT '',
     `profile_id`          int(11)                                  DEFAULT NULL,
     `expire`              datetime                                 DEFAULT NULL,
-    `time_valid`          varchar(10)  NOT NULL                    DEFAULT '',
+    `time_valid`          varchar(20)  NOT NULL                    DEFAULT '',
     `data_used`           bigint(20)                               DEFAULT NULL,
     `data_cap`            bigint(20)                               DEFAULT NULL,
     `time_used`           int(12)                                  DEFAULT NULL,

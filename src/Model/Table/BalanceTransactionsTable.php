@@ -66,6 +66,10 @@ class BalanceTransactionsTable extends Table
             ->integer('receivable')
             ->allowEmptyString('receivable');
 
+        $validator
+            ->integer('received')
+            ->allowEmptyString('received');
+
         return $validator;
     }
 

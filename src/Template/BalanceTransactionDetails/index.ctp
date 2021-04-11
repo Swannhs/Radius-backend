@@ -23,12 +23,13 @@
             <tr>
                 <th scope="col"><?= $this->Paginator->sort('id') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('transaction') ?></th>
-                <th scope="col"><?= $this->Paginator->sort('sender_user_id') ?></th>
+                <th scope="col"><?= $this->Paginator->sort('receiver_user_id') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('user_id') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('realm_id') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('profile_id') ?></th>
-                <th scope="col"><?= $this->Paginator->sort('payable') ?></th>
-                <th scope="col"><?= $this->Paginator->sort('receivable') ?></th>
+                <th scope="col"><?= $this->Paginator->sort('vouchers') ?></th>
+                <th scope="col"><?= $this->Paginator->sort('quantity_rate') ?></th>
+                <th scope="col"><?= $this->Paginator->sort('total') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('created') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('modified') ?></th>
                 <th scope="col" class="actions"><?= __('Actions') ?></th>
@@ -39,12 +40,13 @@
             <tr>
                 <td><?= $this->Number->format($balanceTransactionDetail->id) ?></td>
                 <td><?= h($balanceTransactionDetail->transaction) ?></td>
-                <td><?= $this->Number->format($balanceTransactionDetail->sender_user_id) ?></td>
+                <td><?= $this->Number->format($balanceTransactionDetail->receiver_user_id) ?></td>
                 <td><?= $balanceTransactionDetail->has('user') ? $this->Html->link($balanceTransactionDetail->user->name, ['controller' => 'Users', 'action' => 'view', $balanceTransactionDetail->user->id]) : '' ?></td>
                 <td><?= $balanceTransactionDetail->has('realm') ? $this->Html->link($balanceTransactionDetail->realm->name, ['controller' => 'Realms', 'action' => 'view', $balanceTransactionDetail->realm->id]) : '' ?></td>
                 <td><?= $balanceTransactionDetail->has('profile') ? $this->Html->link($balanceTransactionDetail->profile->name, ['controller' => 'Profiles', 'action' => 'view', $balanceTransactionDetail->profile->id]) : '' ?></td>
-                <td><?= $this->Number->format($balanceTransactionDetail->payable) ?></td>
-                <td><?= $this->Number->format($balanceTransactionDetail->receivable) ?></td>
+                <td><?= $this->Number->format($balanceTransactionDetail->vouchers) ?></td>
+                <td><?= $this->Number->format($balanceTransactionDetail->quantity_rate) ?></td>
+                <td><?= $this->Number->format($balanceTransactionDetail->total) ?></td>
                 <td><?= h($balanceTransactionDetail->created) ?></td>
                 <td><?= h($balanceTransactionDetail->modified) ?></td>
                 <td class="actions">

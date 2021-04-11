@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Controller\AppController;
@@ -7,7 +8,6 @@ use App\Controller\AppController;
  * BalanceTransactionDetails Controller
  *
  * @property \App\Model\Table\BalanceTransactionsTable $BalanceTransactions
- * @property \App\Model\Table\BalanceTransactionDetailsTable $BalanceTransactionDetails
  * @property \App\Model\Table\UsersTable $Users
  * @property \App\Model\Table\BalanceSenderDetailsTable $BalanceSenderDetails
  * @property \App\Model\Table\BalanceReceiverDetailsTable $BalanceReceiverDetails
@@ -27,27 +27,90 @@ class BalanceTransactionsController extends AppController
         $this->loadComponent('Aa');
     }
 
+    function checkToken()
+    {
+        $user = $this->Aa->user_for_token($this);
+        return $user['id'];
+    }
+
+    public function test()
+    {
+
+        $send_items = $this->BalanceSenderDetails
+            ->find()
+            ->where(['sender_user_id' => $this->checkToken()])
+            ->contain(['Users']);
+        $this->set([
+            'data' => $send_items,
+            '_serialize' => ['data']
+        ]);
+    }
+
     public function index()
     {
         $this->request->allowMethod('get');
         if ($this->checkToken()) {
+//            -----------------------------------------------Check for admin only-----------------------------
             if ($this->checkToken() == 44) {
-                $items = $this->BalanceSenderDetails
+                $item = $this->BalanceTransactions
                     ->find()
-                    ->contain(['Users', 'Realms', 'Profiles']);
+                    ->contain('Users');
                 $this->set([
-                    'items' => $items,
-                    '_serialize' => ['items']
+                    'item' => $item,
+                    'status' => true,
+                    '_serialize' => ['item', 'status']
+                ]);
+            } else {
+                $item = $this->BalanceTransactions
+                    ->find()
+                    ->where(['user_id' => $this->checkToken()]);
+                $this->set([
+                    'item' => $item,
+                    'status' => true,
+                    '_serialize' => ['item', 'status']
+                ]);
+            }
+
+        } else {
+            $this->set([
+                'message' => 'Invalid user account',
+                'status' => false,
+                '_serialize' => ['message', 'status']
+            ]);
+        }
+    }
+
+    public function view()
+    {
+        $this->request->allowMethod('get');
+        if ($this->checkToken()) {
+            if ($this->checkToken() == 44) {
+                $key = $this->BalanceTransactions->get($this->request->query('key'));
+                $send_items = $this->BalanceSenderDetails
+                    ->find()
+                    ->where(['sender_user_id' => $key->get('user_id')])
+                    ->contain(['Users']);
+
+                $received_items = $this->BalanceReceiverDetails
+                    ->find()
+                    ->where(['receiver_user_id' => $key->get('user_id')])
+                    ->contain(['Users']);
+
+
+                $this->set([
+                    'send' => $send_items,
+                    'received' => $received_items,
+                    '_serialize' => ['send', 'received']
                 ]);
             } else {
                 $send_items = $this->BalanceSenderDetails
                     ->find()
-                    ->where(['sender_user_id'=> $this->checkToken()])
-                    ->contain(['Users', 'Realms', 'Profiles']);
+                    ->where(['sender_user_id' => $this->checkToken()])
+                    ->contain(['Users']);
                 $received_items = $this->BalanceReceiverDetails
                     ->find()
-                    ->where(['receiver_user_id'=>$this->checkToken()])
-                    ->contain(['Users', 'Realms', 'Profiles']);
+                    ->where(['receiver_user_id' => $this->checkToken()])
+                    ->contain(['Users']);
 
                 $this->set([
                     'send' => $send_items,
@@ -64,11 +127,6 @@ class BalanceTransactionsController extends AppController
         }
     }
 
-    function checkToken()
-    {
-        $user = $this->Aa->user_for_token($this);
-        return $user['id'];
-    }
 
     function checkSenderBalance(): int
     {
@@ -100,21 +158,37 @@ class BalanceTransactionsController extends AppController
         return $id;
     }
 
-
-
-    public function test()
+    public function parent()
     {
-        $data = $this->Users->get($this->checkToken())->get('username');
-
+        $id = $this->Aa->user_for_token($this);
+        $user = $this->Users->get($id['id']);
+        $parent_user = $this->Users->get($user['parent_id']);
         $this->set([
-            'data' => $data,
-            '_serialize' => 'data'
+            'id' => $parent_user['id'],
+            'username' => $parent_user['username'],
+            '_serialize' => ['id', 'username']
         ]);
     }
 
-    private function balanceTransactionDetails(){
-        $tnx_id = bin2hex(random_bytes(5));
 
+    public function ConfirmBalance()
+    {
+        $confirmSender = $this->BalanceTransactions->get($this->checkSenderBalance());
+        $confirmSender->set([
+            'payable' => $confirmSender->get('payable') - $this->request->getData('paid'),
+        ]);
+
+        $confirmReceiver = $this->BalanceTransactions->get($this->checkReceiverBalance());
+        $confirmReceiver->set([
+            'receivable' => $confirmReceiver->get('receivable') - $this->request->getData('paid'),
+            'received' => $confirmReceiver->get('received') + $this->request->getData('paid')
+        ]);
+        return $this->BalanceTransactions->save($confirmSender) && $this->BalanceTransactions->save($confirmReceiver);
+    }
+
+    private function balanceTransactionDetails()
+    {
+        $tnx_id = bin2hex(random_bytes(5));
 
         $balanceTransactionSender = $this->BalanceTransactions->get($this->checkSenderBalance());
         $balanceSenderDetails = $this->BalanceSenderDetails->newEntity();
@@ -122,13 +196,10 @@ class BalanceTransactionsController extends AppController
             'transaction' => $tnx_id,
             'user_id' => $this->request->getData('partner_user_id'),
             'sender_user_id' => $this->checkToken(),
-            'profile_id' => $this->request->getData('profile_id'),
-            'realm_id' => $this->request->getData('realm_id'),
             'sent' => $this->request->getData('paid'),
-            'received' => 0,
             'payable' => $balanceTransactionSender->get('payable'),
             'receivable' => $balanceTransactionSender->get('receivable'),
-            'status' => false
+            'status' => true
         ]);
 
         $balanceTransactionReceiver = $this->BalanceTransactions->get($this->checkReceiverBalance());
@@ -137,19 +208,20 @@ class BalanceTransactionsController extends AppController
             'transaction' => $tnx_id,
             'receiver_user_id' => $this->request->getData('partner_user_id'),
             'user_id' => $this->checkToken(),
-            'profile_id' => $this->request->getData('profile_id'),
-            'realm_id' => $this->request->getData('realm_id'),
-            'sent' => 0,
             'received' => $this->request->getData('paid'),
             'payable' => $balanceTransactionReceiver->get('payable'),
             'receivable' => $balanceTransactionReceiver->get('receivable'),
-            'status' => false
+            'status' => true
         ]);
-        return
-            $this->BalanceSenderDetails
-                ->save($balanceSenderDetails) &&
-            $this->BalanceReceiverDetails
-                ->save($balanceReceiverDetails);
+        if ($this->ConfirmBalance()) {
+            return
+                $this->BalanceSenderDetails
+                    ->save($balanceSenderDetails) &&
+                $this->BalanceReceiverDetails
+                    ->save($balanceReceiverDetails);
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -160,7 +232,7 @@ class BalanceTransactionsController extends AppController
     public function add()
     {
         $this->request->allowMethod('post');
-        if ($this->checkReceiverBalance()){
+        if ($this->checkReceiverBalance()) {
             if ($this->checkSenderBalance()) {
 
                 if ($this->balanceTransactionDetails()) {
@@ -176,15 +248,14 @@ class BalanceTransactionsController extends AppController
                         '_serialize' => ['message', 'status']
                     ]);
                 }
-            }
-            else {
+            } else {
                 $this->set([
                     'message' => 'Invalid user account',
                     'status' => false,
                     '_serialize' => ['message', 'status']
                 ]);
             }
-        } else{
+        } else {
             $this->set([
                 'message' => 'Invalid partner account',
                 'status' => false,
@@ -194,7 +265,8 @@ class BalanceTransactionsController extends AppController
     }
 
 
-    public function confirm(){
+    public function confirm()
+    {
 
     }
 }

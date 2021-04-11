@@ -522,7 +522,8 @@ class AccessProvidersController extends AppController
                 'user_id' => $new_id,
                 'user_name' => $entity->username,
                 'payable' => 0,
-                'receivable' => 0
+                'receivable' => 0,
+                'received' => 0,
             ]);
             if ($this->BalanceTransactions->save($balanceTransaction)) {
                 $message = 'Voucher balance generated successful';

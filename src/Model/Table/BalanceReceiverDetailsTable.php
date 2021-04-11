@@ -43,10 +43,6 @@ class BalanceReceiverDetailsTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->belongsTo('ReceiverUsers', [
-            'foreignKey' => 'receiver_user_id',
-            'joinType' => 'INNER',
-        ]);
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
             'joinType' => 'INNER',
@@ -115,7 +111,6 @@ class BalanceReceiverDetailsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->existsIn(['receiver_user_id'], 'ReceiverUsers'));
         $rules->add($rules->existsIn(['user_id'], 'Users'));
         $rules->add($rules->existsIn(['realm_id'], 'Realms'));
         $rules->add($rules->existsIn(['profile_id'], 'Profiles'));

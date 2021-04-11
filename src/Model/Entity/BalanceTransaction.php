@@ -10,6 +10,7 @@ use Cake\ORM\Entity;
  * @property int $user_id
  * @property int|null $payable
  * @property int|null $receivable
+ * @property int|null $received
  * @property \Cake\I18n\FrozenTime|null $created
  * @property \Cake\I18n\FrozenTime|null $modified
  *
@@ -30,6 +31,7 @@ class BalanceTransaction extends Entity
         'user_id' => true,
         'payable' => true,
         'receivable' => true,
+        'received' => true,
         'created' => true,
         'modified' => true,
         'user' => true,

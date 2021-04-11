@@ -25,6 +25,46 @@ class BalanceTransactionsControllerTest extends TestCase
     ];
 
     /**
+     * Test initialize method
+     *
+     * @return void
+     */
+    public function testInitialize()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test checkToken method
+     *
+     * @return void
+     */
+    public function testCheckToken()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test test method
+     *
+     * @return void
+     */
+    public function testTest()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test summary method
+     *
+     * @return void
+     */
+    public function testSummary()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
      * Test index method
      *
      * @return void
@@ -35,11 +75,41 @@ class BalanceTransactionsControllerTest extends TestCase
     }
 
     /**
-     * Test view method
+     * Test checkSenderBalance method
      *
      * @return void
      */
-    public function testView()
+    public function testCheckSenderBalance()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test checkReceiverBalance method
+     *
+     * @return void
+     */
+    public function testCheckReceiverBalance()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test parent method
+     *
+     * @return void
+     */
+    public function testParent()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test ConfirmBalance method
+     *
+     * @return void
+     */
+    public function testConfirmBalance()
     {
         $this->markTestIncomplete('Not implemented yet.');
     }
@@ -55,21 +125,11 @@ class BalanceTransactionsControllerTest extends TestCase
     }
 
     /**
-     * Test edit method
+     * Test confirm method
      *
      * @return void
      */
-    public function testEdit()
-    {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
-
-    /**
-     * Test delete method
-     *
-     * @return void
-     */
-    public function testDelete()
+    public function testConfirm()
     {
         $this->markTestIncomplete('Not implemented yet.');
     }

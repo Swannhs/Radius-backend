@@ -20,6 +20,7 @@
             echo $this->Form->control('user_id', ['options' => $users]);
             echo $this->Form->control('payable');
             echo $this->Form->control('receivable');
+            echo $this->Form->control('received');
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

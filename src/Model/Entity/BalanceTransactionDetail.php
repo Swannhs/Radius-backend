@@ -8,12 +8,13 @@ use Cake\ORM\Entity;
  *
  * @property int $id
  * @property string $transaction
- * @property int $sender_user_id
+ * @property int $receiver_user_id
  * @property int $user_id
  * @property int $realm_id
  * @property int $profile_id
- * @property int|null $payable
- * @property int|null $receivable
+ * @property int|null $vouchers
+ * @property int|null $quantity_rate
+ * @property int|null $total
  * @property \Cake\I18n\FrozenTime|null $created
  * @property \Cake\I18n\FrozenTime|null $modified
  *
@@ -34,15 +35,16 @@ class BalanceTransactionDetail extends Entity
      */
     protected $_accessible = [
         'transaction' => true,
-        'sender_user_id' => true,
+        'receiver_user_id' => true,
         'user_id' => true,
         'realm_id' => true,
         'profile_id' => true,
-        'payable' => true,
-        'receivable' => true,
+        'vouchers' => true,
+        'quantity_rate' => true,
+        'total' => true,
         'created' => true,
         'modified' => true,
-        'sender_user' => true,
+        'receiver_user' => true,
         'user' => true,
         'realm' => true,
         'profile' => true,

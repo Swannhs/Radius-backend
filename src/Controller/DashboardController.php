@@ -7,6 +7,13 @@ use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
 
+/**
+ * VoucherTransactions Controller
+ * @property \App\Model\Table\UsersTable $Users
+ * @property \App\Model\Table\VoucherTransactionsTable $VoucherTransactions
+ * @property \App\Model\Table\BalanceTransactionsTable $BalanceTransactions
+ * @property \App\Model\Table\VouchersTable $Vouchers
+ */
 class DashboardController extends AppController
 {
 
@@ -31,9 +38,106 @@ class DashboardController extends AppController
         $this->loadModel('Users');
         $this->loadModel('UserSettings');
         $this->loadModel('Realms');
+        $this->loadModel('VoucherTransactions');
+        $this->loadModel('Vouchers');
+        $this->loadModel('BalanceTransactions');
+
         $this->loadComponent('Aa');
         $this->loadComponent('WhiteLabel');
     }
+
+
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+
+
+    function checkTokenCustom()
+    {
+        $user = $this->Aa->user_for_token($this);
+        return $user['id'];
+    }
+
+
+//    --------------------------------------Voucher Start-----------------------------------------
+    public function voucher()
+    {
+
+        $voucherBalance = $this->VoucherTransactions->find()
+            ->where(['user_id' => $this->checkTokenCustom()])
+            ->select('balance');
+
+        $balance = 0;
+        foreach ($voucherBalance as $row) {
+            $balance = $row->balance;
+        }
+
+
+        $vouchers = $this->Vouchers->find()
+            ->where(['user_id' => $this->checkTokenCustom()])
+            ->count();
+
+        $active = $this->Vouchers->find()
+            ->where([
+                'user_id' => $this->checkTokenCustom(),
+                'status' => 'used'
+            ])
+            ->count();
+
+        $item = array();
+        $row = array();
+
+        $row['balance'] = $balance;
+        $row['active'] = $active;
+        $row['total'] = $vouchers;
+
+        array_push($item, $row);
+
+        $this->set([
+            'item' => $item,
+            '_serialize' => ['item']
+        ]);
+    }
+
+//    --------------------------------------Voucher End-----------------------------------------
+
+//    --------------------------------------Cash Start-----------------------------------------
+    public function cash()
+    {
+        $this->request->allowMethod('get');
+        $cash = $this->BalanceTransactions->find()
+            ->where(['user_id' => $this->checkTokenCustom()]);
+        $this->set([
+            'cash' => $cash,
+            '_serialize' => ['cash']
+        ]);
+    }
+//    --------------------------------------Cash End-----------------------------------------
+
+
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+
 
     public function getToken()
     {

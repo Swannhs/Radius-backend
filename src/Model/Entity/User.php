@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Model\Entity;
 
@@ -12,18 +12,18 @@ use Cake\ORM\TableRegistry;
  */
 class User extends Entity
 {
- 
-    protected function _setPassword($value){  
+
+    protected function _setPassword($value){
         $hasher = new WeakPasswordHasher();
         return $hasher->hash($value);
     }
-    
+
     protected function _setToken($value){
         if($value == ''){  //'' is a 'special' value that is suppose to generate a new token
             return Text::uuid();
         }
     }
-    
+
     public function parentNode(){
         if (!$this->id) {
             return null;
@@ -39,5 +39,9 @@ class User extends Entity
             return null;
         }
         return ['Groups' => ['id' => $groupId]]; //Change to 'Group'
-    }     
+    }
+    protected $_hidden = [
+        'password',
+        'token',
+    ];
 }

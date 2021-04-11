@@ -14,17 +14,14 @@ use Cake\ORM\Entity;
  * @property int $profile_id
  * @property int|null $payable
  * @property int|null $receivable
- * @property int|null $received
  * @property int|null $sent
  * @property bool|null $status
  * @property int|null $reference
  * @property \Cake\I18n\FrozenTime|null $created
  * @property \Cake\I18n\FrozenTime|null $modified
  *
- * @property \App\Model\Entity\SenderUser $sender_user
  * @property \App\Model\Entity\User $user
  * @property \App\Model\Entity\Realm $realm
- * @property \App\Model\Entity\Profile $profile
  */
 class BalanceSenderDetail extends Entity
 {
@@ -44,7 +41,6 @@ class BalanceSenderDetail extends Entity
         'realm_id' => true,
         'profile_id' => true,
         'payable' => true,
-        'receivable' => true,
         'received' => true,
         'sent' => true,
         'status' => true,
