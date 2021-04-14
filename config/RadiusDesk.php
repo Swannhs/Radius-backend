@@ -56,16 +56,16 @@ $config['nas_types'][5]     = array('name' => 'Telkom',                 'id' => 
 
 
 
-$config['paths']['wallpaper_location']  = "/rd/resources/images/wallpapers/";
-$config['paths']['dynamic_photos']      = "/cake3/rd_cake/img/dynamic_photos/";   
-$config['paths']['dynamic_detail_icon'] = "/cake3/rd_cake/img/dynamic_details/";
+$config['paths']['wallpaper_location']  = "/cake3/rd_cake/webroot/img/wallpapers/";
+$config['paths']['dynamic_photos']      = "/cake3/rd_cake/webroot/img/dynamic_photos/";   
+$config['paths']['dynamic_detail_icon'] = "/cake3/rd_cake/webroot/img/dynamic_details/";
 $config['paths']['real_photo_path']     = "/cake3/rd_cake/webroot/img/dynamic_photos/";
-$config['paths']['absolute_photo_path'] = "/var/www/html/cake3/rd_cake/webroot/img/dynamic_photos/";
+$config['paths']['absolute_photo_path'] = env('APP_HOME', '/usr/share/nginx/html')."/webroot/img/dynamic_photos/";
 
-$config['paths']['ap_logo_path']        = "/cake3/rd_cake/img/access_providers/";
+$config['paths']['ap_logo_path']        = "/cake3/rd_cake/webroot/img/access_providers/";
 $config['paths']['real_ap_logo_path']   = "/cake3/rd_cake/webroot/img/access_providers/";
 
-$config['paths']['geo_data']            = '/var/www/html/cake3/rd_cake/setup/GeoIp/data/GeoLite2-City.mmdb';
+$config['paths']['geo_data']            = env('APP_HOME', '/usr/share/nginx/html')."/setup/GeoIp/data/GeoLite2-City.mmdb";
 
 
 //Define default settings for the users:
@@ -197,7 +197,7 @@ TIP: Also remember to change the values in:
 ApProfiles.php
 MESHdesk.php
 */
-$config['DynamicClients']['shared_secret'] = 'testing123';
+$config['DynamicClients']['shared_secret'] = env('RADIUS_SECRET', 'testing123');
 
 //=== EXPERIMENTAL STUFF =====
 //--Show experimental menus---
@@ -223,7 +223,7 @@ $config['Admin']['i18n'][0]     = array(
     'language'  => 'English',
     'text'      =>	'United Kingdom -> English',
     'rtl'       => false,
-    'icon_file' =>	'/cake3/rd_cake/img/flags/GB.png',  
+    'icon_file' =>	'/cake3/rd_cake/webroot/img/flags/GB.png',  
     'active'    => true
 );
 

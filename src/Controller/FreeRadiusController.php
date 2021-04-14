@@ -6,8 +6,8 @@ class FreeRadiusController extends AppController {
 
     public $name                = 'PhpPhrases';
     public $base                = "Access Providers/Controllers/FreeRadius/"; //Required for AP Rights
-    protected $radmin_wrapper   = '/var/www/html/cake3/rd_cake/setup/scripts/radmin_wrapper.pl';
-    protected $radscenario      = '/var/www/html/cake3/rd_cake/setup/scripts/radscenario.pl';
+    protected $radmin_wrapper   = '/cake3/rd_cake/setup/scripts/radmin_wrapper.pl';
+    protected $radscenario      = '/cake3/rd_cake/setup/scripts/radscenario.pl';
 
     public function initialize()
     {
