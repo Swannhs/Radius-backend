@@ -223,7 +223,7 @@ $config['Admin']['i18n'][0]     = array(
     'language'  => 'English',
     'text'      =>	'United Kingdom -> English',
     'rtl'       => false,
-    'icon_file' =>	'/cake3/rd_cake/webroot/img/flags/GB.png',  
+    'icon_file' =>	'/webroot/img/flags/GB.png',  
     'active'    => true
 );
 
