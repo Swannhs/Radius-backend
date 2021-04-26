@@ -74,6 +74,7 @@ CREATE TABLE `balance_transactions`
     `id`         INT         NOT NULL AUTO_INCREMENT,
     `user_id`    INT         NOT NULL,
     `payable`    INT NULL,
+    `paid`       INT NULL,
     `receivable` INT NULL,
     `received`   INT NULL,
     `created`    DATETIME NULL,
@@ -82,7 +83,7 @@ CREATE TABLE `balance_transactions`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 insert into balance_transactions
-values (1, 44, 0, 0, 0, CURRENT_DATE, CURRENT_DATE);
+values (1, 44, 0, 0, 0, 0, CURRENT_DATE, CURRENT_DATE);
 
 DROP TABLE IF EXISTS `balance_transaction_details`;
 CREATE TABLE `balance_transaction_details`

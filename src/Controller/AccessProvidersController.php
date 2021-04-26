@@ -579,6 +579,7 @@ class AccessProvidersController extends AppController
                 'user_id' => $new_id,
                 'user_name' => $entity->username,
                 'payable' => 0,
+                'paid' => 0,
                 'receivable' => 0,
                 'received' => 0,
             ]);
@@ -625,6 +626,8 @@ class AccessProvidersController extends AppController
                 $items['id'] = $q_r->id;
                 $items['username'] = $q_r->username;
                 $items['name'] = $q_r->name;
+                $items['role'] = $q_r->role;
+                $items['active'] = $q_r->active;
                 $items['surname'] = $q_r->surname;
                 $items['phone'] = $q_r->phone;
                 $items['address'] = $q_r->address;

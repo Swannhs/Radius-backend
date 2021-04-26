@@ -51,8 +51,8 @@ class BalanceTransactionsController extends AppController
         $this->request->allowMethod('get');
         if ($this->checkToken()) {
 //            -----------------------------------------------Check for admin only-----------------------------
-            $admin = $this->Users->get($this->checkToken());
-            if ($admin->get('parent_id') == null) {
+            $user = $this->Users->get($this->checkToken());
+            if (!$user->get('parent_id')) {
                 $item = $this->BalanceTransactions
                     ->find()
                     ->contain('Users');
@@ -64,7 +64,8 @@ class BalanceTransactionsController extends AppController
             } else {
                 $item = $this->BalanceTransactions
                     ->find()
-                    ->where(['user_id' => $this->checkToken()]);
+                    ->where(['user_id' => $this->checkToken()])
+                    ->contain('Users');
                 $this->set([
                     'item' => $item,
                     'status' => true,
@@ -85,8 +86,8 @@ class BalanceTransactionsController extends AppController
     {
         $this->request->allowMethod('get');
         if ($this->checkToken()) {
-            $admin = $this->Users->get($this->checkToken());
-            if ($admin->get('parent_id') == null) {
+            $user = $this->Users->get($this->checkToken());
+            if (!$user->get('parent_id')) {
                 $key = $this->BalanceTransactions->get($this->request->query('key'));
                 $send_items = $this->BalanceSenderDetails
                     ->find()
@@ -178,6 +179,7 @@ class BalanceTransactionsController extends AppController
         $confirmSender = $this->BalanceTransactions->get($this->checkSenderBalance());
         $confirmSender->set([
             'payable' => $confirmSender->get('payable') - $this->request->getData('paid'),
+            'paid' => $confirmSender->get('paid') + $this->request->getData('paid'),
         ]);
 
         $confirmReceiver = $this->BalanceTransactions->get($this->checkReceiverBalance());
