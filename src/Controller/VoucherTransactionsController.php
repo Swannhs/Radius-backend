@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Cake\Core\Configure;
 use Cake\Database\Exception;
 
 /**
@@ -11,8 +12,9 @@ use Cake\Database\Exception;
  * @property \App\Model\Table\BalanceTransactionsTable $BalanceTransactions
  * @property \App\Model\Table\BalanceSenderDetailsTable $BalanceSenderDetails
  * @property \App\Model\Table\BalanceReceiverDetailsTable $BalanceReceiverDetails
- *  * @property \App\Model\Table\BalanceTransactionDetailsTable $BalanceTransactionDetails
+ * @property \App\Model\Table\BalanceTransactionDetailsTable $BalanceTransactionDetails
  * @property \App\Model\Table\VoucherTransactionsTable $VoucherTransactions
+ * @property \App\Model\Table\RealmsTable $Realms
  * @property \App\Model\Table\VoucherTransactionSendDetailsTable $VoucherTransactionSendDetails
  * @property \App\Model\Table\VoucherTransactionReceivedDetailsTable $VoucherTransactionReceivedDetails
  * @method \App\Model\Entity\VoucherTransaction[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
@@ -40,6 +42,7 @@ class VoucherTransactionsController extends AppController
         $this->loadModel('VoucherTransactionSendDetails');
         $this->loadModel('VoucherTransactionReceivedDetails');
         $this->loadComponent('Aa');
+        $this->loadComponent('RealmAcl');
     }
 
 //------------------------------ Only for valid token----------------------------------
@@ -256,6 +259,59 @@ class VoucherTransactionsController extends AppController
         return $this->VoucherTransactions->save($send_amount) && $this->VoucherTransactions->save($receive_amount);
     }
 
+    public function group()
+    {
+
+        if (isset($this->request->data['partner_user_id'])) {
+
+            //Make sure the $ap_id is a child of $user_id - perhaps we should sub-class the Behaviour...
+            //TODO Complete this check
+
+            $temp_debug = Configure::read('debug');
+            Configure::write('debug', 0); // turn off debugging
+
+
+            $ap_id = $this->request->data('partner_user_id');
+            $id = $this->request->data['id'];
+
+            try {
+
+                $this->Acl->allow(
+                    array('model' => 'Users', 'foreign_key' => $ap_id),
+                    array('model' => 'Realms', 'foreign_key' => $id), 'create');
+
+                $this->Acl->allow(
+                    array('model' => 'Users', 'foreign_key' => $ap_id),
+                    array('model' => 'Realms', 'foreign_key' => $id), 'read');
+
+                $this->Acl->allow(
+                    array('model' => 'Users', 'foreign_key' => $ap_id),
+                    array('model' => 'Realms', 'foreign_key' => $id), 'update');
+
+                $this->Acl->allow(
+                    array('model' => 'Users', 'foreign_key' => $ap_id),
+                    array('model' => 'Realms', 'foreign_key' => $id), 'delete');
+
+                return true;
+
+            } catch (\Exception $e) {
+                return false;
+            }
+//            Configure::write('debug', $temp_debug); // turn off debugging
+        }
+    }
+
+    public function test()
+    {
+        $data['user_id'] = $this->request->query('ap_id');
+        $data['realm_id'] = $this->request->data('realm_id');
+        $data['realm'] = $this->Realms->get($data['realm_id']);
+        $this->set([
+            'data' => $data,
+            '_serialize' => 'data'
+        ]);
+    }
+
 //            --------------------------------------- Active User First-------------------------------
 
     /**
@@ -274,7 +330,7 @@ class VoucherTransactionsController extends AppController
 
     private function insertTransfer()
     {
-        if ($this->insertBalanceDetails()) {
+        if ($this->insertBalanceDetails() && $this->group()) {
 //                        ---------------------------Creating new voucher transactions---------------------
 //                        ------------------------------Preparing entity for receiver-----------------
             $receive_amount = $this->VoucherTransactions->newEntity();
@@ -373,8 +429,8 @@ class VoucherTransactionsController extends AppController
         $this->request->allowMethod('get');
 
         if ($this->checkToken()) {
-            $admin = $this->Users->get($this->checkToken());
-            if ($admin->get('parent_id') == null) {
+            $user = $this->Users->get($this->checkToken());
+            if (!$user->get('parent_id')){
                 $item = $this->VoucherTransactions
                     ->find()
                     ->contain(['Users', 'Profiles', 'Realms']);
@@ -412,7 +468,8 @@ class VoucherTransactionsController extends AppController
     {
         $this->request->allowMethod('get');
         if ($this->checkToken()) {
-            if ($this->checkToken() == 44) {
+            $user = $this->Users->get($this->checkToken());
+            if (!$user->get('parent_id')){
                 $key = $this->VoucherTransactions->get($this->request->query('key'));
 
                 $send_items = $this->VoucherTransactionSendDetails
@@ -556,16 +613,13 @@ class VoucherTransactionsController extends AppController
         }
     }
 
-    public function test(){
-        $admin = $this->Users->get($this->checkToken());
-    }
 
 //-----------------------------------Generate voucher for admin only Start-------------------------------------------
     public function generate()
     {
         $this->request->allowMethod('post');
-        $admin = $this->Users->get($this->checkToken());
-        if ($admin->get('parent_id') == null) {
+        $user = $this->Users->get($this->checkToken());
+        if (!$user->get('parent_id')){
             if ($this->checkSenderVoucher()) {
                 $updateVoucher = $this->VoucherTransactions->get($this->checkSenderVoucher());
                 $updateVoucher = $this->VoucherTransactions->patchEntity($updateVoucher, $this->request->getData());

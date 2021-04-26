@@ -7,6 +7,7 @@ use App\Controller\AppController;
  * Servers Controller
  *
  * @property \App\Model\Table\ServersTable $Servers
+ * @property \App\Model\Table\UsersTable $Users
  *
  * @method \App\Model\Entity\Server[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
  */
@@ -35,7 +36,8 @@ class ServersController extends AppController
     public function index()
     {
         $this->request->allowMethod('get');
-        if ($this->checkToken() == 44){
+        $user = $this->Users->get($this->checkToken());
+        if (!$user->get('parent_id')) {
             $server = $this->Servers->find();
 
             $this->set([
@@ -56,7 +58,8 @@ class ServersController extends AppController
     public function add()
     {
         $this->request->allowMethod('post');
-        if ($this->checkToken() == 44){
+        $user = $this->Users->get($this->checkToken());
+        if (!$user->get('parent_id')) {
         $server = $this->Servers->newEntity();
             $server->set([
                 'type'=> $this->request->getData('type'),
@@ -85,6 +88,57 @@ class ServersController extends AppController
         }else{
             $this->set([
                 'message' => 'Invalid user account',
+                'success' => false,
+                '_serialize' => ['success', 'message']
+            ]);
+        }
+    }
+
+    public function view(){
+        $this->request->allowMethod('get');
+        $user = $this->Users->get($this->checkToken());
+        if (!$user->get('parent_id')) {
+            $data = $this->Servers->get($this->request->query('id'));
+            $this->set([
+                'data' => $data,
+                'success' => true,
+                '_serialize' => ['data', 'message']
+            ]);
+        }else{
+            $this->set([
+                'message' => 'Invalid user account',
+                'success' => false,
+                '_serialize' => ['success', 'message']
+            ]);
+        }
+    }
+
+    public function update()
+    {
+        $this->request->allowMethod('post');
+        $user = $this->Users->get($this->checkToken());
+        if (!$user->get('parent_id')) {
+            $server = $this->request->data();
+            $prepare = $this->Servers->get($server['id'], ['contain' => []]);
+            $update = $this->Servers->patchEntity($prepare, $server);
+
+            if ($this->Servers->save($update)) {
+                $this->set([
+                    'message' => 'Server is update successfully',
+                    'success' => true,
+                    '_serialize' => ['success', 'message']
+                ]);
+            } else {
+                $this->set([
+                    'message' => 'Something is went wrong with database',
+                    'success' => false,
+                    '_serialize' => ['success', 'message']
+                ]);
+            }
+
+        } else {
+            $this->set([
+                'message' => 'Invalid account',
                 'success' => false,
                 '_serialize' => ['success', 'message']
             ]);

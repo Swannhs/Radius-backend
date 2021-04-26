@@ -9,6 +9,7 @@ use App\Controller\AppController;
  *
  * @property \App\Model\Table\TweakRealmsTable $TweakRealms
  * @property \App\Model\Table\TweaksTable $Tweaks
+ * @property \App\Model\Table\UsersTable $Users
  *
  * @method \App\Model\Entity\TweakRealm[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
  */
@@ -100,6 +101,36 @@ class TweakRealmsController extends AppController
                 'message' => 'failed to generate',
                 'success' => false,
                 '_serialize' => ['success', 'message']
+            ]);
+        }
+    }
+
+    public function delete()
+    {
+        $this->request->allowMethod('post');
+        $user = $this->Users->get($this->checkToken());
+        if (!$user->get('parent_id')){
+            $delete = $this->TweakRealms->get($this->request->data('id'));
+
+            if ($this->TweakRealms->delete($delete)){
+                $this->set([
+                    'message' => 'Tweak Realms is removed successfully',
+                    'success' => true,
+                    '_serialize' => ['success','message']
+                ]);
+            }else{
+                $this->set([
+                    'message' => 'Something is went wrong with database',
+                    'success' => false,
+                    '_serialize' => ['success','message']
+                ]);
+            }
+
+        }else{
+            $this->set([
+                'message' => 'Invalid account',
+                'success' => false,
+                '_serialize' => ['success','message']
             ]);
         }
     }

@@ -7213,6 +7213,7 @@ CREATE TABLE `users`
     `password`             varchar(50)  NOT NULL,
     `token`                char(36)              DEFAULT NULL,
     `name`                 varchar(50)  NOT NULL,
+    `role`                 varchar(50)  NOT NULL,
     `surname`              varchar(50)  NOT NULL,
     `address`              varchar(255) NOT NULL,
     `phone`                varchar(50)  NOT NULL,
@@ -7247,7 +7248,7 @@ LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users`
     DISABLE KEYS */;
 INSERT INTO `users`
-VALUES (44, 'root', '9b2b0416194bfdd0db089b9c09fad3163eae5383', 'b4c6ac81-8c7c-4802-b50a-0a6380555b50', 'root', '', '',
+VALUES (44, 'root', '9b2b0416194bfdd0db089b9c09fad3163eae5383', 'b4c6ac81-8c7c-4802-b50a-0a6380555b50', 'root', 'admin', '', '',
         '', '', 1, 0, 4, 8, 4, NULL, 1, 2, '2012-12-10 13:14:13', '2017-02-24 19:25:48', NULL, 0, 316);
 /*!40000 ALTER TABLE `users`
     ENABLE KEYS */;

@@ -14,6 +14,7 @@ use Cake\Core\Configure\Engine\PhpConfig;
  * @property \App\Model\Table\BalanceTransactionsTable $BalanceTransactions
  * @property \App\Model\Table\ServersTable $Server
  * @property \App\Model\Table\VouchersTable $Vouchers
+ * @property \App\Model\Table\ServersTable $Servers
  */
 class DashboardController extends AppController
 {
@@ -638,9 +639,10 @@ class DashboardController extends AppController
 
         $group = $user->group->name;
         $username = $user->username;
+        $role = $user->role;
         $token = $user->token;
-        $id = $user->id;
         $active = $user->active;
+        $id = $user->id;
 
         $cls = 'user';
         $menu = array();
@@ -692,13 +694,6 @@ class DashboardController extends AppController
                 $show_wizard = true;
             }
         }
-        if ($group == Configure::read('group.seller')) {  //Or Seller
-            $cls = 'Seller';
-            $tabs = $this->_build_ap_tabs($id, $display);  //We DO care for rights here!
-            if ($this->Acl->check(['model' => 'Users', 'foreign_key' => $id], $this->acl_base . 'Wizards/index')) {
-                $show_wizard = true;
-            }
-        }
 
         $data_usage = [];
         if (isset($this->realm_id)) {
@@ -708,6 +703,7 @@ class DashboardController extends AppController
         return [
             'token' => $token,
             'active' => $active,
+            'role' => $role,
             'extensions' => $extensions,
             'isRootUser' => $isRootUser,
             'tabs' => $tabs,
@@ -716,6 +712,24 @@ class DashboardController extends AppController
             'white_label' => $white_label,
             'show_wizard' => $show_wizard
         ];
+    }
+
+
+    public function serverCount(){
+        if ($this->checkTokenCustom()){
+            $servers = $this->Servers->find()->count();
+            $this->set([
+                'servers' => $servers,
+                'success' => true,
+                '_serialize' => ['success', 'servers']
+            ]);
+        }else{
+            $this->set([
+                'message' => 'Invalid token',
+                'success' => false,
+                '_serialize' => ['message', 'success']
+            ]);
+        }
     }
 
     private function _build_admin_tabs($user_id, $style = 'take_setting')

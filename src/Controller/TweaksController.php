@@ -8,6 +8,8 @@ use App\Controller\AppController;
  * Tweaks Controller
  *
  * @property \App\Model\Table\TweaksTable $Tweaks
+ * @property \App\Model\Table\TweakRealmsTable $tweakRealms
+ * @property \App\Model\Table\UsersTable $Users
  *
  * @method \App\Model\Entity\Tweak[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
  */
@@ -36,7 +38,8 @@ class TweaksController extends AppController
     public function index()
     {
         $this->request->allowMethod('get');
-        if ($this->checkToken() == 44) {
+        $user = $this->Users->get($this->checkToken());
+        if (!$user->get('parent_id')) {
             $tweaks = $this->Tweaks->find();
 
             $this->set([
@@ -57,7 +60,8 @@ class TweaksController extends AppController
     public function add()
     {
         $this->request->allowMethod('post');
-        if ($this->checkToken()) {
+        $user = $this->Users->get($this->checkToken());
+        if (!$user->get('parent_id')) {
             $tweak = $this->Tweaks->newEntity();
             $tweak->set([
                 'vendor' => $this->request->getData('vendor'),
@@ -81,6 +85,58 @@ class TweaksController extends AppController
                     '_serialize' => ['status', 'message']
                 ]);
             }
+        }
+    }
+
+    public function view()
+    {
+        $this->request->allowMethod('get');
+        $user = $this->Users->get($this->checkToken());
+        if (!$user->get('parent_id')) {
+            $data = $this->Tweaks->get($this->request->query('id'));
+            $this->set([
+                'data' => $data,
+                'success' => true,
+                '_serialize' => ['data', 'message']
+            ]);
+        } else {
+            $this->set([
+                'message' => 'Invalid account',
+                'success' => false,
+                '_serialize' => ['success', 'message']
+            ]);
+        }
+    }
+
+    public function update()
+    {
+        $this->request->allowMethod('post');
+        $user = $this->Users->get($this->checkToken());
+        if (!$user->get('parent_id')) {
+            $server = $this->request->data();
+            $prepare = $this->Tweaks->get($server['id'], ['contain' => []]);
+            $update = $this->Tweaks->patchEntity($prepare, $server);
+
+            if ($this->Tweaks->save($update)) {
+                $this->set([
+                    'message' => 'Tweak is update successfully',
+                    'success' => true,
+                    '_serialize' => ['success', 'message']
+                ]);
+            } else {
+                $this->set([
+                    'message' => 'Something is went wrong with database',
+                    'success' => false,
+                    '_serialize' => ['success', 'message']
+                ]);
+            }
+
+        } else {
+            $this->set([
+                'message' => 'Invalid account',
+                'success' => false,
+                '_serialize' => ['success', 'message']
+            ]);
         }
     }
 }
