@@ -151,6 +151,34 @@ class AccessProvidersController extends AppController
         $this->set(compact('data', '_serialize'));
     }
 
+    public function agentList()
+    {
+        $token = $this->checkToken();
+        if ($token) {
+            $page = $this->request->query('page');
+//            $page = $page === null ? 1 : $page;
+            $start = $this->request->query('start');
+//            $start = $start ? $start : 10;
+            $user = $this->Users->find()->where(['parent_id' => $this->checkToken()]);
+            $total = $user->count();
+            $user = $user->page($page);
+            $user = $user->offset($start);
+            $this->set([
+                'item' => $user,
+                'total' => $total,
+                'success' => true,
+                '_serialize' => ['success', 'item', 'total']
+            ]);
+        } else {
+            $this->set([
+                'error' => 'Invalid token',
+                'success' => false,
+                '_serialize' => ['error', 'success']
+            ]);
+        }
+
+    }
+
     //____ BASIC CRUD Manager ________
     public function index()
     {
@@ -445,6 +473,17 @@ class AccessProvidersController extends AppController
 
     }
 
+    public function swann()
+    {
+        $ap_name = Configure::read('group.seller');
+        $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
+        $group_id = $q_r->id;
+        $this->set([
+            'data' => $group_id,
+            '_serialize' => 'data'
+        ]);
+    }
+
 
     public function add()
     {
@@ -479,11 +518,29 @@ class AccessProvidersController extends AppController
         $this->request->data['language_id'] = $language;
         $this->request->data['country_id'] = $country;
 
+
         //Get the group ID for AP's
-        $ap_name = Configure::read('group.ap');
-        $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
-        $group_id = $q_r->id;
-        $this->request->data['group_id'] = $group_id;
+        //todo: get userType form request
+        if (strtolower($this->request->data('type')) == 'agent') {
+            //Get the group ID for AP's
+            $ap_name = Configure::read('group.ap');
+            $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
+            $group_id = $q_r->id;
+            $this->request->data['group_id'] = $group_id;
+        } else {
+            //Get the group ID for AP's
+            $ap_name = Configure::read('group.seller');
+            $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
+            $group_id = $q_r->id;
+            $this->request->data['group_id'] = $group_id;
+        }
+
+
+//        //Get the group ID for AP's
+//        $ap_name = Configure::read('group.ap');
+//        $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
+//        $group_id = $q_r->id;
+//        $this->request->data['group_id'] = 11;
 
         //Zero the token to generate a new one for this user:
         $this->request->data['token'] = '';

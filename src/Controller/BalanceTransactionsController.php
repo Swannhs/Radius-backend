@@ -51,7 +51,8 @@ class BalanceTransactionsController extends AppController
         $this->request->allowMethod('get');
         if ($this->checkToken()) {
 //            -----------------------------------------------Check for admin only-----------------------------
-            if ($this->checkToken() == 44) {
+            $admin = $this->Users->get($this->checkToken());
+            if ($admin->get('parent_id') == null) {
                 $item = $this->BalanceTransactions
                     ->find()
                     ->contain('Users');
@@ -84,7 +85,8 @@ class BalanceTransactionsController extends AppController
     {
         $this->request->allowMethod('get');
         if ($this->checkToken()) {
-            if ($this->checkToken() == 44) {
+            $admin = $this->Users->get($this->checkToken());
+            if ($admin->get('parent_id') == null) {
                 $key = $this->BalanceTransactions->get($this->request->query('key'));
                 $send_items = $this->BalanceSenderDetails
                     ->find()

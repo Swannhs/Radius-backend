@@ -12,6 +12,7 @@ use Cake\Core\Configure\Engine\PhpConfig;
  * @property \App\Model\Table\UsersTable $Users
  * @property \App\Model\Table\VoucherTransactionsTable $VoucherTransactions
  * @property \App\Model\Table\BalanceTransactionsTable $BalanceTransactions
+ * @property \App\Model\Table\ServersTable $Server
  * @property \App\Model\Table\VouchersTable $Vouchers
  */
 class DashboardController extends AppController
@@ -38,6 +39,7 @@ class DashboardController extends AppController
         $this->loadModel('Users');
         $this->loadModel('UserSettings');
         $this->loadModel('Realms');
+        $this->loadModel('Servers');
         $this->loadModel('VoucherTransactions');
         $this->loadModel('Vouchers');
         $this->loadModel('BalanceTransactions');
@@ -121,8 +123,19 @@ class DashboardController extends AppController
             '_serialize' => ['cash']
         ]);
     }
+
 //    --------------------------------------Cash End-----------------------------------------
 
+
+    public function serverCount()
+    {
+        $this->request->allowMethod('get');
+        $server = $this->Servers->find()->count();
+        $this->set([
+            'server' => $server,
+            '_serialize' => ['server']
+        ]);
+    }
 
 //---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
 //---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
@@ -226,11 +239,9 @@ class DashboardController extends AppController
                     }
                 }
 
-                $data = [];
-                $data = $this->_get_user_detail($u, $auto_compact);
-
+                $user = $this->_get_user_detail($u, $auto_compact);
                 $this->set(array(
-                    'data' => $data,
+                    'data' => $user,
                     'success' => true,
                     '_serialize' => array('data', 'success')
                 ));
@@ -245,6 +256,34 @@ class DashboardController extends AppController
                 ));
 
             }
+        }
+    }
+
+    public function role()
+    {
+        $this->request->allowMethod('get');
+        $token = $this->request->query('token');
+        if ($token) {
+            $user = $this->Users->find()->where(['Users.token' => $token]);
+            if (!$user) {
+                $this->set(array(
+                    'errors' => array('token' => 'invalid'),
+                    'success' => false,
+                    '_serialize' => array('errors', 'success')
+                ));
+            }else {
+                $this->set([
+                    'user' => $user,
+                    'success' => true,
+                    '_serialize' => ['user', 'success']
+                ]);
+            }
+        } else {
+            $this->set([
+                'error' => 'Token missing',
+                'success' => false,
+                '_serialize' => ['error', 'success']
+            ]);
         }
     }
 
@@ -601,6 +640,7 @@ class DashboardController extends AppController
         $username = $user->username;
         $token = $user->token;
         $id = $user->id;
+        $active = $user->active;
 
         $cls = 'user';
         $menu = array();
@@ -652,6 +692,13 @@ class DashboardController extends AppController
                 $show_wizard = true;
             }
         }
+        if ($group == Configure::read('group.seller')) {  //Or Seller
+            $cls = 'Seller';
+            $tabs = $this->_build_ap_tabs($id, $display);  //We DO care for rights here!
+            if ($this->Acl->check(['model' => 'Users', 'foreign_key' => $id], $this->acl_base . 'Wizards/index')) {
+                $show_wizard = true;
+            }
+        }
 
         $data_usage = [];
         if (isset($this->realm_id)) {
@@ -660,6 +707,7 @@ class DashboardController extends AppController
 
         return [
             'token' => $token,
+            'active' => $active,
             'extensions' => $extensions,
             'isRootUser' => $isRootUser,
             'tabs' => $tabs,

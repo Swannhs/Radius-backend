@@ -44,8 +44,8 @@ return [
              * the following line and set the port accordingly
              */
             'port' => env('MYSQL_PORT', 3306),
-            'username' => env('MYSQL_USER', 'rd'),
-            'password' => env('MYSQL_PASSWORD', 'rd'),
+            'username' => env('MYSQL_USER', 'root'),
+            'password' => env('MYSQL_PASSWORD', ''),
             'database' => env('MYSQL_DATABASE', 'rd'),
             'log' => true,
             'url' => env('DATABASE_URL', null),

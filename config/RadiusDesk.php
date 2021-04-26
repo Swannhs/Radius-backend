@@ -2,10 +2,11 @@
 
 $config = array();
 
-//The groups that is defined 
+//The groups that is defined
 $config['group']['admin']   = 'Administrators';     //Has all the rights
 $config['group']['ap']      = 'Access Providers';   //Has selected right
 $config['group']['user']    = 'Permanent Users';    //Has very limited rights
+$config['group']['seller']  = 'Seller Users';    //Has very limited rights
 
 $config['language']['default']      = '4_4';     //This is the id 4 of Languages and id 4 of countries (GB_en)
 $config['commands']['msgcat']       = '/usr/bin/msgcat';
@@ -57,7 +58,7 @@ $config['nas_types'][5]     = array('name' => 'Telkom',                 'id' => 
 
 
 $config['paths']['wallpaper_location']  = "/cake3/rd_cake/webroot/img/wallpapers/";
-$config['paths']['dynamic_photos']      = "/cake3/rd_cake/webroot/img/dynamic_photos/";   
+$config['paths']['dynamic_photos']      = "/cake3/rd_cake/webroot/img/dynamic_photos/";
 $config['paths']['dynamic_detail_icon'] = "/cake3/rd_cake/webroot/img/dynamic_details/";
 $config['paths']['real_photo_path']     = "/cake3/rd_cake/webroot/img/dynamic_photos/";
 $config['paths']['absolute_photo_path'] = env('APP_HOME', '/usr/share/nginx/html')."/webroot/img/dynamic_photos/";
@@ -91,7 +92,7 @@ $config['EmailServer']						                = 'gmail'; //e.g. 'gmail'
 //== 30/3/16 -> Some server wide configurations ==
 $config['server_settings']['user_stats_cut_off_days']       = 90; //3 months (make zero to have no cut off)
 $config['server_settings']['radacct_cut_off_days']          = 90; //3 months (make zero to have no cut off)
- 
+
 //== End server wide configurations ==
 
 $config['webFont']      = 'FontAwesome';
@@ -210,20 +211,20 @@ $config['whitelabel']['active']     = true;
 $config['whitelabel']['hName']      = 'RADIUSdesk';
 $config['whitelabel']['hBg']        = 'fff';
 $config['whitelabel']['hFg']        = '005691';
-                                    
+
 $config['whitelabel']['imgActive']  = true;
 $config['whitelabel']['imgFile']    = 'logo.png';
 
 $config['whitelabel']['fName']      = 'RADIUSdesk';
 
 //=== Language List =====
-$config['Admin']['i18n'][0]     = array(    
+$config['Admin']['i18n'][0]     = array(
     'id'        => '4_4',
     'country'   => 'United Kingdom',
     'language'  => 'English',
     'text'      =>	'United Kingdom -> English',
     'rtl'       => false,
-    'icon_file' =>	'/webroot/img/flags/GB.png',  
+    'icon_file' =>	'/webroot/img/flags/GB.png',
     'active'    => true
 );
 

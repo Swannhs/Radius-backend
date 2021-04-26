@@ -373,7 +373,8 @@ class VoucherTransactionsController extends AppController
         $this->request->allowMethod('get');
 
         if ($this->checkToken()) {
-            if ($this->checkToken() == 44) {
+            $admin = $this->Users->get($this->checkToken());
+            if ($admin->get('parent_id') == null) {
                 $item = $this->VoucherTransactions
                     ->find()
                     ->contain(['Users', 'Profiles', 'Realms']);

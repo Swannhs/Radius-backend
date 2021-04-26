@@ -299,7 +299,8 @@ LOCK TABLES `acos` WRITE;
 /*!40000 ALTER TABLE `acos`
     DISABLE KEYS */;
 INSERT INTO `acos`
-VALUES (29, NULL, NULL, NULL, 'Access Providers',
+VALUES (
+        29, NULL, NULL, NULL, 'Access Providers',
         'A container with rights available to Access Providers - DO NOT DELETE!!', 1, 726),
        (30, NULL, NULL, NULL, 'Permanent Users', 'A container with rights for Permanent Users - DO NOT DELETE!!', 727,
         732),
@@ -1566,6 +1567,7 @@ INSERT INTO `aros`
 VALUES (3115, NULL, 'Groups', 8, NULL, 1, 4),
        (3116, NULL, 'Groups', 9, NULL, 5, 32),
        (3117, NULL, 'Groups', 10, NULL, 33, 208),
+       (3119, NULL, 'Groups', 11, NULL, 5, 32),
        (3118, 3115, 'Users', 44, NULL, 2, 3);
 /*!40000 ALTER TABLE `aros`
     ENABLE KEYS */;
@@ -3014,7 +3016,6 @@ CREATE TABLE `groups`
     `modified` datetime DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 11
   DEFAULT CHARSET = utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3028,7 +3029,8 @@ LOCK TABLES `groups` WRITE;
 INSERT INTO `groups`
 VALUES (8, 'Administrators', '2012-12-10 13:13:09', '2012-12-10 13:13:09'),
        (9, 'Access Providers', '2012-12-10 13:13:19', '2012-12-10 13:13:19'),
-       (10, 'Permanent Users', '2012-12-10 13:13:28', '2012-12-10 13:13:28');
+       (10, 'Permanent Users', '2012-12-10 13:13:28', '2012-12-10 13:13:28'),
+       (11, 'Seller Users', '2012-12-10 13:13:28', '2012-12-10 13:13:28');
 /*!40000 ALTER TABLE `groups`
     ENABLE KEYS */;
 UNLOCK TABLES;
