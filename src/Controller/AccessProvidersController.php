@@ -635,7 +635,7 @@ class AccessProvidersController extends AppController
             $this->request->data['group_id'] = $group_id;
         } else {
             //Get the group ID for AP's
-            $ap_name = Configure::read('group.seller');
+            $ap_name = Configure::read('group.ap');
             $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
             $group_id = $q_r->id;
             $this->request->data['group_id'] = $group_id;
