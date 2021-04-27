@@ -483,9 +483,115 @@ class AccessProvidersController extends AppController
             '_serialize' => 'data'
         ]);
     }
-
-
     public function add()
+    {
+
+        $user = $this->_ap_right_check();
+        if (!$user) {
+            return;
+        }
+
+        $check_items = array(
+            'active',
+            'notif_threshold',
+            'monitor'
+        );
+        foreach ($check_items as $i) {
+            if (isset($this->request->data[$i])) {
+                $this->request->data[$i] = 1;
+            } else {
+                $this->request->data[$i] = 0;
+            }
+        }
+
+        if ($this->request->data['parent_id'] == '0') { //This is the holder of the token
+            $this->request->data['parent_id'] = $user['id'];
+        }
+
+        //Get the language and country
+        $country_language = explode('_', $this->request->data['language']);
+        $country = $country_language[0];
+        $language = $country_language[1];
+
+        $this->request->data['language_id'] = $language;
+        $this->request->data['country_id'] = $country;
+
+
+
+//        //Get the group ID for AP's
+//        $ap_name = Configure::read('group.ap');
+//        $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
+//        $group_id = $q_r->id;
+//        $this->request->data['group_id'] = 11;
+
+        //Zero the token to generate a new one for this user:
+        $this->request->data['token'] = '';
+
+        //The rest of the attributes should be same as the form..
+        $entity = $this->{$this->main_model}->newEntity($this->request->data());
+        if ($this->{$this->main_model}->save($entity)) {
+
+
+            $new_id = $entity->id; // The new id
+            // Now set the notification threshold and frequency
+            //$this->UserSettings->deleteAll(['user_id' => $new_id,'name' => 'notif_threshold']);
+
+
+//----------------------------------------Voucher Transactions-----------------------------------------
+//            $voucherTransaction = $this->VoucherTransactions->newEntity();
+//            $voucherTransaction->set([
+//                'user_id' => $new_id,
+//                'user_name' => $entity->username,
+//                'credit' => 0,
+//                'debit' => 0,
+//                'balance' => 0
+//            ]);
+//            if ($this->VoucherTransactions->save($voucherTransaction)) {
+//                $message = 'Voucher balance generated successful';
+//            } else {
+//                $message = 'Generate Voucher balance failed';
+//            }
+
+//----------------------------------------Voucher Transactions END-----------------------------------------
+
+
+//----------------------------------------Balance Transactions---------------------------------------------
+            $balanceTransaction = $this->BalanceTransactions->newEntity();
+            $balanceTransaction->set([
+                'user_id' => $new_id,
+                'user_name' => $entity->username,
+                'payable' => 0,
+                'paid' => 0,
+                'receivable' => 0,
+                'received' => 0,
+            ]);
+            if ($this->BalanceTransactions->save($balanceTransaction)) {
+                $message = 'Voucher balance generated successful';
+            }
+//----------------------------------------Balance Transactions END-----------------------------------------
+
+
+            $us_entity = $this->UserSettings->newEntity();
+            $us_entity->user_id = $new_id;
+            $us_entity->name = 'notif_threshold';
+            //$us_entity->value      = $this->request->data['notif_threshold'];
+            $us_entity->value = 0;
+            $this->UserSettings->save($us_entity);
+            $us_entity = $this->UserSettings->newEntity();
+            $us_entity->user_id = $new_id;
+            $us_entity->name = 'notif_frequency';
+            //$us_entity->value      = $this->request->data['notif_frequency'];
+            $us_entity->value = 1;
+            $this->UserSettings->save($us_entity);
+            $this->set(array(
+                'message' => $message,
+                'success' => true,
+                '_serialize' => ['message', 'success']
+            ));
+        }
+    }
+
+    public function addCustom()
     {
 
         $user = $this->_ap_right_check();
