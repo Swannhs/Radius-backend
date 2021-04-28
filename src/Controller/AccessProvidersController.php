@@ -151,34 +151,6 @@ class AccessProvidersController extends AppController
         $this->set(compact('data', '_serialize'));
     }
 
-    public function agentList()
-    {
-        $token = $this->checkToken();
-        if ($token) {
-            $page = $this->request->query('page');
-//            $page = $page === null ? 1 : $page;
-            $start = $this->request->query('start');
-//            $start = $start ? $start : 10;
-            $user = $this->Users->find()->where(['parent_id' => $this->checkToken()]);
-            $total = $user->count();
-            $user = $user->page($page);
-            $user = $user->offset($start);
-            $this->set([
-                'item' => $user,
-                'total' => $total,
-                'success' => true,
-                '_serialize' => ['success', 'item', 'total']
-            ]);
-        } else {
-            $this->set([
-                'error' => 'Invalid token',
-                'success' => false,
-                '_serialize' => ['error', 'success']
-            ]);
-        }
-
-    }
-
     //____ BASIC CRUD Manager ________
     public function index()
     {
@@ -473,18 +445,6 @@ class AccessProvidersController extends AppController
 
     }
 
-    public function swann()
-    {
-        $ap_name = Configure::read('group.seller');
-        $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
-        $group_id = $q_r->id;
-        $this->set([
-            'data' => $group_id,
-            '_serialize' => 'data'
-        ]);
-    }
-
-
     public function add()
     {
 
@@ -519,28 +479,15 @@ class AccessProvidersController extends AppController
         $this->request->data['country_id'] = $country;
 
 
-        //Get the group ID for AP's
-        //todo: get userType form request
-        if (strtolower($this->request->data('type')) == 'agent') {
-            //Get the group ID for AP's
-            $ap_name = Configure::read('group.ap');
-            $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
-            $group_id = $q_r->id;
-            $this->request->data['group_id'] = $group_id;
-        } else {
-            //Get the group ID for AP's
-            $ap_name = Configure::read('group.seller');
-            $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
-            $group_id = $q_r->id;
-            $this->request->data['group_id'] = $group_id;
+        if (!$this->request->data('role')){
+            $this->request->data['role'] = 'agent';
         }
 
-
-//        //Get the group ID for AP's
-//        $ap_name = Configure::read('group.ap');
-//        $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
-//        $group_id = $q_r->id;
-//        $this->request->data['group_id'] = 11;
+        //Get the group ID for AP's
+        $ap_name = Configure::read('group.ap');
+        $q_r = $this->Groups->find()->where(['Groups.name' => $ap_name])->first();
+        $group_id = $q_r->id;
+        $this->request->data['group_id'] = $group_id;
 
         //Zero the token to generate a new one for this user:
         $this->request->data['token'] = '';
@@ -579,12 +526,11 @@ class AccessProvidersController extends AppController
                 'user_id' => $new_id,
                 'user_name' => $entity->username,
                 'payable' => 0,
-                'paid' => 0,
                 'receivable' => 0,
                 'received' => 0,
             ]);
             if ($this->BalanceTransactions->save($balanceTransaction)) {
-                $message = 'Voucher balance generated successful';
+                $message = 'User is created successful';
             }
 //----------------------------------------Balance Transactions END-----------------------------------------
 
@@ -626,8 +572,6 @@ class AccessProvidersController extends AppController
                 $items['id'] = $q_r->id;
                 $items['username'] = $q_r->username;
                 $items['name'] = $q_r->name;
-                $items['role'] = $q_r->role;
-                $items['active'] = $q_r->active;
                 $items['surname'] = $q_r->surname;
                 $items['phone'] = $q_r->phone;
                 $items['address'] = $q_r->address;

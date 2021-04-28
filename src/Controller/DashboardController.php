@@ -128,15 +128,6 @@ class DashboardController extends AppController
 //    --------------------------------------Cash End-----------------------------------------
 
 
-    public function serverCount()
-    {
-        $this->request->allowMethod('get');
-        $server = $this->Servers->find()->count();
-        $this->set([
-            'server' => $server,
-            '_serialize' => ['server']
-        ]);
-    }
 
 //---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
 //---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
