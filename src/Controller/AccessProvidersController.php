@@ -572,6 +572,7 @@ class AccessProvidersController extends AppController
                 $items['id'] = $q_r->id;
                 $items['username'] = $q_r->username;
                 $items['name'] = $q_r->name;
+                $items['role'] = $q_r->role;
                 $items['surname'] = $q_r->surname;
                 $items['phone'] = $q_r->phone;
                 $items['address'] = $q_r->address;
