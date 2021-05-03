@@ -38,6 +38,7 @@ class AccessProvidersController extends AppController
         'cmp_wizards' => 'Wizards/index'
 
     ];
+
     protected $acl_base = "Access Providers/Controllers/";
 
     public function initialize()
@@ -479,7 +480,7 @@ class AccessProvidersController extends AppController
         $this->request->data['country_id'] = $country;
 
 
-        if (!$this->request->data('role')){
+        if (!$this->request->data('role')) {
             $this->request->data['role'] = 'agent';
         }
 
@@ -551,6 +552,24 @@ class AccessProvidersController extends AppController
                 'message' => $message,
                 'success' => true,
                 '_serialize' => ['message', 'success']
+            ));
+        } else {
+            $message = 'Error';
+            $errors = $entity->errors();
+            $a = [];
+            foreach (array_keys($errors) as $field) {
+                $detail_string = '';
+                $error_detail = $errors[$field];
+                foreach (array_keys($error_detail) as $error) {
+                    $detail_string = $detail_string . " " . $error_detail[$error];
+                }
+                $a[$field] = $detail_string;
+            }
+            $this->set(array(
+                'errors' => $a,
+                'success' => false,
+                'message' => array('message' => __('Could not create user')),
+                '_serialize' => array('errors', 'success', 'message')
             ));
         }
     }
