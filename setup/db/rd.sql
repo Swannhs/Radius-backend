@@ -1568,7 +1568,6 @@ INSERT INTO `aros`
 VALUES (3115, NULL, 'Groups', 8, NULL, 1, 4),
        (3116, NULL, 'Groups', 9, NULL, 5, 32),
        (3117, NULL, 'Groups', 10, NULL, 33, 208),
-       (3119, NULL, 'Groups', 11, NULL, 5, 32),
        (3118, 3115, 'Users', 44, NULL, 2, 3);
 /*!40000 ALTER TABLE `aros`
     ENABLE KEYS */;

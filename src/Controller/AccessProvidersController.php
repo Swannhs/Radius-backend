@@ -479,7 +479,6 @@ class AccessProvidersController extends AppController
         $this->request->data['language_id'] = $language;
         $this->request->data['country_id'] = $country;
 
-
         if (!$this->request->data('role')) {
             $this->request->data['role'] = 'agent';
         }
