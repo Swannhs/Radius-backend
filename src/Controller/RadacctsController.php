@@ -31,7 +31,7 @@ class RadacctsController extends AppController {
 			(null !== $this->request->getQuery('mac'))
 		){
 
-			//Some defaults 
+			//Some defaults
 			$data_used	= null;
 			$data_cap	= null;
 			$time_used	= null;
@@ -39,7 +39,7 @@ class RadacctsController extends AppController {
 
 //			$new_entry = true;
 
-			//We need a civilized way to tell the query if there are NO accountig data yet BUT there is a CAP (time_cap &| data_cap)! 
+			//We need a civilized way to tell the query if there are NO accountig data yet BUT there is a CAP (time_cap &| data_cap)!
 
 			//$data_used	= 10000;
 			//$data_cap	= 50000;
@@ -137,7 +137,7 @@ class RadacctsController extends AppController {
 			}
 
 			$data = ['data_used' => $data_used, 'data_cap' => $data_cap, 'time_used' => $time_used, 'time_cap' => $time_cap];
-      
+
 			$this->set([
                 'success'   => true,
                 'data'      => $data,
@@ -176,7 +176,7 @@ class RadacctsController extends AppController {
         $heading_line   = [];
         if(null !== $this->request->getQuery('columns')){
             $columns = json_decode($this->request->getQuery('columns'));
-            foreach($columns as $c){             
+            foreach($columns as $c){
                 array_push($heading_line,$c->name);
             }
         }
@@ -193,31 +193,31 @@ class RadacctsController extends AppController {
                 foreach($columns as $c){
                     $column_name = $c->name;
                     if($column_name == 'user_type'){
-                        $user_type = 'unknown'; 
+                        $user_type = 'unknown';
                         //Find device type
                        /* if(count($i['Radcheck']) > 0){
                             foreach($i['Radcheck'] as $rc){
                                 if($rc['attribute'] == 'Rd-User-Type'){
-                                    $user_type = $rc['value'];   
+                                    $user_type = $rc['value'];
                                 }
                             }
                         }*/
                         array_push($csv_line,$user_type);
                     }else{
                         array_push($csv_line,$i->$column_name);
-                    } 
+                    }
                 }
                 array_push($data,$csv_line);
             }
         }
-        
+
         $_serialize = 'data';
         $this->setResponse($this->getResponse()->withDownload('export.csv'));
         $this->viewBuilder()->setClassName('CsvView.Csv');
-        $this->set(compact('data', '_serialize'));  
-        
+        $this->set(compact('data', '_serialize'));
+
     }
-    
+
     public function index(){
         //-- Required query attributes: token;
         //-- Optional query attribute: sel_language (for i18n error messages)
@@ -242,10 +242,10 @@ class RadacctsController extends AppController {
         $query = $this->{$this->main_model}->find();
 
         $this->_build_common_query($query, $user);
-        
+
         //==== TIMEZONE ======
         $tz = 'UTC';
-        
+
         if($this->request->getQuery('timezone_id') != null){
             $tz_id = $this->request->getQuery('timezone_id');
             $ent = $this->{'Timezones'}->find()->where(['Timezones.id' => $tz_id])->first();
@@ -253,7 +253,7 @@ class RadacctsController extends AppController {
                 $tz = $ent->name;
             }
         }
-        
+
         //===== PAGING (MUST BE LAST) ======
         $limit  = 50;   //Defaults
         $page   = 1;
@@ -271,7 +271,7 @@ class RadacctsController extends AppController {
 
         $total  = $query->count();
         $q_r    = $query->all();
-        
+
         $query_total = $this->{$this->main_model}->find();
         $this->_build_common_query($query_total, $user);
         $t_q    = $query_total->select($fields)->first();
@@ -279,13 +279,13 @@ class RadacctsController extends AppController {
         $items  = [];
 
         foreach($q_r as $i){
-              
+
             $user_type      = 'unknown';
             $online_human   = '';
 
             if($i->acctstoptime == null){
                 $online_time    = time()-strtotime($i->acctstarttime);
-                $active         = true; 
+                $active         = true;
                 $online_human   = $this->TimeCalculations->time_elapsed_string($i->acctstarttime,false,true);
             }else{
                 $online_time    = $i->acctstoptime->setTimezone($tz);
@@ -306,7 +306,7 @@ class RadacctsController extends AppController {
                     'nasportid'         => $i->nasportid,
                     'nasporttype'       => $i->nasporttype,
                     //'acctstarttime'     => $i->acctstarttime,
-                    'acctstarttime'     => $i->acctstarttime->setTimezone($tz),   
+                    'acctstarttime'     => $i->acctstarttime->setTimezone($tz),
                     'acctstoptime'      => $online_time,
                     'acctsessiontime'   => $i->acctsessiontime,
                     'acctauthentic'     => $i->acctauthentic,
@@ -328,7 +328,7 @@ class RadacctsController extends AppController {
                     'online_human'      => $online_human
                 ]
             );
-        }                
+        }
         $this->set([
             'items'         => $items,
             'success'       => true,
@@ -361,10 +361,10 @@ class RadacctsController extends AppController {
             //$this->_voucher_status_check($this->request->data['id']);
             $this->{$this->main_model}->query()->delete()->where(['radacctid' => $this->request->data['id']])->execute();
         }else{                          //Assume multiple item delete
-            foreach($this->request->data as $d){ 
+            foreach($this->request->data as $d){
                 //$this->_voucher_status_check($d['id']);
                 $this->{$this->main_model}->query()->delete()->where(['radacctid' => $d['id']])->execute();
-            }         
+            }
         }
 
         $fail_flag = false;
@@ -383,13 +383,13 @@ class RadacctsController extends AppController {
 	}
 
     public function kickActive(){
-    
+
         //__ Authentication + Authorization __
         $user = $this->_ap_right_check();
         if(!$user){
             return;
         }
-        
+
         $some_session_closed    = false;
         $count                  = 0;
         $msg                    = 'Could not locate session';
@@ -398,18 +398,18 @@ class RadacctsController extends AppController {
         foreach(array_keys($this->request->query) as $key){
             if(preg_match('/^\d+/',$key)){
                 $ent = $this->{$this->main_model}->find()->where(['Radaccts.radacctid' => $key])->first();
-                $count++;               
+                $count++;
                 if($ent->acctstoptime !== null){
                     $some_session_closed = true;
                 }else{
                     $data = $this->Kicker->kick($ent); //Sent it to the Kicker
                 }
             }
-        }  
-        
-        if($count >0){      
+        }
+
+        if($count >0){
             $data = ['title' => 'Disconnect Sent', 'message' => 'Disconnect Instructions Sent', 'type' =>'info'];
-        }   
+        }
 
         if(($some_session_closed)&&($count>0)){
             $msg = 'Sessions Is already Closed';
@@ -418,7 +418,7 @@ class RadacctsController extends AppController {
             }
             $data = ['title' => 'Session Closed Already', 'message' => $msg, 'type' =>'warn'];
         }
-    
+
         $this->set([
             'success'       => true,
             'data'          => $data,
@@ -445,7 +445,7 @@ class RadacctsController extends AppController {
 
                         $this->{$this->main_model}->save($radacctEntity);
                     }
-                }  
+                }
             }
         }
 
@@ -465,11 +465,11 @@ class RadacctsController extends AppController {
             return;
         }
 
-        $timezone_id    = 316; //London by default  
+        $timezone_id    = 316; //London by default
         $e_user         = $this->{'Users'}->find()->where(['Users.id' => $user['id']])->first();
         if($e_user->timezone_id){
             $timezone_id = $e_user->timezone_id;
-        } 
+        }
 
         $scale = 'large';
 
@@ -498,32 +498,32 @@ class RadacctsController extends AppController {
                     ],
                     [
                             'xtype'         => 'button',
-                             
+
                             //To list all
                             'glyph'         => Configure::read('icnWatch'),
                             'pressed'       => false,
-                            
+
                             //To list only active
                             //'glyph'         => Configure::read('icnLight'),
                             //'pressed'       => true,
-                                    
+
                             'scale'         => $scale,
                             'itemId'        => 'connected',
                             'enableToggle'  => true,
-                             
-                            'ui'            => 'button-green',  
+
+                            'ui'            => 'button-green',
                             'tooltip'       => __('Show only currently connected')
                     ],
                     [
                         'xtype' => 'tbseparator'
                     ],
                     [
-                        'xtype'         => 'cmbTimezones', 
-                        'width'         => 300, 
+                        'xtype'         => 'cmbTimezones',
+                        'width'         => 300,
                         'itemId'        => 'cmbTimezone',
-                        'name'          => 'timezone_id', 
+                        'name'          => 'timezone_id',
                         'labelClsExtra' => 'lblRdReq',
-                        'labelWidth'    => 75, 
+                        'labelWidth'    => 75,
                         'padding'       => '7 0 0 0',
                         'margin'        => 0,
                         'value'         => $timezone_id
@@ -537,7 +537,7 @@ class RadacctsController extends AppController {
                         ['xtype' => 'button', 'glyph'     => Configure::read('icnKick'),'scale' => $scale, 'itemId' => 'kick', 'tooltip'=> __('Kick user off')],
                         ['xtype' => 'button', 'glyph'     => Configure::read('icnClose'),'scale' => $scale, 'itemId' => 'close','tooltip'=> __('Close session')],
                     ]]
-               
+
             ];
         }
 
@@ -550,14 +550,14 @@ class RadacctsController extends AppController {
             $specific_group = [];
             //Reload
             array_push($action_group,[
-                'xtype'     =>  'splitbutton',  
-                'glyph'     => Configure::read('icnReload'),   
-                'scale'     => $scale, 
-                'itemId'    => 'reload',   
+                'xtype'     =>  'splitbutton',
+                'glyph'     => Configure::read('icnReload'),
+                'scale'     => $scale,
+                'itemId'    => 'reload',
                 'tooltip'   => __('Reload'),
                 'menu'      => [
                     'items'     => [
-                                    '<b class="menu-title">'.__('Reload every').':</b>',            
+                                    '<b class="menu-title">'.__('Reload every').':</b>',
                     ['text'  => __('30 seconds'),      'itemId'    => 'mnuRefresh30s', 'group' => 'refresh','checked' => false ],
                     ['text'  => __('1 minute'),        'itemId'    => 'mnuRefresh1m', 'group' => 'refresh' ,'checked' => false],
                     ['text'  => __('5 minutes'),       'itemId'    => 'mnuRefresh5m', 'group' => 'refresh', 'checked' => false ],
@@ -565,49 +565,49 @@ class RadacctsController extends AppController {
                 ]]]);
 
             array_push($action_group, [
-                'xtype'         => 'button', 
-                'glyph'         => Configure::read('icnWatch'),      
+                'xtype'         => 'button',
+                'glyph'         => Configure::read('icnWatch'),
                 'scale'         => $scale,
                 'itemId'        => 'connected',
                 'enableToggle'  => true,
-                'pressed'       => false,  
-                'ui'            => 'button-green',  
+                'pressed'       => false,
+                'ui'            => 'button-green',
                 'tooltip'       => __('Show only currently connected')
             ]);
 
 
             if($this->Acl->check(['model' => 'Users', 'foreign_key' => $id], $this->base.'export_csv')){
                 array_push($document_group,[
-                    'xtype'     => 'button', 
-                    'glyph'     => Configure::read('icnCsv'),     
-                    'scale'     => $scale, 
-                    'itemId'    => 'csv',      
+                    'xtype'     => 'button',
+                    'glyph'     => Configure::read('icnCsv'),
+                    'scale'     => $scale,
+                    'itemId'    => 'csv',
                     'tooltip'   => __('Export CSV')]);
             }
 
           array_push($document_group, [
-                'xtype'     => 'button', 
-                'glyph'     => Configure::read('icnGraph'),     
-                'scale'     => $scale, 
-                'itemId'    => 'graph',      
+                'xtype'     => 'button',
+                'glyph'     => Configure::read('icnGraph'),
+                'scale'     => $scale,
+                'itemId'    => 'graph',
                 'tooltip'   => __('Usage graph')]);
 
 
            if($this->Acl->check(['model' => 'Users', 'foreign_key' => $id], $this->base.'kick_active')){
                 array_push($specific_group, [
-                    'xtype'     => 'button', 
-                    'glyph'     => Configure::read('icnKick'), 
-                    'scale'     => $scale, 
-                    'itemId'    => 'kick', 
+                    'xtype'     => 'button',
+                    'glyph'     => Configure::read('icnKick'),
+                    'scale'     => $scale,
+                    'itemId'    => 'kick',
                     'tooltip'   => __('Kick user off')]);
             }
 
             if($this->Acl->check(['model' => 'Users', 'foreign_key' => $id], $this->base.'close_open')){
                 array_push($specific_group, [
-                    'xtype'     => 'button', 
-                    'glyph'     => Configure::read('icnClose'), 
-                    'scale'     => $scale, 
-                    'itemId'    => 'close', 
+                    'xtype'     => 'button',
+                    'glyph'     => Configure::read('icnClose'),
+                    'scale'     => $scale,
+                    'itemId'    => 'close',
                     'tooltip'   => __('Close session')]);
             }
 
@@ -632,7 +632,7 @@ class RadacctsController extends AppController {
 
         $where = [];
         $joins = [];
-                        
+
         //====== Only_connectd filter ==========
         $only_connected = false;
         if(null !== $this->request->getQuery('only_connected')){
@@ -640,7 +640,8 @@ class RadacctsController extends AppController {
                 $only_connected = true;
                 array_push($where,$this->main_model.".acctstoptime IS NULL");
             }
-        }                  
+        }
+
 
         //===== SORT =====
         //Default values for sort and dir
@@ -654,12 +655,12 @@ class RadacctsController extends AppController {
                 $sort = 'Radaccts.acctstarttime';
             }
             $dir  = $this->request->getQuery('dir');
-        } 
+        }
 
         $query->order([$sort => $dir]);
         //==== END SORT ===
 
-       
+
 
         //======= For a specified username filter *Usually on the edit of user / voucher ======
         if(null !== $this->request->getQuery('username')){
@@ -687,11 +688,11 @@ class RadacctsController extends AppController {
 
                     $col = $this->main_model.'.'.$f->field;
                     array_push($where, ["$col LIKE" => '%'.$f->value.'%']);
- 
+
                 }
                 //Bools
                 if($f->type == 'boolean'){
-                   
+
                 }
                 //Date
                 if($f->type == 'date'){
@@ -732,19 +733,19 @@ class RadacctsController extends AppController {
         //====== END REQUEST FILTER =====
 
         //====== AP FILTER =====
-        if($user['group_name'] == Configure::read('group.ap')){  //AP               
+        if($user['group_name'] == Configure::read('group.ap')){  //AP
             $this->loadModel('Realms');
 
-            
+
             $ap_clause      = [];
             $ap_id          = $user['id'];
-            
+
             //** ALL the Realms beloning to this AP
             $q_r            = $this->{'Realms'}->find()->where(['Realms.user_id' => $user['id']])->all();
             foreach($q_r as $r){
                 array_push($ap_clause, [$this->main_model.'.realm' => $r->name]);
             }
-              
+
             //** ALL the AP's children **
             $tree_array_children    = [];
             $found_children         = false;
@@ -756,7 +757,7 @@ class RadacctsController extends AppController {
                     $found_children = true;
                 }
             }
-             
+
             if($found_children){
                 $r_children = $this->Realms->find()->where(['Realms.user_id IN ' => $tree_array_children])->all();
                 foreach($r_children as $r_c){
@@ -764,9 +765,9 @@ class RadacctsController extends AppController {
                     array_push($ap_clause, [$this->main_model.'.realm' => $name]);
                 }
             }
-            
+
             //** ALL the AP's Parents **
-            
+
             $tree_array_parents     = [];
             $this->parents = $this->Users->find('path', ['for' => $user['id'], 'fields' => ['Users.id']]); //Get all the parents up to the root
             foreach($this->parents as $i){
@@ -774,8 +775,8 @@ class RadacctsController extends AppController {
                 if($i_id != $user['id']){ //upstream
                     array_push($tree_array_parents, $i_id);
                 }
-            } 
-                       
+            }
+
             $r_parents = $this->Realms->find()->where(['Realms.user_id IN ' => $tree_array_parents, 'Realms.available_to_siblings' => true])->all();
 
             foreach($r_parents as $r_p){
@@ -786,18 +787,18 @@ class RadacctsController extends AppController {
                                 ['model' => 'Realms','foreign_key' => $id], 'read');
                 if($read == true){
                     array_push($ap_clause, [$this->main_model.'.realm' => $name]);
-                }                  
+                }
             }
-            
-            
+
+
             //Add it as an OR clause
             array_push($where, ['OR' => $ap_clause]);
         }
-        //====== END AP FILTER =====        
+        //====== END AP FILTER =====
         return $query->where($where);
     }
 
-   
+
     private function _voucher_status_check($id){
 
         //Find the count of this username; if zero check if voucher; if voucher change status to 'new';
