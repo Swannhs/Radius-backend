@@ -301,16 +301,6 @@ class VoucherTransactionsController extends AppController
         }
     }
 
-    public function test()
-    {
-        $data['user_id'] = $this->request->query('ap_id');
-        $data['realm_id'] = $this->request->data('realm_id');
-        $data['realm'] = $this->Realms->get($data['realm_id']);
-        $this->set([
-            'data' => $data,
-            '_serialize' => 'data'
-        ]);
-    }
 
 //            --------------------------------------- Active User First-------------------------------
 
@@ -462,6 +452,7 @@ class VoucherTransactionsController extends AppController
         }
     }
 
+
     //    -------------------------------Configuring For balance transaction End----------------------------------------------
 
     public function view()
@@ -469,7 +460,7 @@ class VoucherTransactionsController extends AppController
         $this->request->allowMethod('get');
         if ($this->checkToken()) {
             $user = $this->Users->get($this->checkToken());
-            if (!$user->get('parent_id')){
+            if ($user->get('parent_id')){
                 $key = $this->VoucherTransactions->get($this->request->query('key'));
 
                 $send_items = $this->VoucherTransactionSendDetails
