@@ -297,8 +297,6 @@ class VouchersController extends AppController
             'status' => true,
             '_serialize' => ['items', 'success', 'totalCount']
         ]);
-
-
     }
 
     //__________________________________ BASIC CRUD Manager ______________________________________//
