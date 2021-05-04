@@ -6,8 +6,8 @@ class FreeRadiusController extends AppController {
 
     public $name                = 'PhpPhrases';
     public $base                = "Access Providers/Controllers/FreeRadius/"; //Required for AP Rights
-    protected $radmin_wrapper   = '/cake3/rd_cake/setup/scripts/radmin_wrapper.pl';
-    protected $radscenario      = '/cake3/rd_cake/setup/scripts/radscenario.pl';
+    protected $radmin_wrapper   = '/var/www/html/cake3/rd_cake/setup/scripts/radmin_wrapper.pl';
+    protected $radscenario      = '/var/www/html/cake3/rd_cake/setup/scripts/radscenario.pl';
 
     public function initialize()
     {
@@ -30,7 +30,7 @@ class FreeRadiusController extends AppController {
                 $clean = trim($i);
                 $clean = preg_replace("/\s+/", ";", $clean);
                 $e = explode(';',$clean);
-                
+
                 //First the basics
                 if(($e[0] == 'accepts') && (intval($e[1]) != 0)){
                     array_push($items['auth_basic'], ['name' => __("Accepted"), 'data' => intval($e[1])]);
@@ -38,7 +38,7 @@ class FreeRadiusController extends AppController {
                 if(($e[0] == 'rejects') && (intval($e[1]) != 0)){
                     array_push($items['auth_basic'], ['name' => __("Rejected"), 'data' => intval($e[1])]);
                 }
-                
+
                 //Then the detail
                 if(($e[0] == 'responses') && (intval($e[1]) != 0)){
                     array_push($items['auth_detail'], ['name' => __("Responses"), 'data' => intval($e[1])]);
@@ -71,7 +71,7 @@ class FreeRadiusController extends AppController {
                 if(($e[0] == 'unknown_types') && (intval($e[1]) != 0)){
                     array_push($items['auth_detail'], ['name' => __("Unknown types"), 'data' => intval($e[1])]);
                 }
-                
+
                 if(($e[0] == 'bad_authenticator') && (intval($e[1]) != 0)){
                     array_push($items['auth_detail'], ['name' => __("Bad Authenticator"), 'data' => intval($e[1])]);
                 }
@@ -88,7 +88,7 @@ class FreeRadiusController extends AppController {
                 $clean = trim($i);
                 $clean = preg_replace("/\s+/", ";", $clean);
                 $e = explode(';',$clean);
-              
+
                 //Then the detail
                 if(($e[0] == 'responses') && (intval($e[1]) != 0)){
                     array_push($items['acct_detail'], ['name' => __("Responses"), 'data' => intval($e[1])]);
@@ -138,9 +138,9 @@ class FreeRadiusController extends AppController {
         $items = array();
         $items['pid'] = intval($pid);
         if($pid == ''){
-            $items['running'] = false; 
+            $items['running'] = false;
         }else{
-            $items['running'] = true; 
+            $items['running'] = true;
         }
 
         $this->set([
@@ -160,7 +160,7 @@ class FreeRadiusController extends AppController {
 
         exec("sudo " . $this->radmin_wrapper . " start freeradius");
         $items = [];
-        
+
         $this->set([
             'data'          => $items,
             'success'       => true,
@@ -178,7 +178,7 @@ class FreeRadiusController extends AppController {
 
         exec("sudo " . $this->radmin_wrapper . " stop freeradius");
         $items = [];
-        
+
         $this->set([
             'data'          => $items,
             'success'       => true,
@@ -187,7 +187,7 @@ class FreeRadiusController extends AppController {
     }
 
     public function info(){
-    
+
         //__ Authentication + Authorization __
         $user = $this->_ap_right_check();
         if(!$user){
@@ -207,7 +207,7 @@ class FreeRadiusController extends AppController {
             ]);
             return;
         }
-        
+
         unset($output);
         exec("sudo " . $this->radmin_wrapper . " version freeradius",$output);
         if(count($output)>0){
@@ -227,7 +227,7 @@ class FreeRadiusController extends AppController {
             }
             $items['clients'] = $clients;
         }
-        
+
         unset($output);
         exec("sudo " . $this->radmin_wrapper . " modules freeradius",$output);
         if(count($output)>0){
@@ -240,8 +240,8 @@ class FreeRadiusController extends AppController {
             }
             $items['modules'] = $modules;
         }
-         
-        
+
+
         $this->set([
             'data'          => $items,
             'success'       => true,
@@ -270,7 +270,7 @@ class FreeRadiusController extends AppController {
                     $time_added = $q_r->value - time();
                     if($time_added > 0){
                         $items['time_added'] = $time_added;
-                    }    
+                    }
                 }
             }
         }
@@ -280,7 +280,7 @@ class FreeRadiusController extends AppController {
         if(count($output)>0){
             $condition = $output[0];
             $items['condition'] = $condition;
-        }      
+        }
         $this->set([
             'data'          => $items,
             'success'       => true,
@@ -349,7 +349,7 @@ class FreeRadiusController extends AppController {
 
         $items['timeout']   = $timeout;
         $items['time_added']= 360;
-    
+
         $this->set([
             'data'          => $items,
             'success'       => true,
@@ -404,7 +404,7 @@ class FreeRadiusController extends AppController {
 
             $this->Checks->save($checkEntity);
 
-            $items['time_added'] = $time_added;    
+            $items['time_added'] = $time_added;
         }
 
         $this->set([
@@ -488,13 +488,13 @@ class FreeRadiusController extends AppController {
             if(($send_flag == true) && ($line > $send_line)){
                 if($i !=''){
                     array_push($send_data,$i);
-                }   
+                }
             }
 
             if(($receive_flag == true) && ($line > $receive_line)){
                 if($i !=''){
                     array_push($receive_data,$i);
-                }    
+                }
             }
 
             $line++;

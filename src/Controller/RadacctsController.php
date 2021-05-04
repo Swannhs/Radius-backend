@@ -642,7 +642,6 @@ class RadacctsController extends AppController {
             }
         }
 
-
         //===== SORT =====
         //Default values for sort and dir
         $sort   = 'Radaccts.username';

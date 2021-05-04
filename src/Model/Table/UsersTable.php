@@ -106,7 +106,7 @@ class UsersTable extends Table
     public function validationDefault(Validator $validator){
         $validator = new Validator();
         $validator
-            ->notEmpty('username', 'A username is required')
+            ->notEmpty('username', 'A usrname is required')
             ->add('username', [
                 'usernameUnique' => [
                     'message' => 'The username you provided is already taken. Please provide another one.',

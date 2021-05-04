@@ -40,8 +40,4 @@ class User extends Entity
         }
         return ['Groups' => ['id' => $groupId]]; //Change to 'Group'
     }
-    protected $_hidden = [
-        'password',
-        'token',
-    ];
 }

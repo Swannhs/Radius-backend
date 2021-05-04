@@ -1,157 +1,44 @@
 <?php
 
 namespace App\Controller;
-
 use App\Controller\AppController;
 
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
 
-/**
- * VoucherTransactions Controller
- * @property \App\Model\Table\UsersTable $Users
- * @property \App\Model\Table\VoucherTransactionsTable $VoucherTransactions
- * @property \App\Model\Table\BalanceTransactionsTable $BalanceTransactions
- * @property \App\Model\Table\ServersTable $Server
- * @property \App\Model\Table\VouchersTable $Vouchers
- * @property \App\Model\Table\ServersTable $Servers
- */
-class DashboardController extends AppController
-{
+class DashboardController extends AppController{
 
     public $base = "Access Providers/Controllers/Dashboard/";
     //protected $ui   = 'toplevel';
-    protected $ui = 'default';
+    protected $ui       = 'default';
     //protected $ui       = 'tab-grey';
     //protected $plain    = true;
-    protected $plain = false;
+    protected $plain    = false;
 
     //Options are: tab-teal, tab-blue, tab-orange, tab-green, tab-metal, tab-brown
-    protected $tabUINone = 'default';
-    protected $tabUIOne = 'tab-blue';
-    protected $tabUITwo = 'tab-orange';
-    protected $tabUIThree = 'tab-metal';
+    protected $tabUINone    = 'default';
+    protected $tabUIOne     = 'tab-blue';
+    protected $tabUITwo     = 'tab-orange';
+    protected $tabUIThree   = 'tab-metal';
 
-    protected $acl_base = "Access Providers/Controllers/";
+    protected $acl_base     = "Access Providers/Controllers/";
 
-    public function initialize()
-    {
+    public function initialize(){
         parent::initialize();
         $this->loadModel('Users');
         $this->loadModel('UserSettings');
         $this->loadModel('Realms');
-        $this->loadModel('Servers');
-        $this->loadModel('VoucherTransactions');
-        $this->loadModel('Vouchers');
-        $this->loadModel('BalanceTransactions');
-
         $this->loadComponent('Aa');
         $this->loadComponent('WhiteLabel');
     }
 
-
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-
-
-    function checkTokenCustom()
-    {
-        $user = $this->Aa->user_for_token($this);
-        return $user['id'];
-    }
-
-
-//    --------------------------------------Voucher Start-----------------------------------------
-    public function voucher()
-    {
-
-        $voucherBalance = $this->VoucherTransactions->find()
-            ->where(['user_id' => $this->checkTokenCustom()])
-            ->select('balance');
-
-        $balance = 0;
-        foreach ($voucherBalance as $row) {
-            $balance = $row->balance;
-        }
-
-
-        $vouchers = $this->Vouchers->find()
-            ->where(['user_id' => $this->checkTokenCustom()])
-            ->count();
-
-        $active = $this->Vouchers->find()
-            ->where([
-                'user_id' => $this->checkTokenCustom(),
-                'status' => 'used'
-            ])
-            ->count();
-
-        $item = array();
-        $row = array();
-
-        $row['balance'] = $balance;
-        $row['active'] = $active;
-        $row['total'] = $vouchers;
-
-        array_push($item, $row);
-
-        $this->set([
-            'item' => $item,
-            '_serialize' => ['item']
-        ]);
-    }
-
-//    --------------------------------------Voucher End-----------------------------------------
-
-//    --------------------------------------Cash Start-----------------------------------------
-    public function cash()
-    {
-        $this->request->allowMethod('get');
-        $cash = $this->BalanceTransactions->find()
-            ->where(['user_id' => $this->checkTokenCustom()]);
-        $this->set([
-            'cash' => $cash,
-            '_serialize' => ['cash']
-        ]);
-    }
-
-//    --------------------------------------Cash End-----------------------------------------
-
-
-
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-
-
-    public function getToken()
-    {
+    public function getToken(){
 
         //Sample call from CURL
         //curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' -i 'http://127.0.0.1/cake3/rd_cake/dashboard/get-token.json'
         //--data 'username=root&password=admin'
         //END Sample Call from Curl
-        $this->loadComponent('Auth', [
+         $this->loadComponent('Auth', [
             'authenticate' => [
                 'Form' => [
                     'userModel' => 'Users',
@@ -169,37 +56,36 @@ class DashboardController extends AppController
 
         if ($this->request->is('post')) {
             $user = $this->Auth->identify();
-            if ($user) {
+            if ($user){
 
                 $this->set(array(
-                    'data' => ['token' => $user['token'], 'username' => $user['username']],
-                    'success' => true,
-                    '_serialize' => array('data', 'success')
+                    'data'          => ['token' => $user['token'],'username' =>$user['username']],
+                    'success'       => true,
+                    '_serialize' => array('data','success')
                 ));
 
-            } else {
+            }else{
 
                 $this->set(array(
-                    'errors' => array('username' => __('Confirm this name'), 'password' => __('Type the password again')),
-                    'success' => false,
-                    'message' => __('Authentication failed'),
-                    '_serialize' => array('errors', 'success', 'message')
+                    'errors'        => array('username' => __('Confirm this name'),'password'=> __('Type the password again')),
+                    'success'       => false,
+                    'message'       => __('Authentication failed'),
+                    '_serialize' => array('errors','success','message')
                 ));
 
             }
-        } else {
+        }else{
             $this->set(array(
-                'errors' => array('username' => __('Required'), 'password' => __('Required')),
-                'success' => false,
-                'message' => __('HTTP POST Required -> Authentication failed'),
-                '_serialize' => array('errors', 'success', 'message')
+                'errors'        => array('username' => __('Required'),'password'=> __('Required')),
+                'success'       => false,
+                'message'       => __('HTTP POST Required -> Authentication failed'),
+                '_serialize' => array('errors','success','message')
             ));
             return;
         }
     }
 
-    public function authenticate()
-    {
+    public function authenticate(){
 
         $this->loadComponent('Auth', [
             'authenticate' => [
@@ -219,193 +105,163 @@ class DashboardController extends AppController
 
         if ($this->request->is('post')) {
             $user = $this->Auth->identify();
-            if ($user) {
+            if ($user){
                 //We can get the detail for the user
                 $u = $this->Users->find()->contain(['Groups'])->where(['Users.id' => $user['id']])->first();
 
                 //Check for auto-compact setting
                 $auto_compact = false;
-                if (isset($this->request->data['auto_compact'])) {
-                    if ($this->request->data['auto_compact'] == 'true') { //Carefull with the query's true and false it is actually a string
+                if(isset($this->request->data['auto_compact'])){
+                    if($this->request->data['auto_compact']=='true'){ //Carefull with the query's true and false it is actually a string
                         $auto_compact = true;
                     }
                 }
 
-                $user = $this->_get_user_detail($u, $auto_compact);
+                $data = [];
+                $data = $this->_get_user_detail($u,$auto_compact);
+
                 $this->set(array(
-                    'data' => $user,
-                    'success' => true,
-                    '_serialize' => array('data', 'success')
+                    'data'          => $data,
+                    'success'       => true,
+                    '_serialize' => array('data','success')
                 ));
 
-            } else {
+            }else{
 
                 $this->set(array(
-                    'errors' => array('username' => __('Confirm this name'), 'password' => __('Type the password again')),
-                    'success' => false,
-                    'message' => __('Authentication failed'),
-                    '_serialize' => array('errors', 'success', 'message')
+                    'errors'        => array('username' => __('Confirm this name'),'password'=> __('Type the password again')),
+                    'success'       => false,
+                    'message'       => __('Authentication failed'),
+                    '_serialize' => array('errors','success','message')
                 ));
 
             }
         }
     }
 
-    public function role()
-    {
-        $this->request->allowMethod('get');
-        $token = $this->request->query('token');
-        if ($token) {
-            $user = $this->Users->find()->where(['Users.token' => $token]);
-            if (!$user) {
+	public function checkToken(){
+
+        if((isset($this->request->query['token']))&&($this->request->query['token'] != '')){
+
+            $token  = $this->request->query['token'];
+            $user   = $this->Users->find()->contain(['Groups'])->where(['Users.token' => $token])->first();
+
+            if(!$user){
                 $this->set(array(
-                    'errors' => array('token' => 'invalid'),
-                    'success' => false,
-                    '_serialize' => array('errors', 'success')
-                ));
-            }else {
-                $this->set([
-                    'user' => $user,
-                    'success' => true,
-                    '_serialize' => ['user', 'success']
-                ]);
-            }
-        } else {
-            $this->set([
-                'error' => 'Token missing',
-                'success' => false,
-                '_serialize' => ['error', 'success']
-            ]);
-        }
-    }
-
-    public function checkToken()
-    {
-
-        if ((isset($this->request->query['token'])) && ($this->request->query['token'] != '')) {
-
-            $token = $this->request->query['token'];
-            $user = $this->Users->find()->contain(['Groups'])->where(['Users.token' => $token])->first();
-
-            if (!$user) {
-                $this->set(array(
-                    'errors' => array('token' => 'invalid'),
-                    'success' => false,
-                    '_serialize' => array('errors', 'success')
+                    'errors'        => array('token'=>'invalid'),
+                    'success'       => false,
+                    '_serialize'    => array('errors','success')
                 ));
 
-            } else {
-                // print_r($user);
+            }else{
+               // print_r($user);
 
                 //Check for auto-compact setting
                 $auto_compact = false;
-                if (isset($this->request->query['auto_compact'])) {
-                    if ($this->request->query['auto_compact'] == 'true') { //Carefull with the query's true and false it is actually a string
+                if(isset($this->request->query['auto_compact'])){
+                    if($this->request->query['auto_compact']=='true'){ //Carefull with the query's true and false it is actually a string
                         $auto_compact = true;
                     }
                 }
 
-                $data = $this->_get_user_detail($user, $auto_compact);
+                $data = $this->_get_user_detail($user,$auto_compact);
                 $this->set(array(
-                    'data' => $data,
-                    'success' => true,
-                    '_serialize' => array('data', 'success')
+                    'data'          => $data,
+                    'success'       => true,
+                    '_serialize'    => array('data','success')
                 ));
             }
 
-        } else {
+        }else{
 
             $this->set(array(
-                'errors' => array('token' => 'missing'),
-                'success' => false,
-                '_serialize' => array('errors', 'success')
+                'errors'        => array('token'=>'missing'),
+                'success'       => false,
+                '_serialize'    => array('errors','success')
             ));
         }
 
     }
 
-    public function i18n()
-    {
+    public function i18n(){
         $items = array();
         $i18n = Configure::read('Admin.i18n');
-        foreach ($i18n as $i) {
-            if ($i['active']) {
+        foreach($i18n as $i){
+            if($i['active']){
                 array_push($items, $i);
             }
         }
         $this->set(array(
             'items' => $items,
             'success' => true,
-            '_serialize' => array('items', 'success')
+            '_serialize' => array('items','success')
         ));
     }
 
-    public function utilitiesItems()
-    {
+     public function utilitiesItems(){
 
-        $ta = 'left';
-        $data = [
+        $ta     = 'left';
+        $data   = [
             [
-                'xtype' => 'button',
-                'text' => 'Users Overview',
-                'glyph' => Configure::read('icnUser'),
-                'scale' => 'large',
-                'itemId' => 'btnDataUsage',
+                'xtype'   => 'button',
+                'text'    => 'Users Overview',
+                'glyph'   => Configure::read('icnUser'),
+                'scale'   => 'large',
+                'itemId'  => 'btnDataUsage',
                 'textAlign' => $ta
             ]
         ];
         $this->set(array(
-            'data' => $data,
+            'data'   => $data,
             'success' => true,
-            '_serialize' => array('success', 'data')
+            '_serialize' => array('success','data')
         ));
 
     }
 
-    public function settingsView()
-    {
+     public function settingsView(){
         $user = $this->Aa->user_for_token($this);
-        if (!$user) {
+        if(!$user){
             return;
         }
-        $user_id = $user['id'];
+        $user_id    = $user['id'];
 
 
-        $wl = $this->WhiteLabel->detail($user_id);
-        $data = $wl;
+        $wl         = $this->WhiteLabel->detail($user_id);
+        $data       = $wl;
 
-        $e_user = $this->{'Users'}->find()->where(['Users.id' => $user['id']])->first();
+        $e_user     = $this->{'Users'}->find()->where(['Users.id' => $user['id']])->first();
         $timezone_id = 316; //London by default
-        if ($e_user->timezone_id) {
+        if($e_user->timezone_id){
             $timezone_id = $e_user->timezone_id;
         }
         $data['timezone_id'] = $timezone_id;
 
         $check_items = array(
-            'compact_view'
-        );
+		    'compact_view'
+	    );
 
-        $overview_items = [
-            'radius_overview'
-        ];
-        $active_overview_items = [];
+	    $overview_items = [
+	    'radius_overview'
+	    ];
+	    $active_overview_items = [];
 
-        foreach ($overview_items as $o) {
-            $q_r_o = $this->UserSettings->find()->where(['user_id' => $user_id, 'name' => "$o"])->first();
-            if ($q_r_o) {
-                if ($q_r_o->value == 1) {
-                    array_push($active_overview_items, $o);
+	    foreach($overview_items as $o){
+	        $q_r_o = $this->UserSettings->find()->where(['user_id' => $user_id,'name' => "$o"])->first();
+	        if($q_r_o){
+                if($q_r_o->value == 1){
+                    array_push($active_overview_items,$o);
                 }
             }
-        }
+	    }
 
-        $data['overviews_to_include[]'] = $active_overview_items;
+	    $data['overviews_to_include[]'] = $active_overview_items;
 
-        foreach ($check_items as $i) {
-            $q_rc = $this->UserSettings->find()->where(['user_id' => $user_id, 'name' => "$i"])->first();
-            if ($q_rc) {
+	    foreach($check_items as $i){
+	        $q_rc = $this->UserSettings->find()->where(['user_id' => $user_id,'name' => "$i"])->first();
+            if($q_rc){
                 $val_rc = 0;
-                if ($q_rc->value == 1) {
+                if($q_rc->value == 1){
                     $val_rc = "$i";
                 }
                 $data["$i"] = $val_rc;
@@ -413,51 +269,50 @@ class DashboardController extends AppController
         }
 
         //Now for the more difficult bit finding the default realm if there are not one.
-        $q_rr = $this->UserSettings->find()->where(['user_id' => $user_id, 'name' => 'realm_id'])->first();
-        if ($q_rr) {
-            $q_r = $this->Realms->find()->where(['id' => $q_rr->value])->first();
-            $realm_name = $q_r->name;
+        $q_rr = $this->UserSettings->find()->where(['user_id' => $user_id,'name' => 'realm_id'])->first();
+        if($q_rr){
+            $q_r                = $this->Realms->find()->where(['id' => $q_rr->value])->first();
+            $realm_name         = $q_r->name;
             $data['realm_name'] = $realm_name;
-            $data['realm_id'] = $q_rr->value;
-        } else {
+            $data['realm_id']   = $q_rr->value;
+        }else{
             //We need to find the first valid realm
-            if ($user['group_name'] == 'Administrators') {
-                $q_r = $this->Realms->find()->first();
-                if ($q_r) {
-                    $realm_name = $q_r->name;
+            if($user['group_name'] == 'Administrators'){
+                $q_r            = $this->Realms->find()->first();
+                if($q_r){
+                    $realm_name         = $q_r->name;
                     $data['realm_name'] = $realm_name;
-                    $data['realm_id'] = $q_r->id;
+                    $data['realm_id']   = $q_r->id;
                 }
             }
 
-            if ($user['group_name'] == 'Access Providers') {
+            if($user['group_name'] == 'Access Providers'){
                 $realm_detail = $this->_ap_default_realm($user_id);
-                if (array_key_exists('realm_id', $realm_detail)) {
+                if(array_key_exists('realm_id',$realm_detail)){
                     $data['realm_name'] = $realm_detail['realm_name'];
-                    $data['realm_id'] = $realm_detail['realm_id'];
+                    $data['realm_id']   = $realm_detail['realm_id'];
                 }
             }
         }
 
         $this->set(array(
-            'data' => $data,
+            'data'   => $data,
             'success' => true,
-            '_serialize' => array('success', 'data')
+            '_serialize' => array('success','data')
         ));
     }
 
-    public function settingsSubmit()
-    {
+     public function settingsSubmit(){
 
-        //This is a deviation from the standard JSON serialize view since extjs requires a html type reply when files
+         //This is a deviation from the standard JSON serialize view since extjs requires a html type reply when files
         //are posted to the server.
         $this->viewBuilder()->layout('ext_file_upload');
 
         $user = $this->Aa->user_for_token($this);
-        if (!$user) {
+        if(!$user){
             return;
         }
-        $user_id = $user['id'];
+        $user_id    = $user['id'];
 
         $remove_items = [
             'radius_overview',
@@ -467,275 +322,250 @@ class DashboardController extends AppController
         ];
 
         //Clean up everything
-        foreach ($remove_items as $ri) {
-            $this->UserSettings->deleteAll(['UserSetting.user_id' => $user_id, 'UserSetting.name' => $ri]);
+        foreach($remove_items as $ri){
+             $this->UserSettings->deleteAll(['UserSetting.user_id' => $user_id,'UserSetting.name' => $ri]);
         }
 
         $ap_id = $user_id;
 
         $check_items = array(
-            'wl_active',
-            'wl_img_active'
-        );
-        foreach ($check_items as $i) {
-            if (isset($this->request->data[$i])) {
+			'wl_active',
+			'wl_img_active'
+		);
+        foreach($check_items as $i){
+            if(isset($this->request->data[$i])){
                 $this->request->data[$i] = 1;
-            } else {
+            }else{
                 $this->request->data[$i] = 0;
             }
         }
 
-        $looking_for = ['wl_active', 'wl_header', 'wl_h_bg', 'wl_h_fg', 'wl_footer', 'wl_img_active', 'wl_img_file'];
+        $looking_for    = ['wl_active','wl_header','wl_h_bg','wl_h_fg','wl_footer','wl_img_active','wl_img_file'];
 
-        if ($this->request->data['wl_active'] == 1) {
+        if($this->request->data['wl_active'] == 1){
 
-            $new_logo = false;
+            $new_logo       = false;
 
             //Check if there came some image with it
-            if (isset($_FILES['wl_img_file_upload'])) {
-                if ($_FILES['wl_img_file_upload']['size'] > 0) {
-                    $path_parts = pathinfo($_FILES['wl_img_file_upload']['name']);
-                    $unique = time();
-                    $filename = $unique . '.' . $path_parts['extension'];
-                    $dest = WWW_ROOT . "img/access_providers/" . $filename;
-                    move_uploaded_file($_FILES['wl_img_file_upload']['tmp_name'], $dest);
-                    $new_logo = true;
+            if(isset($_FILES['wl_img_file_upload'])){
+                if($_FILES['wl_img_file_upload']['size'] > 0){
+                    $path_parts     = pathinfo($_FILES['wl_img_file_upload']['name']);
+                    $unique         = time();
+                    $filename       = $unique.'.'.$path_parts['extension'];
+                    $dest           = WWW_ROOT."img/access_providers/".$filename;
+                    move_uploaded_file ($_FILES['wl_img_file_upload']['tmp_name'] , $dest);
+                    $new_logo       = true;
                 }
 
-                if ($new_logo == true) {
-                    $this->UserSettings->deleteAll(['user_id' => $ap_id, 'name' => 'wl_img_file']);
+                if($new_logo == true){
+                    $this->UserSettings->deleteAll(['user_id' => $ap_id,'name' => 'wl_img_file']);
                     $entity = $this->UserSettings->newEntity();
-                    $entity->user_id = $ap_id;
-                    $entity->name = 'wl_img_file';
-                    $entity->value = $filename;
+                    $entity->user_id    = $ap_id;
+                    $entity->name       = 'wl_img_file';
+                    $entity->value      = $filename;
                     $this->UserSettings->save($entity);
                 }
             }
 
-            foreach ($looking_for as $i) {
+            foreach($looking_for as $i){
                 //Delete old one
-                if (($i == 'wl_img_file') && ($new_logo == true)) {
+                if(($i == 'wl_img_file')&&($new_logo == true)){
                     continue; //We skip it if we added a new file
                 }
 
-                $this->UserSettings->deleteAll(['user_id' => $ap_id, 'name' => $i]);
+                $this->UserSettings->deleteAll(['user_id' => $ap_id,'name' => $i]);
                 //Add a New ONE
-                $entity = $this->UserSettings->newEntity();
-                $entity->user_id = $ap_id;
-                $entity->name = $i;
-                $entity->value = $this->request->data["$i"];
+                $entity             = $this->UserSettings->newEntity();
+                $entity->user_id    = $ap_id;
+                $entity->name       = $i;
+                $entity->value      = $this->request->data["$i"];
                 $this->UserSettings->save($entity);
             }
-        } else {
+        }else{
 
-            foreach ($looking_for as $ri) {
-                $this->UserSettings->deleteAll(['UserSetting.user_id' => $user_id, 'UserSetting.name' => $ri]);
+            foreach($looking_for as $ri){
+                 $this->UserSettings->deleteAll(['UserSetting.user_id' => $user_id,'UserSetting.name' => $ri]);
             }
         }
 
-        if (isset($this->request->data['realm_id'])) {
-            $s = $this->UserSettings->newEntity();
+        if(isset($this->request->data['realm_id'])){
+		    $s = $this->UserSettings->newEntity();
             $s->user_id = $user_id;
-            $s->name = 'realm_id';
-            $s->value = $this->request->data['realm_id'];
+            $s->name    = 'realm_id';
+            $s->value   = $this->request->data['realm_id'];
             $this->UserSettings->save($s);
         }
 
-        if (isset($this->request->data['compact_view'])) {
-            $s = $this->UserSettings->newEntity();
+        if(isset($this->request->data['compact_view'])){
+		    $s = $this->UserSettings->newEntity();
             $s->user_id = $user_id;
-            $s->name = 'compact_view';
-            $s->value = 1;
+            $s->name    = 'compact_view';
+            $s->value   = 1;
             $this->UserSettings->save($s);
         }
 
         if (array_key_exists('overviews_to_include', $this->request->data)) {
-            if (!empty($this->request->data['overviews_to_include'])) {
-                foreach ($this->request->data['overviews_to_include'] as $e) {
-                    if ($e != '') {
+            if(!empty($this->request->data['overviews_to_include'])){
+                foreach($this->request->data['overviews_to_include'] as $e){
+                    if($e != ''){
                         $s = $this->UserSettings->newEntity();
                         $s->user_id = $user_id;
-                        $s->name = $e;
-                        $s->value = 1;
+                        $s->name    = $e;
+                        $s->value   = 1;
                         $this->UserSettings->save($s);
                     }
                 }
             }
         }
 
-        if (isset($this->request->data['default_overview'])) {
-            $s = $this->UserSettings->newEntity();
+        if(isset($this->request->data['default_overview'])){
+		    $s = $this->UserSettings->newEntity();
             $s->user_id = $user_id;
-            $s->name = 'default_overview';
-            $s->value = $this->request->data['default_overview'];
+            $s->name    = 'default_overview';
+            $s->value   = $this->request->data['default_overview'];
             $this->UserSettings->save($s);
         }
 
-        if (isset($this->request->data['timezone_id'])) {
-            $e_user = $this->{'Users'}->find()->where(['Users.id' => $user['id']])->first();
-            $this->{'Users'}->patchEntity($e_user, ['timezone_id' => $this->request->data['timezone_id']]);
+        if(isset($this->request->data['timezone_id'])){
+            $e_user     = $this->{'Users'}->find()->where(['Users.id' => $user['id']])->first();
+            $this->{'Users'}->patchEntity($e_user,['timezone_id' => $this->request->data['timezone_id']]);
             $this->{'Users'}->save($e_user);
         }
 
         //Return the wl settings as data
-        $white_label = [];
-        $wl = $this->WhiteLabel->detail($ap_id);
-        $white_label['active'] = true;
-        $white_label['hName'] = $wl['wl_header'];
-        $white_label['hBg'] = '#' . $wl['wl_h_bg'];
-        $white_label['hFg'] = '#' . $wl['wl_h_fg'];
-        $white_label['fName'] = $wl['wl_footer'];
+        $white_label            = [];
+        $wl                     = $this->WhiteLabel->detail($ap_id);
+        $white_label['active']  = true;
+        $white_label['hName']   = $wl['wl_header'];
+        $white_label['hBg']     = '#'.$wl['wl_h_bg'];
+        $white_label['hFg']     = '#'.$wl['wl_h_fg'];
+        $white_label['fName']   = $wl['wl_footer'];
 
-        if (($wl['wl_img_active'] === 'wl_img_active') || ($wl['wl_img_active'] == 1)) {
+        if(($wl['wl_img_active'] === 'wl_img_active')||($wl['wl_img_active'] == 1)){
             $white_label['imgActive'] = true;
-        } else {
+        }else{
             $white_label['imgActive'] = false;
         }
-        $white_label['imgFile'] = $wl['wl_img'];
+        $white_label['imgFile']    = $wl['wl_img'];
 
         $this->set(array(
-            'success' => true,
-            'data' => $white_label,
-            '_serialize' => array('success', 'data')
+            'success'   => true,
+            'data'      => $white_label,
+            '_serialize' => array('success','data')
         ));
     }
 
-    public function changePassword()
-    {
+    public function changePassword(){
         //$user = $this->_ap_right_check();
         $user = $this->Aa->user_for_token($this);
-        if (!$user) {
+        if(!$user){
             return;
         }
-        $user_id = $user['id'];
-        $data = array();
-        $u = $this->Users->get($user_id);
+        $user_id    = $user['id'];
+        $data       = array();
+        $u          = $this->Users->get($user_id);
 
-        $u->set('password', $this->request->data['password']);
-        $u->set('token', ''); //Setting it ti '' will trigger a new token generation
+        $u->set('password',$this->request->data['password']);
+        $u->set('token',''); //Setting it ti '' will trigger a new token generation
         $this->Users->save($u);
-        $data['token'] = $u->get('token');
+        $data['token']  = $u->get('token');
 
         $this->set(array(
             'success' => true,
-            'data' => $data,
-            '_serialize' => array('success', 'data')
+            'data'    => $data,
+            '_serialize' => array('success','data')
         ));
     }
 
-    private function _get_user_detail($user, $auto_compact = false)
-    {
+    private function _get_user_detail($user,$auto_compact=false){
 
         //print_r($user);
 
-        $group = $user->group->name;
-        $username = $user->username;
-        $role = $user->role;
-        $token = $user->token;
-        $active = $user->active;
-        $id = $user->id;
+        $group      = $user->group->name;
+        $username   = $user->username;
+        $token      = $user->token;
+        $id         = $user->id;
 
-        $cls = 'user';
-        $menu = array();
+        $cls        = 'user';
+        $menu       = array();
 
         $isRootUser = false;
         $extensions = false;
-        if (Configure::read('extensions.active') == true) {
+        if(Configure::read('extensions.active') == true){
             $extensions = true;
         }
 
         $display = 'take_setting'; //Default is to take the settings value
 
-        if ($auto_compact) {
+        if($auto_compact){
             $display = 'compact'; //Override setting due to screen size to small
         }
 
         //White Label
-        $white_label = [];
-        if (Configure::read('whitelabel.active') == true) {
-            $wl = $this->WhiteLabel->detail($id);
-            $white_label['active'] = true;
-            $white_label['hName'] = $wl['wl_header'];
-            $white_label['hBg'] = '#' . $wl['wl_h_bg'];
-            $white_label['hFg'] = '#' . $wl['wl_h_fg'];
-            $white_label['fName'] = $wl['wl_footer'];
+        $white_label            = [];
+        if(Configure::read('whitelabel.active') == true){
+            $wl                     = $this->WhiteLabel->detail($id);
+            $white_label['active']  = true;
+            $white_label['hName']   = $wl['wl_header'];
+            $white_label['hBg']     = '#'.$wl['wl_h_bg'];
+            $white_label['hFg']     = '#'.$wl['wl_h_fg'];
+            $white_label['fName']   = $wl['wl_footer'];
 
-            // if(($wl['wl_img_active'] == 1)){
-            if (($wl['wl_img_active'] === 'wl_img_active') || ($wl['wl_img_active'] == 1)) {
+           // if(($wl['wl_img_active'] == 1)){
+            if(($wl['wl_img_active'] === 'wl_img_active')||($wl['wl_img_active'] == 1)){
                 $white_label['imgActive'] = true;
-            } else {
+            }else{
                 $white_label['imgActive'] = false;
             }
-            $white_label['imgFile'] = $wl['wl_img'];
+            $white_label['imgFile']    = $wl['wl_img'];
         }
 
         $show_wizard = false;
 
-        if ($group == Configure::read('group.admin')) {  //Admin
+        if( $group == Configure::read('group.admin')){  //Admin
             $cls = 'admin';
-            $tabs = $this->_build_admin_tabs($id, $display);  //We do not care for rights here;
+            $tabs= $this->_build_admin_tabs($id,$display);  //We do not care for rights here;
             $isRootUser = true;
             $show_wizard = true;
         }
 
-        if ($group == Configure::read('group.ap')) {  //Or AP
+        if( $group == Configure::read('group.ap')){  //Or AP
             $cls = 'access_provider';
-            $tabs = $this->_build_ap_tabs($id, $display);  //We DO care for rights here!
-            if ($this->Acl->check(['model' => 'Users', 'foreign_key' => $id], $this->acl_base . 'Wizards/index')) {
+            $tabs= $this->_build_ap_tabs($id,$display);  //We DO care for rights here!
+            if($this->Acl->check(['model' => 'Users', 'foreign_key' => $id],$this->acl_base.'Wizards/index')){
                 $show_wizard = true;
             }
         }
 
         $data_usage = [];
-        if (isset($this->realm_id)) {
-            $data_usage = ['realm_id' => $this->realm_id, 'realm_name' => $this->realm_name];
+        if(isset($this->realm_id)){
+           $data_usage = ['realm_id' => $this->realm_id, 'realm_name' => $this->realm_name];
         }
 
         return [
-            'token' => $token,
-            'active' => $active,
-            'role' => $role,
-            'extensions' => $extensions,
-            'isRootUser' => $isRootUser,
-            'tabs' => $tabs,
-            'data_usage' => $data_usage,
-            'user' => ['id' => $id, 'username' => $username, 'group' => $group, 'cls' => $cls, 'timezone_id' => $user->timezone_id],
-            'white_label' => $white_label,
-            'show_wizard' => $show_wizard
+            'token'         =>  $token,
+            'extensions'    =>  $extensions,
+            'isRootUser'    =>  $isRootUser,
+            'tabs'          =>  $tabs,
+            'data_usage'    =>  $data_usage,
+            'user'          =>  ['id' => $id, 'username' => $username,'group' => $group,'cls' => $cls,'timezone_id' => $user->timezone_id],
+            'white_label'   =>  $white_label,
+            'show_wizard'   =>  $show_wizard
         ];
     }
 
-
-    public function serverCount(){
-        if ($this->checkTokenCustom()){
-            $servers = $this->Servers->find()->count();
-            $this->set([
-                'servers' => $servers,
-                'success' => true,
-                '_serialize' => ['success', 'servers']
-            ]);
-        }else{
-            $this->set([
-                'message' => 'Invalid token',
-                'success' => false,
-                '_serialize' => ['message', 'success']
-            ]);
-        }
-    }
-
-    private function _build_admin_tabs($user_id, $style = 'take_setting')
-    {
+     private function _build_admin_tabs($user_id,$style = 'take_setting'){
         $show = 'title'; //Default is not compact
-        if ($style == 'take_setting') {
-            $q_rc = $this->UserSettings->find()->where(['user_id' => $user_id, 'name' => "compact_view"])->first();
-            if ($q_rc) {
-                if ($q_rc->value == 1) {
+        if($style == 'take_setting'){
+            $q_rc = $this->UserSettings->find()->where(['user_id' => $user_id,'name' => "compact_view"])->first();
+            if($q_rc){
+                if($q_rc->value == 1){
                     $show = 'tooltip';
                 }
             }
         }
 
-        if ($style == 'compact') { //override due to screen size
+        if($style == 'compact'){ //override due to screen size
             $show = 'tooltip';
         }
 
@@ -744,29 +574,29 @@ class DashboardController extends AppController
 
         //Admin
         array_push($tabs, array(
-                "$show" => __('Admin'),
-                'glyph' => Configure::read('icnAdmin'),
-                'plain' => false,
-                'ui' => $this->ui,
-                'xtype' => 'tabpanel',
-                'itemId' => 'tabAdmin',
-                'layout' => 'fit',
-                'items' => array(
+                "$show"   => __('Admin'),
+                'glyph'   => Configure::read('icnAdmin'),
+                'plain'   => false,
+                'ui'      => $this->ui,
+                'xtype'   => 'tabpanel',
+                'itemId'  => 'tabAdmin',
+                'layout'  => 'fit',
+                'items'   => array(
                     array(
-                        'title' => __('Admins'),
-                        'glyph' => Configure::read('icnAdmin'),
-                        'id' => 'cAccessProviders',
-                        'layout' => 'fit',
-                        'tabConfig' => [
+                        'title'   => __('Admins'),
+                        'glyph'   => Configure::read('icnAdmin'),
+                        'id'      => 'cAccessProviders',
+                        'layout'  => 'fit',
+                        'tabConfig'=> [
                             'ui' => $this->tabUIOne
                         ]
                     ),
                     array(
-                        'title' => __('Realms (Groups)'),
-                        'glyph' => Configure::read('icnRealm'),
-                        'id' => 'cRealms',
-                        'layout' => 'fit',
-                        'tabConfig' => [
+                        'title'   => __('Realms (Groups)'),
+                        'glyph'   => Configure::read('icnRealm'),
+                        'id'      => 'cRealms',
+                        'layout'  => 'fit',
+                        'tabConfig'=> [
                             'ui' => $this->tabUITwo
                         ]
                     )
@@ -777,38 +607,38 @@ class DashboardController extends AppController
 
         //Users
         array_push($tabs, [
-                "$show" => __('Users'),
-                'xtype' => 'tabpanel',
-                'glyph' => Configure::read('icnUser'),
-                'plain' => false,
-                'ui' => $this->ui,
-                'layout' => 'fit',
-                'itemId' => 'tabUsers',
-                'items' => [
+                "$show"   => __('Users'),
+                'xtype'   => 'tabpanel',
+                'glyph'   => Configure::read('icnUser'),
+                'plain'   => false,
+                'ui'      => $this->ui,
+                'layout'  => 'fit',
+                'itemId'  => 'tabUsers',
+                'items'   => [
                     [
-                        'title' => __('Permanent Users'),
-                        'glyph' => Configure::read('icnUser'),
-                        'id' => 'cPermanentUsers',
-                        'layout' => 'fit',
-                        'tabConfig' => [
+                        'title'     => __('Permanent Users'),
+                        'glyph'     => Configure::read('icnUser'),
+                        'id'        => 'cPermanentUsers',
+                        'layout'    => 'fit',
+                        'tabConfig'=> [
                             'ui' => $this->tabUIOne
                         ]
                     ],
                     [
-                        'title' => __('Vouchers'),
-                        'glyph' => Configure::read('icnVoucher'),
-                        'id' => 'cVouchers',
-                        'layout' => 'fit',
-                        'tabConfig' => [
+                        'title'     => __('Vouchers'),
+                        'glyph'     => Configure::read('icnVoucher'),
+                        'id'        => 'cVouchers',
+                        'layout'    => 'fit',
+                        'tabConfig'=> [
                             'ui' => $this->tabUITwo
                         ]
                     ],
                     [
-                        'title' => __('Activity Monitor'),
-                        'glyph' => Configure::read('icnActivity'),
-                        'id' => 'cActivityMonitor',
-                        'layout' => 'fit',
-                        'tabConfig' => [
+                        'title'     => __('Activity Monitor'),
+                        'glyph'     => Configure::read('icnActivity'),
+                        'id'        => 'cActivityMonitor',
+                        'layout'    => 'fit',
+                        'tabConfig'=> [
                             'ui' => $this->tabUIThree
                         ]
                     ]
@@ -818,19 +648,19 @@ class DashboardController extends AppController
 
         //Users
         array_push($tabs, array(
-                "$show" => __('Profiles'),
-                'glyph' => Configure::read('icnProfile'),
-                'plain' => false,
-                'ui' => $this->ui,
-                'xtype' => 'tabpanel',
-                'layout' => 'fit',
-                'items' => [
+                "$show"   => __('Profiles'),
+                'glyph'   => Configure::read('icnProfile'),
+                'plain'   => false,
+                'ui'      => $this->ui,
+                'xtype'   => 'tabpanel',
+                'layout'  => 'fit',
+                'items'   => [
                     [
-                        'title' => __('Profiles'),
-                        'glyph' => Configure::read('icnProfile'),
-                        'id' => 'cProfiles',
-                        'layout' => 'fit',
-                        'tabConfig' => [
+                        'title'   => __('Profiles'),
+                        'glyph'   => Configure::read('icnProfile'),
+                        'id'      => 'cProfiles',
+                        'layout'  => 'fit',
+                        'tabConfig'=> [
                             'ui' => $this->tabUIOne
                         ]
                     ]
@@ -840,47 +670,47 @@ class DashboardController extends AppController
 
         //RADIUS
         array_push($tabs, array(
-                "$show" => __('RADIUS'),
-                'glyph' => Configure::read('icnRadius'),
-                'plain' => $this->plain,
-                'ui' => $this->ui,
-                'xtype' => 'tabpanel',
-                'layout' => 'fit',
-                'items' => array(
+                "$show"   => __('RADIUS'),
+                'glyph'   => Configure::read('icnRadius'),
+                'plain'   => $this->plain,
+                'ui'      => $this->ui,
+                'xtype'   => 'tabpanel',
+                'layout'  => 'fit',
+                'items'   => array(
                     array(
-                        'title' => __('RADIUS Clients'),
-                        'glyph' => Configure::read('icnNas'),
-                        'id' => 'cDynamicClients',
-                        'layout' => 'fit',
-                        'tabConfig' => [
+                        'title'   => __('RADIUS Clients'),
+                        'glyph'   => Configure::read('icnNas'),
+                        'id'      => 'cDynamicClients',
+                        'layout'  => 'fit',
+                        'tabConfig'=> [
                             'ui' => $this->tabUIOne
                         ]
                     ),
-                    /*   array(
-                           'title'   => __('NAS Devices'),
-                           'glyph'   => Configure::read('icnNas'),
-                           'id'      => 'cNas',
-                           'layout'  => 'fit'
-                       )  */
+                 /*   array(
+                        'title'   => __('NAS Devices'),
+                        'glyph'   => Configure::read('icnNas'),
+                        'id'      => 'cNas',
+                        'layout'  => 'fit'
+                    )  */
                 )
             )
         );
 
         //Login Pages
         array_push($tabs, array(
-                "$show" => __('Login Pages'),
-                'glyph' => Configure::read('icnSignIn'),
-                'xtype' => 'tabpanel',
-                'plain' => $this->plain,
-                'ui' => $this->ui,
-                'layout' => 'fit',
-                'items' => array(
+                "$show"   => __('Login Pages'),
+                'glyph'   => Configure::read('icnSignIn'),
+                'xtype'   => 'tabpanel',
+                'plain'   => $this->plain,
+                'ui'      => $this->ui,
+                'layout'  => 'fit',
+                'items'   => array(
                     array(
-                        'title' => __('Login Pages'),
-                        'glyph' => Configure::read('icnSignIn'),
-                        'id' => 'cDynamicDetails',
-                        'layout' => 'fit',
-                        'tabConfig' => [
+                        'title'   => __('Login Pages'),
+                        'glyph'   => Configure::read('icnSignIn'),
+                        'id'      => 'cDynamicDetails',
+                        'layout'  => 'fit',
+                        'tabConfig'=> [
                             'ui' => $this->tabUIOne
                         ]
                     )
@@ -890,25 +720,25 @@ class DashboardController extends AppController
 
         //Other
         array_push($tabs, array(
-                "$show" => __('Other'),
-                'glyph' => Configure::read('icnGears'),
-                'xtype' => 'tabpanel',
-                'plain' => $this->plain,
-                'ui' => $this->ui,
-                'itemId' => 'tpOther',
-                'layout' => 'fit',
-                'items' => array(
+                "$show"   => __('Other'),
+                'glyph'   => Configure::read('icnGears'),
+                'xtype'   => 'tabpanel',
+                'plain'   => $this->plain,
+                'ui'      => $this->ui,
+                'itemId'  => 'tpOther',
+                'layout'  => 'fit',
+                'items'   => array(
                     [
-                        'title' => __('Rights Manager'),
-                        'glyph' => Configure::read('icnKey'),
-                        'id' => 'cAcos',
-                        'layout' => 'fit'
+                        'title'   => __('Rights Manager'),
+                        'glyph'   => Configure::read('icnKey'),
+                        'id'      => 'cAcos',
+                        'layout'  => 'fit'
                     ],
                     [
-                        'title' => __('Settings'),
-                        'glyph' => Configure::read('icnGears'),
-                        'id' => 'cSettings',
-                        'layout' => 'fit'
+                        'title'   => __('Settings'),
+                        'glyph'   => Configure::read('icnGears'),
+                        'id'      => 'cSettings',
+                        'layout'  => 'fit'
                     ],
                 )
             )
@@ -919,77 +749,77 @@ class DashboardController extends AppController
         $overview_items = [];
 
         //Find out if there is a dafault setting for the realm.
-        $radius_overview = false;
-        $realm_blank = false;
+        $radius_overview        = false;
+        $realm_blank            = false;
 
 
         //Find if there is a realm specified in the settings
-        $q_rr = $this->UserSettings->find()->where(['user_id' => $user_id, 'name' => 'realm_id'])->first();
+        $q_rr =  $this->UserSettings->find()->where(['user_id' => $user_id,'name' => 'realm_id'])->first();
 
-        if ($q_rr) {
+        if($q_rr){
             //Get the name of the realm
             $q_r = $this->Realms->find()->where(['id' => $q_rr->value])->first();
 
-            if ($q_r) {
-                $realm_name = $q_r->name;
+            if($q_r){
+                $realm_name         = $q_r->name;
                 $data['realm_name'] = $realm_name;
-                $data['realm_id'] = $q_rr->value;
+                $data['realm_id']   = $q_rr->value;
 
-                $this->realm_name = $realm_name;
-                $this->realm_id = $q_rr->value;
+                $this->realm_name   = $realm_name;
+                $this->realm_id     = $q_rr->value;
 
                 //Get the settings of whether to show the two tabs
-                $q_rdu = $this->UserSettings->find()->where(['user_id' => $user_id, 'name' => 'radius_overview'])->first();
+                $q_rdu = $this->UserSettings->find()->where(['user_id' => $user_id,'name' => 'radius_overview'])->first();
 
-                if ($q_rdu) {
-                    if ($q_rdu->value == 1) {
+                if($q_rdu){
+                    if($q_rdu->value == 1){
                         $radius_overview = true;
                     }
                 }
 
-            } else {
+            }else{
                 $realm_blank = true;
             }
-            //No realm specified in settings; get a default one (if there might be one )
-        } else {
+        //No realm specified in settings; get a default one (if there might be one )
+        }else{
             $q_r = $this->Realms->find()->first();
-            if ($q_r) {
-                $realm_name = $q_r->name;
+            if($q_r){
+                $realm_name         = $q_r->name;
                 $data['realm_name'] = $realm_name;
-                $data['realm_id'] = $q_r->id;
+                $data['realm_id']   = $q_r->id;
 
-                $this->realm_name = $realm_name;
-                $this->realm_id = $q_r->id;
-            } else {
+                $this->realm_name   = $realm_name;
+                $this->realm_id     = $q_r->id;
+            }else{
                 $realm_blank = true;
             }
         }
 
         //We found a realm and should display it
-        if (($realm_blank == false) && ($radius_overview == true)) {
+        if(($realm_blank == false)&&($radius_overview == true)){
             array_push($overview_items, array(
-                    'title' => __('Users'),
-                    'glyph' => Configure::read('icnUser'),
-                    'id' => 'cDataUsage',
-                    'layout' => 'fit',
-                    'tabConfig' => [
+                    'title'   => __('Users'),
+                    'glyph'   => Configure::read('icnUser'),
+                    'id'      => 'cDataUsage',
+                    'layout'  => 'fit',
+                    'tabConfig'=> [
                         'ui' => $this->tabUIOne
                     ]
                 )
             );
 
-        } else {
+        }else{
 
             //We could not find a realm and should display a welcome message
-            if ($realm_blank == true) {
+            if($realm_blank == true){
                 array_push($overview_items, array(
-                        'title' => __('Welcome Message'),
-                        'glyph' => Configure::read('icnNote'),
-                        'margin' => 10,
+                        'title'   => __('Welcome Message'),
+                        'glyph'   => Configure::read('icnNote'),
+                        'margin'  => 10,
                         'padding' => 10,
-                        'id' => 'cWelcome',
-                        'layout' => 'fit',
-                        'tabConfig' => [
+                        'id'      => 'cWelcome',
+                        'layout'  => 'fit',
+                        'tabConfig'=> [
                             'ui' => $this->tabUIOne
                         ]
                     )
@@ -998,51 +828,50 @@ class DashboardController extends AppController
         }
 
         array_push($overview_items, array(
-                'title' => __('Utilities'),
-                'glyph' => Configure::read('icnGears'),
-                'id' => 'cUtilities',
-                'layout' => 'fit',
-                'tabConfig' => [
+                'title'   => __('Utilities'),
+                'glyph'   => Configure::read('icnGears'),
+                'id'      => 'cUtilities',
+                'layout'  => 'fit',
+                'tabConfig'=> [
                     'ui' => $this->tabUIThree
                 ]
             )
         );
 
-        array_unshift($tabs, array(
-            "$show" => __('Overview'),
-            'xtype' => 'tabpanel',
-            'glyph' => Configure::read('icnView'),
-            'plain' => $this->plain,
-            'ui' => $this->ui,
-            'itemId' => 'tpOverview',
-            'layout' => 'fit',
-            'items' => $overview_items
+        array_unshift($tabs,array(
+            "$show"     => __('Overview'),
+            'xtype'     => 'tabpanel',
+            'glyph'     => Configure::read('icnView'),
+            'plain'     => $this->plain,
+            'ui'        => $this->ui,
+            'itemId'    => 'tpOverview',
+            'layout'    => 'fit',
+            'items'     => $overview_items
         ));
 
         return $tabs;
     }
 
-    private function _build_ap_tabs($id, $style = 'take_setting')
-    {
-        $tabs = array();
+    private function _build_ap_tabs($id,$style = 'take_setting'){
+        $tabs   = array();
         $user_id = $id;
 
         $show = 'title'; //Default is not compact
-        if ($style == 'take_setting') {
-            $q_rc = $this->UserSettings->find()->where(['user_id' => $user_id, 'name' => "compact_view"])->first();
-            if ($q_rc) {
-                if ($q_rc->value == 1) {
+        if($style == 'take_setting'){
+            $q_rc = $this->UserSettings->find()->where(['user_id' => $user_id,'name' => "compact_view"])->first();
+            if($q_rc){
+                if($q_rc->value == 1){
                     $show = 'tooltip';
                 }
             }
         }
 
-        if ($style == 'compact') { //override due to screen size
+        if($style == 'compact'){ //override due to screen size
             $show = 'tooltip';
         }
 
         //Base to start looking from.
-        $base = "Access Providers/Controllers/";
+        $base   = "Access Providers/Controllers/";
 
 
         //____ Overview Tab ___
@@ -1050,70 +879,70 @@ class DashboardController extends AppController
         $overview_items = array();
 
         //Find out if there is a dafault setting for the realm.
-        $radius_overview = false;
-        $realm_blank = false;
+        $radius_overview        = false;
+        $realm_blank            = false;
 
         //Find if there is a realm specified in the settings
-        $q_rr = $this->UserSettings->find()->where(['user_id' => $user_id, 'name' => 'realm_id'])->first();
+        $q_rr =  $this->UserSettings->find()->where(['user_id' => $user_id,'name' => 'realm_id'])->first();
 
-        if ($q_rr) {
+        if($q_rr){
             //Get the name of the realm
             $q_r = $this->Realms->find()->where(['id' => $q_rr->value])->first();
-            $realm_name = $q_r->name;
+            $realm_name         = $q_r->name;
             $data['realm_name'] = $realm_name;
-            $data['realm_id'] = $q_rr->value;
+            $data['realm_id']   = $q_rr->value;
 
-            $this->realm_name = $realm_name;
-            $this->realm_id = $q_rr->value;
+            $this->realm_name   = $realm_name;
+            $this->realm_id     = $q_rr->value;
 
             //Get the settings of whether to show the two tabs
-            $q_rdu = $this->UserSettings->find()->where(['user_id' => $user_id, 'name' => 'radius_overview'])->first();
+            $q_rdu = $this->UserSettings->find()->where(['user_id' => $user_id,'name' => 'radius_overview'])->first();
 
-            if ($q_rdu) {
-                if ($q_rdu->value == 1) {
+            if($q_rdu){
+                if($q_rdu->value == 1){
                     $radius_overview = true;
                 }
             }
 
 
-            //No realm specified in settings; get a default one (if there might be one )
-        } else {
+        //No realm specified in settings; get a default one (if there might be one )
+        }else{
             $realm_detail = $this->_ap_default_realm($user_id);
-            if (array_key_exists('realm_id', $realm_detail)) {
+            if(array_key_exists('realm_id',$realm_detail)){
                 $data['realm_name'] = $realm_detail['realm_name'];
-                $data['realm_id'] = $realm_detail['realm_id'];
+                $data['realm_id']   = $realm_detail['realm_id'];
 
-                $this->realm_name = $realm_detail['realm_name'];
-                $this->realm_id = $realm_detail['realm_id'];
-            } else { // Could not find a default realm
+                $this->realm_name   = $realm_detail['realm_name'];
+                $this->realm_id     = $realm_detail['realm_id'];
+            }else{ // Could not find a default realm
                 $realm_blank = true;
             }
         }
 
-        //We found a realm and should display it
-        if (($realm_blank == false) && ($radius_overview == true)) {
+         //We found a realm and should display it
+        if(($realm_blank == false)&&($radius_overview == true)){
             array_push($overview_items, array(
-                    'title' => __('Users'),
-                    'glyph' => Configure::read('icnData'),
-                    'id' => 'cDataUsage',
-                    'layout' => 'fit',
-                    'tabConfig' => [
+                    'title'   => __('Users'),
+                    'glyph'   => Configure::read('icnData'),
+                    'id'      => 'cDataUsage',
+                    'layout'  => 'fit',
+                    'tabConfig'=> [
                         'ui' => $this->tabUIOne
                     ]
                 )
             );
-        } else {
+        }else{
 
             //We could not find a realm and should display a welcome message
-            if ($realm_blank == true) {
+            if($realm_blank == true){
                 array_push($overview_items, array(
-                        'title' => __('Welcome Message'),
-                        'glyph' => Configure::read('icnNote'),
-                        'margin' => 10,
+                        'title'   => __('Welcome Message'),
+                        'glyph'   => Configure::read('icnNote'),
+                        'margin'  => 10,
                         'padding' => 10,
-                        'id' => 'cWelcome',
-                        'layout' => 'fit',
-                        'tabConfig' => [
+                        'id'      => 'cWelcome',
+                        'layout'  => 'fit',
+                        'tabConfig'=> [
                             'ui' => $this->tabUIOne
                         ]
                     )
@@ -1122,67 +951,68 @@ class DashboardController extends AppController
         }
 
 
+
         array_push($overview_items, array(
-                'title' => __('Utilities'),
-                'glyph' => Configure::read('icnGears'),
-                'id' => 'cUtilities',
-                'layout' => 'fit',
-                'tabConfig' => [
+                'title'   => __('Utilities'),
+                'glyph'   => Configure::read('icnGears'),
+                'id'      => 'cUtilities',
+                'layout'  => 'fit',
+                'tabConfig'=> [
                     'ui' => $this->tabUIThree
                 ]
             )
         );
 
         array_push($tabs, array(
-                "$show" => __('Overview'),
-                'xtype' => 'tabpanel',
-                'plain' => $this->plain,
-                'ui' => $this->ui,
-                'glyph' => Configure::read('icnView'),
-                'itemId' => 'tpOverview',
-                'layout' => 'fit',
-                'items' => $overview_items
+                "$show"     => __('Overview'),
+                'xtype'     => 'tabpanel',
+                'plain'     => $this->plain,
+                'ui'        => $this->ui,
+                'glyph'     => Configure::read('icnView'),
+                'itemId'    => 'tpOverview',
+                'layout'    => 'fit',
+                'items'   => $overview_items
             )
         );
 
-        //____ Admin Tab ____
+         //____ Admin Tab ____
         $admin_items = array();
-        if ($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base . "AccessProviders/index")) {
+        if($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base."AccessProviders/index")){
 
             array_push($admin_items, array(
-                    'title' => __('Admins'),
-                    'glyph' => Configure::read('icnAdmin'),
-                    'id' => 'cAccessProviders',
-                    'layout' => 'fit',
-                    'tabConfig' => [
+                    'title'   => __('Admins'),
+                    'glyph'   => Configure::read('icnAdmin'),
+                    'id'      => 'cAccessProviders',
+                    'layout'  => 'fit',
+                    'tabConfig'=> [
                         'ui' => $this->tabUIOne
                     ]
                 )
             );
         }
 
-        if ($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base . "Realms/index")) {
+        if($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base."Realms/index")){
             array_push($admin_items, array(
-                    'title' => __('Realms (Groups)'),
-                    'glyph' => Configure::read('icnRealm'),
-                    'id' => 'cRealms',
-                    'layout' => 'fit',
-                    'tabConfig' => [
+                    'title'   => __('Realms (Groups)'),
+                    'glyph'   => Configure::read('icnRealm'),
+                    'id'      => 'cRealms',
+                    'layout'  => 'fit',
+                    'tabConfig'=> [
                         'ui' => $this->tabUITwo
                     ]
                 )
             );
         }
 
-        if (count($admin_items) > 0) {
+        if(count($admin_items) > 0){
             array_push($tabs, array(
-                    "$show" => __('Admin'),
-                    'plain' => $this->plain,
-                    'ui' => $this->ui,
-                    'glyph' => Configure::read('icnAdmin'),
-                    'xtype' => 'tabpanel',
-                    'layout' => 'fit',
-                    'items' => $admin_items
+                    "$show"   => __('Admin'),
+                    'plain'   => $this->plain,
+                    'ui'      => $this->ui,
+                    'glyph'   => Configure::read('icnAdmin'),
+                    'xtype'   => 'tabpanel',
+                    'layout'  => 'fit',
+                    'items'   => $admin_items
                 )
             );
         }
@@ -1191,13 +1021,13 @@ class DashboardController extends AppController
         $users_items = [];
 
 
-        if ($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base . "PermanentUsers/index")) {
+        if($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base."PermanentUsers/index")){
             array_push($users_items, array(
-                    'title' => __('Permanent Users'),
-                    'glyph' => Configure::read('icnUser'),
-                    'id' => 'cPermanentUsers',
-                    'layout' => 'fit',
-                    'tabConfig' => [
+                    'title'     => __('Permanent Users'),
+                    'glyph'     => Configure::read('icnUser'),
+                    'id'        => 'cPermanentUsers',
+                    'layout'    => 'fit',
+                    'tabConfig'=> [
                         'ui' => $this->tabUIOne
                     ]
                 )
@@ -1205,26 +1035,26 @@ class DashboardController extends AppController
 
         }
 
-        if ($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base . "Vouchers/index")) {
+        if($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base."Vouchers/index")){
             array_push($users_items, array(
-                    'title' => __('Vouchers'),
-                    'glyph' => Configure::read('icnVoucher'),
-                    'id' => 'cVouchers',
-                    'layout' => 'fit',
-                    'tabConfig' => [
+                    'title'     => __('Vouchers'),
+                    'glyph'     => Configure::read('icnVoucher'),
+                    'id'        => 'cVouchers',
+                    'layout'    => 'fit',
+                    'tabConfig'=> [
                         'ui' => $this->tabUITwo
                     ]
                 )
             );
         }
 
-        if (count($users_items) > 0) {
+        if(count($users_items)>0){
             array_push($users_items, [
-                    'title' => __('Activity Monitor'),
-                    'glyph' => Configure::read('icnActivity'),
-                    'id' => 'cActivityMonitor',
-                    'layout' => 'fit',
-                    'tabConfig' => [
+                    'title'     => __('Activity Monitor'),
+                    'glyph'     => Configure::read('icnActivity'),
+                    'id'        => 'cActivityMonitor',
+                    'layout'    => 'fit',
+                    'tabConfig'=> [
                         'ui' => $this->tabUIThree
                     ]
                 ]
@@ -1232,15 +1062,15 @@ class DashboardController extends AppController
         }
 
 
-        if (count($admin_items) > 0) {
+        if(count($admin_items) > 0){
             array_push($tabs, array(
-                    "$show" => __('Users'),
-                    'plain' => $this->plain,
-                    'ui' => $this->ui,
-                    'xtype' => 'tabpanel',
-                    'glyph' => Configure::read('icnUser'),
-                    'layout' => 'fit',
-                    'items' => $users_items
+                    "$show"   => __('Users'),
+                    'plain'   => $this->plain,
+                    'ui'      => $this->ui,
+                    'xtype'   => 'tabpanel',
+                    'glyph'   => Configure::read('icnUser'),
+                    'layout'  => 'fit',
+                    'items'   => $users_items
                 )
             );
         }
@@ -1248,28 +1078,28 @@ class DashboardController extends AppController
         //____ Profiles Tab ____
         $profile_items = array();
 
-        if ($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base . "Profiles/index")) {
+        if($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base."Profiles/index")){
             array_push($profile_items, array(
-                    'title' => __('Profiles'),
-                    'glyph' => Configure::read('icnProfile'),
-                    'id' => 'cProfiles',
-                    'layout' => 'fit',
-                    'tabConfig' => [
+                    'title'   => __('Profiles'),
+                    'glyph'   => Configure::read('icnProfile'),
+                    'id'      => 'cProfiles',
+                    'layout'  => 'fit',
+                    'tabConfig'=> [
                         'ui' => $this->tabUIOne
                     ]
                 )
             );
         }
 
-        if (count($profile_items) > 0) {
+        if(count($profile_items) > 0){
             array_push($tabs, array(
-                    "$show" => __('Profiles'),
-                    'plain' => $this->plain,
-                    'ui' => $this->ui,
-                    'glyph' => Configure::read('icnProfile'),
-                    'xtype' => 'tabpanel',
-                    'layout' => 'fit',
-                    'items' => $profile_items
+                "$show"   => __('Profiles'),
+                'plain'   => $this->plain,
+                'ui'      => $this->ui,
+                'glyph'   => Configure::read('icnProfile'),
+                'xtype'   => 'tabpanel',
+                'layout'  => 'fit',
+                'items'   => $profile_items
                 )
             );
         }
@@ -1277,38 +1107,38 @@ class DashboardController extends AppController
         //____ RADIUS Tab ____
         $radius_items = array();
 
-        if ($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base . "DynamicClients/index")) {
+        if($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base."DynamicClients/index")){
             array_push($radius_items, array(
-                    'title' => __('RADIUS Clients'),
-                    'glyph' => Configure::read('icnNas'),
-                    'id' => 'cDynamicClients',
-                    'layout' => 'fit',
-                    'tabConfig' => [
+                    'title'   => __('RADIUS Clients'),
+                    'glyph'   => Configure::read('icnNas'),
+                    'id'      => 'cDynamicClients',
+                    'layout'  => 'fit',
+                    'tabConfig'=> [
                         'ui' => $this->tabUIOne
                     ]
                 )
             );
         }
-        /*
-                if($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base."Nas/index")){
-                    array_push($radius_items, array(
-                            'title'   => __('NAS Devices'),
-                            'glyph'   => Configure::read('icnNas'),
-                            'id'      => 'cNas',
-                            'layout'  => 'fit'
-                        )
-                    );
-                }
-        */
-        if (count($radius_items) > 0) {
+/*
+        if($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base."Nas/index")){
+            array_push($radius_items, array(
+                    'title'   => __('NAS Devices'),
+                    'glyph'   => Configure::read('icnNas'),
+                    'id'      => 'cNas',
+                    'layout'  => 'fit'
+                )
+            );
+        }
+*/
+        if(count($radius_items) > 0){
             array_push($tabs, array(
-                    "$show" => __('RADIUS'),
-                    'glyph' => Configure::read('icnRadius'),
-                    'plain' => $this->plain,
-                    'ui' => $this->ui,
-                    'xtype' => 'tabpanel',
-                    'layout' => 'fit',
-                    'items' => $radius_items
+                "$show"   => __('RADIUS'),
+                'glyph'   => Configure::read('icnRadius'),
+                'plain'   => $this->plain,
+                'ui'      => $this->ui,
+                'xtype'   => 'tabpanel',
+                'layout'  => 'fit',
+                'items'   => $radius_items
                 )
             );
         }
@@ -1317,29 +1147,29 @@ class DashboardController extends AppController
 
         $login_pages_items = [];
 
-        if ($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base . "DynamicDetails/index")) {
+        if($this->Acl->check(array('model' => 'Users', 'foreign_key' => $id), $base."DynamicDetails/index")){
             array_push($login_pages_items, [
-                    'title' => __('Login Pages'),
-                    'glyph' => Configure::read('icnSignIn'),
-                    'id' => 'cDynamicDetails',
-                    'layout' => 'fit',
-                    'tabConfig' => [
+                    'title'   => __('Login Pages'),
+                    'glyph'   => Configure::read('icnSignIn'),
+                    'id'      => 'cDynamicDetails',
+                    'layout'  => 'fit',
+                    'tabConfig'=> [
                         'ui' => $this->tabUIOne
                     ]
                 ]
             );
         }
 
-        if (count($login_pages_items) > 0) {
+        if(count($login_pages_items) > 0){
             array_push($tabs, [
 
-                    "$show" => __('Login Pages'),
-                    'glyph' => Configure::read('icnSignIn'),
-                    'xtype' => 'tabpanel',
-                    'plain' => $this->plain,
-                    'ui' => $this->ui,
-                    'layout' => 'fit',
-                    'items' => $login_pages_items
+                "$show"   => __('Login Pages'),
+                'glyph'   => Configure::read('icnSignIn'),
+                'xtype'   => 'tabpanel',
+                'plain'   => $this->plain,
+                'ui'      => $this->ui,
+                'layout'  => 'fit',
+                'items'   => $login_pages_items
                 ]
             );
         }
@@ -1347,30 +1177,29 @@ class DashboardController extends AppController
         return $tabs;
     }
 
-    private function _ap_default_realm($ap_id)
-    {
+    private function _ap_default_realm($ap_id){
 
         $realm = array();
 
-        $q_r = $this->Users->find('path', ['for' => $ap_id]);
+        $q_r = $this->Users->find('path',['for' => $ap_id]);
 
         $found_flag = false;
 
 
-        foreach ($q_r as $i) {
-            $user_id = $i->id;
-            $r = $this->Realms->find()->where(['Realms.user_id' => $user_id, 'Realms.available_to_siblings' => true])->all();
+        foreach($q_r as $i){
+            $user_id    = $i->id;
+            $r          = $this->Realms->find()->where(['Realms.user_id' => $user_id,'Realms.available_to_siblings'=> true])->all();
 
-            foreach ($r as $j) {
-                $id = $j->id;
-                $name = $j->name;
+            foreach($r  as $j){
+                $id     = $j->id;
+                $name   = $j->name;
 
                 $read = $this->Acl->check(
-                    array('model' => 'Users', 'foreign_key' => $ap_id),
-                    array('model' => 'Realms', 'foreign_key' => $id), 'read');
-                if ($read == true) {
-                    $realm['realm_id'] = $id;
-                    $realm['realm_name'] = $name;
+                            array('model' => 'Users', 'foreign_key' => $ap_id),
+                            array('model' => 'Realms','foreign_key' => $id), 'read');
+                if($read == true){
+                    $realm['realm_id']      = $id;
+                    $realm['realm_name']    = $name;
                     $found_flag = true;
                     break; // We only need one
                 }
@@ -1379,20 +1208,20 @@ class DashboardController extends AppController
 
         //All the realms owned by anyone this access provider created (and also itself)
         //will automatically be under full controll of this access provider
-        if ($found_flag == false) {
-            $this->children = $this->Users->find_access_provider_children($ap_id);
-            $or_array = array(['Realms.user_id' => $ap_id]); //Start with itself
-            if ($this->children) {   //Only if the AP has any children...
-                foreach ($this->children as $i) {
+        if($found_flag == false){
+            $this->children     = $this->Users->find_access_provider_children($ap_id);
+            $or_array           = array(['Realms.user_id' => $ap_id]); //Start with itself
+            if($this->children){   //Only if the AP has any children...
+                foreach($this->children as $i){
                     $id = $i['id'];
-                    array_push($or_array, array('Realms.user_id' => $id));
+                    array_push($or_array,array('Realms.user_id' => $id));
                 }
             }
-            if (count($or_array) > 0) { //Only if there are something to 'OR'
+            if(count($or_array)>0){ //Only if there are something to 'OR'
                 $r_sub = $this->Realms->find()->where(['OR' => $or_array])->all();
-                foreach ($r_sub as $j) {
-                    $realm['realm_id'] = $j->id;
-                    $realm['realm_name'] = $j->name;
+                foreach($r_sub  as $j){
+                    $realm['realm_id']     = $j->id;
+                    $realm['realm_name']   = $j->name;
                     break; //We only need one
                 }
             }
