@@ -232,11 +232,21 @@ class DashboardController extends AppController
                 }
 
                 $user = $this->_get_user_detail($u, $auto_compact);
-                $this->set(array(
-                    'data' => $user,
-                    'success' => true,
-                    '_serialize' => array('data', 'success')
-                ));
+
+                if ($user){
+                    $this->set(array(
+                        'data' => $user,
+                        'success' => true,
+                        '_serialize' => array('data', 'success')
+                    ));
+                }else{
+                    $this->set(array(
+                        'message' => 'User is not enable yet',
+                        'success' => false,
+                        '_serialize' => array('message', 'success')
+                    ));
+                }
+
 
             } else {
 
@@ -691,18 +701,23 @@ class DashboardController extends AppController
             $data_usage = ['realm_id' => $this->realm_id, 'realm_name' => $this->realm_name];
         }
 
-        return [
-            'token' => $token,
-            'active' => $active,
-            'role' => $role,
-            'extensions' => $extensions,
-            'isRootUser' => $isRootUser,
-            'tabs' => $tabs,
-            'data_usage' => $data_usage,
-            'user' => ['id' => $id, 'username' => $username, 'group' => $group, 'cls' => $cls, 'timezone_id' => $user->timezone_id],
-            'white_label' => $white_label,
-            'show_wizard' => $show_wizard
-        ];
+        if ($active){
+            return [
+                'token' => $token,
+                'active' => $active,
+                'role' => $role,
+                'extensions' => $extensions,
+                'isRootUser' => $isRootUser,
+                'tabs' => $tabs,
+                'data_usage' => $data_usage,
+                'user' => ['id' => $id, 'username' => $username, 'group' => $group, 'cls' => $cls, 'timezone_id' => $user->timezone_id],
+                'white_label' => $white_label,
+                'show_wizard' => $show_wizard
+            ];
+        }
+        else{
+            return false;
+        }
     }
 
 

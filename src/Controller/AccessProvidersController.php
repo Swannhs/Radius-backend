@@ -526,6 +526,7 @@ class AccessProvidersController extends AppController
                 'user_id' => $new_id,
                 'user_name' => $entity->username,
                 'payable' => 0,
+                'paid' => 0,
                 'receivable' => 0,
                 'received' => 0,
             ]);
