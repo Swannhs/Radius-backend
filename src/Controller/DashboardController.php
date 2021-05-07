@@ -7,6 +7,8 @@ use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
 
+use Cake\Datasource\ConnectionManager;
+
 /**
  * VoucherTransactions Controller
  * @property \App\Model\Table\UsersTable $Users
@@ -15,6 +17,7 @@ use Cake\Core\Configure\Engine\PhpConfig;
  * @property \App\Model\Table\ServersTable $Server
  * @property \App\Model\Table\VouchersTable $Vouchers
  * @property \App\Model\Table\ServersTable $Servers
+ * @property \App\Model\Table\RadacctsTable $Radaccts
  */
 class DashboardController extends AppController
 {
@@ -44,6 +47,7 @@ class DashboardController extends AppController
         $this->loadModel('VoucherTransactions');
         $this->loadModel('Vouchers');
         $this->loadModel('BalanceTransactions');
+        $this->loadModel('Radaccts');
 
         $this->loadComponent('Aa');
         $this->loadComponent('WhiteLabel');
@@ -74,44 +78,97 @@ class DashboardController extends AppController
 //    --------------------------------------Voucher Start-----------------------------------------
     public function voucher()
     {
+        $user_id = $this->checkTokenCustom();
+        if ($user_id) {
 
-        $voucherBalance = $this->VoucherTransactions->find()
-            ->where(['user_id' => $this->checkTokenCustom()])
-            ->select('balance');
+            $vouchers = $this->Vouchers->find()
+                ->where(['user_id' => $user_id])
+                ->count();
 
-        $balance = 0;
-        foreach ($voucherBalance as $row) {
-            $balance = $row->balance;
+            $active = $this->Vouchers->find()
+                ->where([
+                    'user_id' => $user_id,
+                    'status' => 'used'
+                ])->count();
+
+            $conn = ConnectionManager::get('default');
+            $stmt = $conn->execute('SELECT count(vc.id) FROM rd.vouchers
+                vc INNER JOIN rd.radacct rac ON vc.name = rac.username
+                WHERE vc.user_id = :user_id AND rac.acctstarttime
+                IS NOT NULL AND rac.acctstoptime IS NULL', ['user_id' => $user_id]);
+            $onlinePack = $stmt->fetchAll('assoc');
+            $online = $onlinePack[0];
+
+            $item = array();
+            $row = array();
+
+            $row['active'] = $active;
+            $row['total'] = $vouchers;
+            $row['online'] = $online{'count(vc.id)'};
+
+            array_push($item, $row);
+
+            $this->set([
+                'item' => $item[0],
+                'success' => true,
+                '_serialize' => ['success', 'item']
+            ]);
+        } else {
+            $this->set([
+                'message' => 'Invalid user account',
+                'success' => false,
+                '_serialize' => ['message', 'success']
+            ]);
         }
 
-
-        $vouchers = $this->Vouchers->find()
-            ->where(['user_id' => $this->checkTokenCustom()])
-            ->count();
-
-        $active = $this->Vouchers->find()
-            ->where([
-                'user_id' => $this->checkTokenCustom(),
-                'status' => 'used'
-            ])
-            ->count();
-
-        $item = array();
-        $row = array();
-
-        $row['balance'] = $balance;
-        $row['active'] = $active;
-        $row['total'] = $vouchers;
-
-        array_push($item, $row);
-
-        $this->set([
-            'item' => $item,
-            '_serialize' => ['item']
-        ]);
     }
 
 //    --------------------------------------Voucher End-----------------------------------------
+
+
+//    -------------------------------------Credit Start----------------------------------------
+    public function credit()
+    {
+        $this->request->allowMethod('get');
+        $user_id = $this->checkTokenCustom();
+
+        if ($user_id) {
+            $voucherBalance = $this->VoucherTransactions->find()
+                ->where(['user_id' => $user_id]);
+
+            $balance = 0;
+            $credit = 0;
+            $debit = 0;
+            foreach ($voucherBalance as $row) {
+                $balance = $row->balance;
+                $credit = $row->credit;
+                $debit = $row->credit;
+            }
+            $item = array();
+            $row = array();
+
+            $row['balance'] = $balance;
+            $row['credit'] = $credit;
+            $row['debit'] = $debit;
+
+            array_push($item, $row);
+
+            $this->set([
+                'item' => $item[0],
+                'success' => true,
+                '_serialize' => ['success', 'item']
+            ]);
+        } else {
+            $this->set([
+                'message' => 'Invalid user account',
+                'success' => false,
+                '_serialize' => ['message', 'success']
+            ]);
+        }
+
+
+    }
+//    -------------------------------------Credit End----------------------------------------
 
 //    --------------------------------------Cash Start-----------------------------------------
     public function cash()
@@ -119,9 +176,33 @@ class DashboardController extends AppController
         $this->request->allowMethod('get');
         $cash = $this->BalanceTransactions->find()
             ->where(['user_id' => $this->checkTokenCustom()]);
+
+        $payable = 0;
+        $paid = 0;
+        $receivable = 0;
+        $received = 0;
+
+        foreach ($cash as $row){
+            $payable = $row->payable;
+            $paid = $row->paid;
+            $receivable = $row->receivable;
+            $received = $row->received;
+        }
+        $item = array();
+        $row = array();
+
+        $row['payable'] = $payable;
+        $row['paid'] = $paid;
+        $row['receivable'] = $receivable;
+        $row['received'] = $received;
+
+        array_push($item, $row);
+
+
         $this->set([
-            'cash' => $cash,
-            '_serialize' => ['cash']
+            'item' => $item[0],
+            'success' => true,
+            '_serialize' => ['success', 'item']
         ]);
     }
 
@@ -232,21 +313,11 @@ class DashboardController extends AppController
                 }
 
                 $user = $this->_get_user_detail($u, $auto_compact);
-
-                if ($user){
-                    $this->set(array(
-                        'data' => $user,
-                        'success' => true,
-                        '_serialize' => array('data', 'success')
-                    ));
-                }else{
-                    $this->set(array(
-                        'message' => 'User is not enable yet',
-                        'success' => false,
-                        '_serialize' => array('message', 'success')
-                    ));
-                }
-
+                $this->set(array(
+                    'data' => $user,
+                    'success' => true,
+                    '_serialize' => array('data', 'success')
+                ));
 
             } else {
 
@@ -701,23 +772,18 @@ class DashboardController extends AppController
             $data_usage = ['realm_id' => $this->realm_id, 'realm_name' => $this->realm_name];
         }
 
-        if ($active){
-            return [
-                'token' => $token,
-                'active' => $active,
-                'role' => $role,
-                'extensions' => $extensions,
-                'isRootUser' => $isRootUser,
-                'tabs' => $tabs,
-                'data_usage' => $data_usage,
-                'user' => ['id' => $id, 'username' => $username, 'group' => $group, 'cls' => $cls, 'timezone_id' => $user->timezone_id],
-                'white_label' => $white_label,
-                'show_wizard' => $show_wizard
-            ];
-        }
-        else{
-            return false;
-        }
+        return [
+            'token' => $token,
+            'active' => $active,
+            'role' => $role,
+            'extensions' => $extensions,
+            'isRootUser' => $isRootUser,
+            'tabs' => $tabs,
+            'data_usage' => $data_usage,
+            'user' => ['id' => $id, 'username' => $username, 'group' => $group, 'cls' => $cls, 'timezone_id' => $user->timezone_id],
+            'white_label' => $white_label,
+            'show_wizard' => $show_wizard
+        ];
     }
 
 

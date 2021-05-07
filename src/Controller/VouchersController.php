@@ -7,6 +7,8 @@ use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
 
+use Cake\Database\Expression\QueryExpression;
+use Cake\ORM\Query;
 use Cake\Utility\Inflector;
 use Cake\ORM\TableRegistry;
 
@@ -272,6 +274,9 @@ class VouchersController extends AppController
 //            ----------------------------------------------Customize-----------------------------------By-------Swann--------
 //            ----------------------------------------------Customize-----------------------------------By-------Swann--------
 //            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+
+
+
     public function indexUserVouchers()
     {
         $items = $this->Vouchers->find()->where(['user_id' => $this->checkToken()]);
@@ -284,6 +289,15 @@ class VouchersController extends AppController
             $page = $this->request->query['page'];
             $offset = $this->request->query['start'];
         }
+
+//      -----------------Handle Search----------------
+
+        if (isset($this->request->query['q'])){
+            $items = $items->where(function (QueryExpression $expression, Query $query){
+                return $expression->like('name', $this->request->query('q'));
+            });
+        }
+
 
         $items->page($page);
         $items->limit($limit);
@@ -435,7 +449,8 @@ class VouchersController extends AppController
                 'user_id' => $this->checkToken(),
                 'profile_id' => $this->request->data('profile_id'),
                 'realm_id' => $this->request->data('realm_id')
-            ]);
+            ])
+            ->first();
         $id = 0;
         foreach ($idA as $row) {
             $id = $row->id;
