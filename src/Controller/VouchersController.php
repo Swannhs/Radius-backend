@@ -440,10 +440,11 @@ class VouchersController extends AppController
         ));
     }
 
+
 //    --------------------------Checking Sender Balance -------------------------------
     function checkSenderTransaction()
     {
-        $idA = $this->VoucherTransactions
+        $sender = $this->VoucherTransactions
             ->find()
             ->where([
                 'user_id' => $this->checkToken(),
@@ -451,11 +452,7 @@ class VouchersController extends AppController
                 'realm_id' => $this->request->data('realm_id')
             ])
             ->first();
-        $id = 0;
-        foreach ($idA as $row) {
-            $id = $row->id;
-        }
-        return $id;
+        return $sender ? $sender->id : false;
     }
 
     public function add()

@@ -131,7 +131,7 @@ class BalanceTransactionsController extends AppController
     }
 
 
-    function checkSenderBalance(): int
+    function checkSenderBalance()
     {
         $user = $this->Aa->user_for_token($this);
         if ($user) {
@@ -148,17 +148,15 @@ class BalanceTransactionsController extends AppController
         return 0;
     }
 
-    function checkReceiverBalance(): int
+    function checkReceiverBalance()
     {
-        $idA = $this->BalanceTransactions->find()->select('id')
+        $receiver = $this->BalanceTransactions->find()->select('id')
             ->where([
                 'user_id' => $this->request->getData('partner_user_id')
-            ]);
-        $id = 0;
-        foreach ($idA as $row) {
-            $id = $row->id;
-        }
-        return $id;
+            ])
+            ->first();
+
+        return $receiver ? $receiver->id : false;
     }
 
     public function parent()
