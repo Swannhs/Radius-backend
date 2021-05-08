@@ -625,40 +625,48 @@ class VouchersController extends AppController
         return $profileController->getVoucherTime($user, $profile_id);
     }
 
-    public function voucherReset()
+    public function reset()
     {
-        $check = $this->Vouchers->find()
-            ->where(['id' => $this->request->getData('reset')])
-            ->where(['user_id' => $this->checkToken()]);
+        $user = $this->_ap_right_check();
+        if (!$user) {
+            return;
+        }
 
-        if ($check) {
-            $reset = $this->Vouchers->get($this->request->getData('reset'));
-            $password = bin2hex(random_bytes(3));
-            $reset->set([
-                'password' => $password,
-                'extra_name' => '',
-                'extra_value' => '',
-                'time_valid' => $reset->get('time_valid')
-            ]);
-            if ($this->Vouchers->save($reset)) {
-                $this->set([
-                    'message' => 'Operation successful',
-                    'success' => true,
-                    '_serialize' => ['success', 'message']
-                ]);
+        if (
+            (isset($this->request->data['voucher_id'])) ||
+            (isset($this->request->data['name'])) //Can also change by specifying name
+        ) {
+            $single_field = false;
+            if (isset($this->request->data['name'])) {
+                $entity = $this->{$this->main_model}->find()->where(['name' => $this->request->data['name']])->first();
+            } else {
+                $entity = $this->{$this->main_model}->get($this->request->data['voucher_id']);
+            }
+
+            if ($entity) {
+                $pwd = $this->VoucherGenerator->generatePassword();
+                $this->request->data['password'] = $pwd;
+                $entity->extra_value = ''; //reset device owner
+                $this->{$this->main_model}->patchEntity($entity, $this->request->data());
+                if ($this->{$this->main_model}->save($entity)) {
+                    $this->set(array(
+                        'success' => true,
+                        '_serialize' => array('success')
+                    ));
+                } else {
+                    $this->set([
+                        'message' => 'Could not reset voucher this time',
+                        'success' => false,
+                        '_serialize' => ['success', 'message']
+                    ]);
+                }
             } else {
                 $this->set([
-                    'message' => 'Something is went wrong in our system',
+                    'message' => 'Could not reset voucher this time',
                     'success' => false,
                     '_serialize' => ['success', 'message']
                 ]);
             }
-        } else {
-            $this->set([
-                'message' => 'You are denied to do this operation',
-                'success' => false,
-                '_serialize' => ['success', 'message']
-            ]);
         }
     }
 

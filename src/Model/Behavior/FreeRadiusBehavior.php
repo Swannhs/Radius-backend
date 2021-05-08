@@ -39,7 +39,8 @@ class FreeRadiusBehavior extends Behavior {
         'password'          => 'Cleartext-Password',
         'time_valid'        => 'Rd-Voucher',
         'expire'            => 'Expiration',
-        'ssid_only'         => 'Rd-Ssid-Check'
+        'ssid_only'         => 'Rd-Ssid-Check',
+        'extra_value'       => 'Rd-Voucher-Device-Owner'
     ];
 
     protected  $readOnlyAttributes = [
