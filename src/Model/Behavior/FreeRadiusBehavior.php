@@ -39,7 +39,8 @@ class FreeRadiusBehavior extends Behavior {
         'password'          => 'Cleartext-Password',
         'time_valid'        => 'Rd-Voucher',
         'expire'            => 'Expiration',
-        'ssid_only'         => 'Rd-Ssid-Check'
+        'ssid_only'         => 'Rd-Ssid-Check',
+        'extra_value'       => 'Rd-Voucher-Device-Owner'
     ];
 
     protected  $readOnlyAttributes = [
@@ -408,9 +409,9 @@ class FreeRadiusBehavior extends Behavior {
                 $valid      = $request->data['days_valid']."-".$hours."-".$minutes."-00";
                 $entity->time_valid = $valid;    
             }
-        }else{
+        }else if(!$entity->time_valid){
             $entity->time_valid = '';
-        }
+        } 
 		//Auto-populate the time_cap field with the value for time_valid
 		if($entity->time_valid !== ''){
 			$expire		= $entity->time_valid;
@@ -506,7 +507,7 @@ class FreeRadiusBehavior extends Behavior {
         }
 
         $request = Router::getRequest();
-        if(!(isset($request->data['days_valid']))){
+        if(!(isset($request->data['days_valid'])) && !($entity->time_valid)){
             $this->_remove_radcheck_item($username,$this->vChecks["time_valid"]);
         }
 
@@ -656,7 +657,7 @@ class FreeRadiusBehavior extends Behavior {
         $ssid_only = false;
         //Remove any references if there are perhaps any
         $this->{'Radchecks'}->deleteAll(['username' => $username]);
-         $this->{'UserSsids'}->deleteAll(['username' => $username]);
+        $this->{'UserSsids'}->deleteAll(['username' => $username]);
 
         foreach(array_keys($this->vChecks) as $key){
             if(($entity->{$key} !== '')&&($entity->{$key} !== null)){

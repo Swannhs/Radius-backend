@@ -14,6 +14,8 @@ use Cake\ORM\TableRegistry;
 
 use Cake\Mailer\Email;
 
+use Cake\Log\Log;
+
 /**
  * VoucherTransactionDetails Controller
  *
@@ -442,43 +444,27 @@ class VouchersController extends AppController
 
 
 //    --------------------------Checking Sender Balance -------------------------------
-    function checkSenderTransaction()
+    function checkSenderTransaction($user_id)
     {
-        $sender = $this->VoucherTransactions
+        return $this->VoucherTransactions
             ->find()
             ->where([
-                'user_id' => $this->checkToken(),
+                'user_id' => $user_id == 0 ? $this->checkToken() : $user_id,
                 'profile_id' => $this->request->data('profile_id'),
                 'realm_id' => $this->request->data('realm_id')
             ])
             ->first();
-        return $sender ? $sender->id : false;
     }
 
     public function add()
     {
-
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-
-        if ($this->checkSenderTransaction()) {
-            $transaction = $this->VoucherTransactions->get($this->checkSenderTransaction());
-            if ($transaction->get('balance') >= $this->request->getData('quantity')) {
-                $transactions = $transaction->set([
-                    'balance' => $transaction->get('balance') - $this->request->getData('quantity'),
-                    'debit' => $transaction->get('debit') + $this->request->getData('quantity')
-                ]);
-                $this->VoucherTransactions->save($transactions);
+        $transaction = $this->checkSenderTransaction($this->request->getData('user_id'));
+        // Log::write('debug', 'transaction: '.((string)$transaction));
+        if ($transaction) {
+            if ($transaction->balance >= $this->request->getData('quantity')) {
+                $transaction->balance = $transaction->balance - $this->request->getData('quantity');
+                $transaction->debit = $transaction->debit + $this->request->getData('quantity');
+                $this->VoucherTransactions->save($transaction);
 
 
 //       --------------------------------Started to create voucher -----------------------
@@ -539,6 +525,19 @@ class VouchersController extends AppController
                     return;
                 }
 
+                $s = '';
+                if (($suffix != '') && ($suffix_vouchers)) {
+                    $s = $suffix;
+                }
+                // generate batch name adding suffix of realm as prefix of batch name
+                $this->request->data['batch'] = $this->VoucherGenerator->generateBatchName($s);
+
+                // if active_on_first login is not selected from UI then find Rd-Voucher values from profile
+                if(!$this->request->data['activate_on_login']){
+                    $this->request->data['activate_on_login'] = 1;
+                    $this->request->data['time_valid'] = $this->getVoucherTimeValidity($user, $profile_entity->id);
+                }
+
                 //--Here we start with the work!
                 $qty = 1;//Default value
                 $counter = 0;
@@ -564,9 +563,11 @@ class VouchersController extends AppController
                         }
 
                         $s = '';
-                        if (($suffix != '') && ($suffix_vouchers)) {
-                            $s = $suffix;
-                        }
+                        // no need to use suffix for voucher
+                        // if (($suffix != '') && ($suffix_vouchers)) {
+                        //     $s = $suffix;
+                        // }
+
                         $un = $this->VoucherGenerator->generateUsernameForVoucher($p, $s);
                         $pwd = $this->VoucherGenerator->generatePassword();
                         $this->request->data['name'] = $un;
@@ -606,66 +607,66 @@ class VouchersController extends AppController
             } else {
                 $this->set([
                     'success' => false,
-                    'message' => 'You have not enough balance',
+                    'message' => 'Your requested amount exit your credit limit.',
                     '_serialize' => ['success', 'message']
                 ]);
             }
         } else {
             $this->set([
                 'success' => false,
-                'message' => 'You have not enough balance',
+                'message' => 'You don\'t have enough credit to create voucher, please recharge.',
                 '_serialize' => ['success', 'message']
             ]);
         }
     }
 
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
+    private function getVoucherTimeValidity($user, $profile_id) {
+        $profileController = new ProfilesController;
+        return $profileController->getVoucherTime($user, $profile_id);
+    }
 
-
-    public function voucherReset()
+    public function reset()
     {
-        $check = $this->Vouchers->find()
-            ->where(['id' => $this->request->getData('reset')])
-            ->where(['user_id' => $this->checkToken()]);
+        $user = $this->_ap_right_check();
+        if (!$user) {
+            return;
+        }
 
-        if ($check) {
-            $reset = $this->Vouchers->get($this->request->getData('reset'));
-            $password = bin2hex(random_bytes(3));
-            $reset->set([
-                'password' => $password,
-                'extra_name' => '',
-                'extra_value' => '',
-                'time_valid' => $reset->get('time_valid')
-            ]);
-            if ($this->Vouchers->save($reset)) {
-                $this->set([
-                    'message' => 'Operation successful',
-                    'success' => true,
-                    '_serialize' => ['success', 'message']
-                ]);
+        if (
+            (isset($this->request->data['voucher_id'])) ||
+            (isset($this->request->data['name'])) //Can also change by specifying name
+        ) {
+            $single_field = false;
+            if (isset($this->request->data['name'])) {
+                $entity = $this->{$this->main_model}->find()->where(['name' => $this->request->data['name']])->first();
+            } else {
+                $entity = $this->{$this->main_model}->get($this->request->data['voucher_id']);
+            }
+
+            if ($entity) {
+                $pwd = $this->VoucherGenerator->generatePassword();
+                $this->request->data['password'] = $pwd;
+                $entity->extra_value = ''; //reset device owner
+                $this->{$this->main_model}->patchEntity($entity, $this->request->data());
+                if ($this->{$this->main_model}->save($entity)) {
+                    $this->set(array(
+                        'success' => true,
+                        '_serialize' => array('success')
+                    ));
+                } else {
+                    $this->set([
+                        'message' => 'Could not reset voucher this time',
+                        'success' => false,
+                        '_serialize' => ['success', 'message']
+                    ]);
+                }
             } else {
                 $this->set([
-                    'message' => 'Something is went wrong in our system',
+                    'message' => 'Could not reset voucher this time',
                     'success' => false,
                     '_serialize' => ['success', 'message']
                 ]);
             }
-        } else {
-            $this->set([
-                'message' => 'You are denied to do this operation',
-                'success' => false,
-                '_serialize' => ['success', 'message']
-            ]);
         }
     }
 
