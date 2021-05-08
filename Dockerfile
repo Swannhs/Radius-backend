@@ -17,7 +17,8 @@ RUN apt-get update && apt-get install -y \
     git \
     zip \
     unzip \
-    cron
+    cron \
+    nano
 
 
 # Clear cache
@@ -73,11 +74,16 @@ RUN chown -R www-data. $APP_HOME/tmp \
 RUN mkdir -p /etc/cron.d \
     && cp $APP_HOME/setup/cron/cron3 /etc/cron.d/
 
+RUN chmod -R 0644 /etc/cron.d/cron3 \
+    && crontab /etc/cron.d/cron3 \
+    && touch /var/log/cron.log
+
 COPY ./entrypoint.sh /
 
-RUN chmod -R 0755 /entrypoint.sh && \
-  crontab /etc/cron.d/cron3 && \
-  touch /var/log/cron.log
+RUN chmod -R 0755 /entrypoint.sh
+
+RUN chown -R www-data. /etc/cron.d/cron3 \
+    && chown -R www-data. /var/log/cron.log
 
 # Move dictionary files to proper directories for profile component
 # See: cake2/rd_cake/Config/RadiusDesk.php

@@ -137,7 +137,8 @@ class VoucherGeneratorComponent extends Component {
 
     public function initialize(array $config){
         $this->controller = $this->_registry->getController();
-        $this->Radchecks  = TableRegistry::get('Radchecks'); 
+        $this->Radchecks  = TableRegistry::get('Radchecks');
+		$this->Vouchers  = TableRegistry::get('Vouchers'); 
     }
 
     public function generateVoucher(){
@@ -160,7 +161,7 @@ class VoucherGeneratorComponent extends Component {
     }
     
     public function generatePassword(){
-        return $this->_random_alpha_numeric();
+        return $this->_random_number();
     }
     
     public function generateUsernameForVoucher($prefix, $suffix){
@@ -170,7 +171,7 @@ class VoucherGeneratorComponent extends Component {
             $like_statement = $like_statement.'@'.$suffix;
         }
         if($prefix !==''){
-            $like_statement = $prefix.'-'.$like_statement;
+            $like_statement = $prefix.$like_statement;
         }    
     
         $q_r = $this->Radchecks->find()
@@ -179,7 +180,7 @@ class VoucherGeneratorComponent extends Component {
             ->first();
         if($q_r){
             $username = $q_r->username;
-            $username = preg_replace('/^\w+-/', '', $username);//Remove prefix
+            $username = preg_replace('/'.$prefix.'/', '', $username);//Remove prefix
             $username = preg_replace('/@\w+$/', '', $username);//Remove sufix
             $next_number = (int)$username+1;
             $next_number = sprintf('%05d', $next_number);
@@ -192,10 +193,38 @@ class VoucherGeneratorComponent extends Component {
         }
         
         if($prefix !==''){
-            $next_number = $prefix.'-'.$next_number;
+            $next_number = $prefix.$next_number;
         }
         return $next_number;
     }
+
+	public function generateBatchName($prefix){
+    
+        $like_statement = '[0-9][0-9][0-9][0-9][0-9]'; //FIXME if you want the vouchers to hve more numbers also add here
+        if($prefix !==''){
+            $like_statement = $prefix.$like_statement;
+        }    
+    
+        $q_r = $this->Vouchers->find()
+            ->where(['Vouchers.batch REGEXP' => $like_statement])
+            ->order(['Vouchers.batch' => 'DESC'])
+            ->first();
+
+		if($q_r){
+			$batch = $q_r->batch;
+			$batch = preg_replace('/'.$prefix.'/', '', $batch);//Remove prefix
+			$batch = preg_replace('/@\w+$/', '', $batch);//Remove sufix
+			$next_number = (int)$batch+1;
+			$next_number = sprintf('%05d', $next_number);
+		}else{ 
+			$next_number = $this->startNumber;
+		}
+
+		if($prefix !==''){
+            $next_number = $prefix.$next_number;
+        }
+		return $next_number;
+	}
 
     private function _word_number_word_number(){
 
@@ -242,7 +271,7 @@ class VoucherGeneratorComponent extends Component {
 	private function _random_number(){
 		$duplicate_flag = true;
 		while($duplicate_flag){		
-			$v_value = rand ( 1000,999999);
+			$v_value = rand ( 100000,999999);
 			if(!in_array("v_value", $this->voucherNames)){
 				$duplicate_flag = false; //Break the loop - we ar unique;
 				array_push($this->voucherNames, $v_value);

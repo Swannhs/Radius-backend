@@ -965,4 +965,22 @@ class ProfilesController extends AppController
         $this->{'Radgroupchecks'}->deleteAll(['groupname' => $groupname]);
         $this->{'Radgroupreplies'}->deleteAll(['groupname' => $groupname]);
     }
+
+    public function getVoucherTime($user, $profile_id) {
+        $query      = $this->{$this->main_model}->find()->where(['id', $profile_id]);
+        $this->CommonQuery->build_common_query($query, $user, ['Radusergroups'=> ['Radgroupchecks']]);
+        $q_r        = $query->all();
+        foreach($q_r as $i){    
+            $time_valid_in_profile = '';
+            foreach ($i->radusergroups as $cmp){
+                foreach ($cmp->radgroupchecks as $radgroupcheck) {
+                    if($radgroupcheck->attribute == 'Rd-Voucher'){
+                        return $radgroupcheck->value;
+                    }             
+                }
+            }
+        }
+
+        return $time_valid_in_profile;
+    }
 }
