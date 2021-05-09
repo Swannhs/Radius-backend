@@ -967,7 +967,7 @@ class ProfilesController extends AppController
     }
 
     public function getVoucherTime($user, $profile_id) {
-        $query      = $this->{$this->main_model}->find()->where(['id', $profile_id]);
+        $query      = $this->{$this->main_model}->find()->where(['id' => $profile_id]);
         $this->CommonQuery->build_common_query($query, $user, ['Radusergroups'=> ['Radgroupchecks']]);
         $q_r        = $query->all();
         foreach($q_r as $i){    
