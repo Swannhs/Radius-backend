@@ -224,7 +224,7 @@ class UsageTask extends Shell {
             $stmt       = $conn->execute("SELECT (UNIX_TIMESTAMP(now()) - UNIX_TIMESTAMP(acctstarttime)) as time_since_login from radacct where username='$username' order by acctstarttime ASC LIMIT 1");
             $row        = $stmt->fetch('assoc');
 
-            $perc_used_from_login  = intval(($row['time_since_login'] / $time_avail)* 100);
+            $perc_used_from_login  = intval(ceil(($row['time_since_login'] / $time_avail)* 100));
 
             if($perc_used_from_login >= 100){
                 $perc_used_from_login = 'depleted';  

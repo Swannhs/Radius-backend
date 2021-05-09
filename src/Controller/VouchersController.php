@@ -766,6 +766,12 @@ class VouchersController extends AppController
             }
         }
 
+        // if active_on_first login is not selected from UI then find Rd-Voucher values from profile
+        if(!$this->request->data['activate_on_login']){
+            $this->request->data['activate_on_login'] = 1;
+            $this->request->data['time_valid'] = $this->getVoucherTimeValidity($user, $profile_entity->id);
+        }
+
         //If it is expiring; set it in the correct format
         if ($this->request->data['never_expire'] == 0) {
             $newDate = date_create_from_format('m/d/Y', $this->request->data['expire']);
