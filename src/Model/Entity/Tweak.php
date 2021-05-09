@@ -13,6 +13,8 @@ use Cake\ORM\Entity;
  * @property string $injection_type
  * @property string $payload
  * @property string $note
+ * @property \Cake\I18n\FrozenTime|null $created
+ * @property \Cake\I18n\FrozenTime|null $modified
  *
  * @property \App\Model\Entity\Realm[] $realms
  */
@@ -34,6 +36,8 @@ class Tweak extends Entity
         'injection_type' => true,
         'payload' => true,
         'note' => true,
+        'created' => true,
+        'modified' => true,
         'realms' => true,
     ];
 }

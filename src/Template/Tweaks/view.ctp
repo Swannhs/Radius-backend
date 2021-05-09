@@ -46,6 +46,14 @@
             <th scope="row"><?= __('Id') ?></th>
             <td><?= $this->Number->format($tweak->id) ?></td>
         </tr>
+        <tr>
+            <th scope="row"><?= __('Created') ?></th>
+            <td><?= h($tweak->created) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Modified') ?></th>
+            <td><?= h($tweak->modified) ?></td>
+        </tr>
     </table>
     <div class="related">
         <h4><?= __('Related Realms') ?></h4>
