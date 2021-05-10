@@ -272,6 +272,11 @@ class CommonQueryComponent extends Component {
             if($query !== '[null]'){
                 if($model == 'PermanentUsers'){
                     array_push($where_clause,[$model.".username LIKE" => '%'.$query.'%']);
+                }else if($model == 'Vouchers'){
+                    $tree_array = array();
+                    array_push($tree_array,[$model.".name LIKE" => '%'.$query.'%']);
+                    array_push($tree_array,[$model.".batch LIKE" => '%'.$query.'%']);
+                    array_push($where_clause,array('OR' => $tree_array));
                 }else{
                     array_push($where_clause,[$model.".name LIKE" => '%'.$query.'%']);
                 }
