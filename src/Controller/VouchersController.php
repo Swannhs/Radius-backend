@@ -264,58 +264,6 @@ class VouchersController extends AppController
         $this->set('file_name', '2016-06' . '_June_CLM.pdf');
         $this->response->type('pdf');
     }
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-//            ----------------------------------------------Customize-----------------------------------By-------Swann--------
-
-
-
-    public function indexUserVouchers()
-    {
-        $items = $this->Vouchers->find()->where(['user_id' => $this->checkToken()]);
-
-        $limit = 50;
-        $page = 1;
-        $offset = 0;
-        if (isset($this->request->query['limit'])) {
-            $limit = $this->request->query['limit'];
-            $page = $this->request->query['page'];
-            $offset = $this->request->query['start'];
-        }
-
-//      -----------------Handle Search----------------
-
-        if (isset($this->request->query['q'])){
-            $items = $items->where(function (QueryExpression $expression, Query $query){
-                return $expression->like('name', $this->request->query('q'));
-            });
-        }
-
-
-        $items->page($page);
-        $items->limit($limit);
-        $items->offset($offset);
-
-        $total = $items->count();
-
-        $this->set([
-            'items' => $items,
-            'totalCount' => $total,
-            'status' => true,
-            '_serialize' => ['items', 'success', 'totalCount']
-        ]);
-
-
-    }
 
     //__________________________________ BASIC CRUD Manager ______________________________________//
     public function index()
@@ -327,12 +275,28 @@ class VouchersController extends AppController
             return;
         }
 
-        $query = $this->{$this->main_model}->find();
+        $user_id = $user['id'];
 
-        if ($this->CommonQuery->build_with_realm_query($query, $user, ['Users', 'Realms']) == false) {
-            return;
+        if($this->Aa->admin_check($this)){   //Only for admin users!
+            $query = $this->{$this->main_model}->find();
+
+            if ($this->CommonQuery->build_with_realm_query($query, $user, ['Users', 'Realms']) == false) {
+                return;
+            }
+        }else{
+            $query = $this->{$this->main_model}->find()->where(['user_id' => $user_id]);
+
+            if ($this->CommonQuery->build_with_realm_query($query, $user) == false) {
+                return;
+            }
         }
 
+        $this->_getVouchers($user, $query);
+        
+    }
+
+
+    private function _getVouchers($user, $query){
 
         $limit = 50;
         $page = 1;
@@ -444,7 +408,7 @@ class VouchersController extends AppController
 
 
 //    --------------------------Checking Sender Balance -------------------------------
-    function checkSenderTransaction($user_id)
+    private function _checkSenderTransaction($user_id)
     {
         return $this->VoucherTransactions
             ->find()
@@ -458,23 +422,21 @@ class VouchersController extends AppController
 
     public function add()
     {
-        $transaction = $this->checkSenderTransaction($this->request->getData('user_id'));
+        //__ Authentication + Authorization __
+        $user = $this->_ap_right_check();
+        if (!$user) {
+            return;
+        }
+
+        $user_id = $user['id'];
+
+        $transaction = $this->_checkSenderTransaction($this->request->getData('user_id'));
         // Log::write('debug', 'transaction: '.((string)$transaction));
         if ($transaction) {
             if ($transaction->balance >= $this->request->getData('quantity')) {
                 $transaction->balance = $transaction->balance - $this->request->getData('quantity');
                 $transaction->debit = $transaction->debit + $this->request->getData('quantity');
                 $this->VoucherTransactions->save($transaction);
-
-
-//       --------------------------------Started to create voucher -----------------------
-
-                $user = $this->_ap_right_check();
-                if (!$user) {
-                    return;
-                }
-
-                $user_id = $user['id'];
 
                 //Get the owner's id
                 if ($this->request->data['user_id'] == '0') { //This is the holder of the token - override '0'
