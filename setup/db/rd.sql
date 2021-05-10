@@ -30,6 +30,8 @@ CREATE TABLE `servers`
     `proxy_port`       VARCHAR(50) NOT NULL,
     `api_server_port`       VARCHAR(50) NOT NULL,
     `note`       VARCHAR(50) NOT NULL,
+    `created`    DATETIME NULL,
+    `modified`   DATETIME NULL,
     PRIMARY KEY (`id`)
 )ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -54,6 +56,8 @@ CREATE TABLE `tweaks`
     `injection_type`       VARCHAR(50) NOT NULL,
     `payload`       VARCHAR(50) NOT NULL,
     `note`       VARCHAR(50) NOT NULL,
+    `created`    DATETIME NULL,
+    `modified`   DATETIME NULL,
     PRIMARY KEY (`id`)
 )ENGINE = InnoDB
   DEFAULT CHARSET = utf8;

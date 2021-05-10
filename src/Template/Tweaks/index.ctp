@@ -24,6 +24,8 @@
                 <th scope="col"><?= $this->Paginator->sort('injection_type') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('payload') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('note') ?></th>
+                <th scope="col"><?= $this->Paginator->sort('created') ?></th>
+                <th scope="col"><?= $this->Paginator->sort('modified') ?></th>
                 <th scope="col" class="actions"><?= __('Actions') ?></th>
             </tr>
         </thead>
@@ -37,6 +39,8 @@
                 <td><?= h($tweak->injection_type) ?></td>
                 <td><?= h($tweak->payload) ?></td>
                 <td><?= h($tweak->note) ?></td>
+                <td><?= h($tweak->created) ?></td>
+                <td><?= h($tweak->modified) ?></td>
                 <td class="actions">
                     <?= $this->Html->link(__('View'), ['action' => 'view', $tweak->id]) ?>
                     <?= $this->Html->link(__('Edit'), ['action' => 'edit', $tweak->id]) ?>

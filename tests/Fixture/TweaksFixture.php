@@ -22,6 +22,8 @@ class TweaksFixture extends TestFixture
         'injection_type' => ['type' => 'string', 'length' => 50, 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
         'payload' => ['type' => 'string', 'length' => 50, 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
         'note' => ['type' => 'string', 'length' => 50, 'null' => false, 'default' => null, 'collate' => 'utf8_general_ci', 'comment' => '', 'precision' => null, 'fixed' => null],
+        'created' => ['type' => 'datetime', 'length' => null, 'null' => true, 'default' => null, 'comment' => '', 'precision' => null],
+        'modified' => ['type' => 'datetime', 'length' => null, 'null' => true, 'default' => null, 'comment' => '', 'precision' => null],
         '_constraints' => [
             'primary' => ['type' => 'primary', 'columns' => ['id'], 'length' => []],
         ],
@@ -47,6 +49,8 @@ class TweaksFixture extends TestFixture
                 'injection_type' => 'Lorem ipsum dolor sit amet',
                 'payload' => 'Lorem ipsum dolor sit amet',
                 'note' => 'Lorem ipsum dolor sit amet',
+                'created' => '2021-05-09 17:16:42',
+                'modified' => '2021-05-09 17:16:42',
             ],
         ];
         parent::init();

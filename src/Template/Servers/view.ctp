@@ -54,6 +54,14 @@
             <th scope="row"><?= __('Id') ?></th>
             <td><?= $this->Number->format($server->id) ?></td>
         </tr>
+        <tr>
+            <th scope="row"><?= __('Created') ?></th>
+            <td><?= h($server->created) ?></td>
+        </tr>
+        <tr>
+            <th scope="row"><?= __('Modified') ?></th>
+            <td><?= h($server->modified) ?></td>
+        </tr>
     </table>
     <div class="related">
         <h4><?= __('Related Server Realms') ?></h4>

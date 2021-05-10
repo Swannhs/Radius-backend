@@ -26,6 +26,8 @@
                 <th scope="col"><?= $this->Paginator->sort('proxy_port') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('api_server_port') ?></th>
                 <th scope="col"><?= $this->Paginator->sort('note') ?></th>
+                <th scope="col"><?= $this->Paginator->sort('created') ?></th>
+                <th scope="col"><?= $this->Paginator->sort('modified') ?></th>
                 <th scope="col" class="actions"><?= __('Actions') ?></th>
             </tr>
         </thead>
@@ -41,6 +43,8 @@
                 <td><?= h($server->proxy_port) ?></td>
                 <td><?= h($server->api_server_port) ?></td>
                 <td><?= h($server->note) ?></td>
+                <td><?= h($server->created) ?></td>
+                <td><?= h($server->modified) ?></td>
                 <td class="actions">
                     <?= $this->Html->link(__('View'), ['action' => 'view', $server->id]) ?>
                     <?= $this->Html->link(__('Edit'), ['action' => 'edit', $server->id]) ?>

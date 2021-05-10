@@ -26,21 +26,31 @@ class TweaksControllerTest extends TestCase
     ];
 
     /**
-     * Test index method
+     * Test initialize method
      *
      * @return void
      */
-    public function testIndex()
+    public function testInitialize()
     {
         $this->markTestIncomplete('Not implemented yet.');
     }
 
     /**
-     * Test view method
+     * Test checkToken method
      *
      * @return void
      */
-    public function testView()
+    public function testCheckToken()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test index method
+     *
+     * @return void
+     */
+    public function testIndex()
     {
         $this->markTestIncomplete('Not implemented yet.');
     }
@@ -56,21 +66,21 @@ class TweaksControllerTest extends TestCase
     }
 
     /**
-     * Test edit method
+     * Test view method
      *
      * @return void
      */
-    public function testEdit()
+    public function testView()
     {
         $this->markTestIncomplete('Not implemented yet.');
     }
 
     /**
-     * Test delete method
+     * Test update method
      *
      * @return void
      */
-    public function testDelete()
+    public function testUpdate()
     {
         $this->markTestIncomplete('Not implemented yet.');
     }

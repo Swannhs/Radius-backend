@@ -15,6 +15,8 @@ use Cake\ORM\Entity;
  * @property string $proxy_port
  * @property string $api_server_port
  * @property string $note
+ * @property \Cake\I18n\FrozenTime|null $created
+ * @property \Cake\I18n\FrozenTime|null $modified
  *
  * @property \App\Model\Entity\ServerRealm[] $server_realms
  */
@@ -38,6 +40,8 @@ class Server extends Entity
         'proxy_port' => true,
         'api_server_port' => true,
         'note' => true,
+        'created' => true,
+        'modified' => true,
         'server_realms' => true,
     ];
 }

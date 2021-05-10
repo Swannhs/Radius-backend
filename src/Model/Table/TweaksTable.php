@@ -9,7 +9,7 @@ use Cake\Validation\Validator;
 /**
  * Tweaks Model
  *
- * @property \App\Model\Table\RealmsTable&\Cake\ORM\Association\BelongsToMany $Realms
+ * @property &\Cake\ORM\Association\HasMany $TweakRealms
  *
  * @method \App\Model\Entity\Tweak get($primaryKey, $options = [])
  * @method \App\Model\Entity\Tweak newEntity($data = null, array $options = [])
@@ -19,6 +19,8 @@ use Cake\Validation\Validator;
  * @method \App\Model\Entity\Tweak patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
  * @method \App\Model\Entity\Tweak[] patchEntities($entities, array $data, array $options = [])
  * @method \App\Model\Entity\Tweak findOrCreate($search, callable $callback = null, $options = [])
+ *
+ * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class TweaksTable extends Table
 {
@@ -36,10 +38,10 @@ class TweaksTable extends Table
         $this->setDisplayField('name');
         $this->setPrimaryKey('id');
 
-        $this->belongsToMany('Realms', [
+        $this->addBehavior('Timestamp');
+
+        $this->hasMany('TweakRealms', [
             'foreignKey' => 'tweak_id',
-            'targetForeignKey' => 'realm_id',
-            'joinTable' => 'tweaks_realms',
         ]);
     }
 
