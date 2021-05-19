@@ -182,7 +182,7 @@ class DashboardController extends AppController
         $receivable = 0;
         $received = 0;
 
-        foreach ($cash as $row){
+        foreach ($cash as $row) {
             $payable = $row->payable;
             $paid = $row->paid;
             $receivable = $row->receivable;
@@ -207,7 +207,6 @@ class DashboardController extends AppController
     }
 
 //    --------------------------------------Cash End-----------------------------------------
-
 
 
 //---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
@@ -279,6 +278,7 @@ class DashboardController extends AppController
         }
     }
 
+
     public function authenticate()
     {
 
@@ -344,7 +344,7 @@ class DashboardController extends AppController
                     'success' => false,
                     '_serialize' => array('errors', 'success')
                 ));
-            }else {
+            } else {
                 $this->set([
                     'user' => $user,
                     'success' => true,
@@ -787,15 +787,16 @@ class DashboardController extends AppController
     }
 
 
-    public function serverCount(){
-        if ($this->checkTokenCustom()){
+    public function serverCount()
+    {
+        if ($this->checkTokenCustom()) {
             $servers = $this->Servers->find()->count();
             $this->set([
                 'servers' => $servers,
                 'success' => true,
                 '_serialize' => ['success', 'servers']
             ]);
-        }else{
+        } else {
             $this->set([
                 'message' => 'Invalid token',
                 'success' => false,
