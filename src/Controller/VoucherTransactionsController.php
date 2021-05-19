@@ -620,7 +620,7 @@ class VoucherTransactionsController extends AppController
                     'profile_id' => $this->request->data('profile_id'),
                     'realm_id' => $this->request->data('realm_id'),
                     'credit' => $this->request->data('transfer_amount') + $updateVoucher->get('credit'),
-                    'debit' => 0,
+                    'debit' => 0 + $updateVoucher->get('debit'),
                     'balance' => $this->request->data('transfer_amount') + $updateVoucher->get('balance'),
                     'quantity_rate' => $this->request->data('quantity_rate')
                 ]);
