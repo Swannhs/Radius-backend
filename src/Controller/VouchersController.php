@@ -16,6 +16,8 @@ use Cake\Mailer\Email;
 
 use Cake\Log\Log;
 
+use Cake\I18n\Time;
+
 /**
  * VoucherTransactionDetails Controller
  *
@@ -349,30 +351,7 @@ class VouchersController extends AppController
                 if ($field == 'time_valid') {
                     if ($i->{"$field"} != '') {
                         $row['activate_on_login'] = true;
-                        $pieces = explode("-", $i->{"$field"});
-                        $a_o_l_reply = '';
-                        if ($pieces[0] !== '0') {
-                            $days = 'Days';
-                            if ($pieces[0] == 1) {
-                                $days = 'Day';
-                            }
-                            $a_o_l_reply = $a_o_l_reply . ltrim($pieces[0], '0') . " $days ";
-                        }
-                        if ($pieces[1] !== '00') {
-                            $hours = 'Hours';
-                            if ($pieces[1] == '01') {
-                                $hours = 'Hour';
-                            }
-                            $a_o_l_reply = $a_o_l_reply . ltrim($pieces[1], '0') . " $hours ";
-                        }
-                        if ($pieces[2] !== '00') {
-                            $minutes = 'Minutes';
-                            if ($pieces[2] == '01') {
-                                $minutes = 'Minute';
-                            }
-                            $a_o_l_reply = $a_o_l_reply . ltrim($pieces[2], '0') . " $minutes";
-                        }
-                        $row['time_valid_in_words'] = $a_o_l_reply;
+                        $row['time_valid_in_words'] = $this->_getValidity($i);
                     }
                 }
 
@@ -406,6 +385,49 @@ class VouchersController extends AppController
         ));
     }
 
+
+    private function _getValidity($voucher)
+    {
+        $activated = new Time($voucher->activated_on);
+        $pieces = explode("-", $voucher->time_valid);
+        $valid_to = $activated->modify($pieces[0] . ' days')->modify($pieces[1] . ' hours')->modify($pieces[2] . ' minutes')->modify($pieces[3] . ' seconds');
+        $now = Time::now();
+        if ($now > $valid_to)
+            return 'expired';
+
+        $diff = $now->diff($valid_to);
+        $formatted = sprintf('%d-%02d-%02d-%02d', $diff->days, $diff->h, $diff->i, $diff->s);
+        return $this->_getValidityInWords($formatted);
+    }
+
+    private function _getValidityInWords($time_valid)
+    {
+        $pieces = explode("-", $time_valid);
+
+        if ($pieces[0] !== '0') {
+            $days = 'Days';
+            if ($pieces[0] == 1) {
+                $days = 'Day';
+            }
+            return ltrim($pieces[0], '0') . " $days";
+        }
+        if ($pieces[1] !== '00') {
+            $hours = 'Hours';
+            if ($pieces[1] == '01') {
+                $hours = 'Hour';
+            }
+            return ltrim($pieces[1], '0') . " $hours";
+        }
+        if ($pieces[2] !== '00') {
+            $minutes = 'Minutes';
+            if ($pieces[2] == '01') {
+                $minutes = 'Minute';
+            }
+            return ltrim($pieces[2], '0') . " $minutes";
+        }
+
+        return 'Few seconds left!';
+    }
 
 //    --------------------------Checking Sender Balance -------------------------------
     private function _checkSenderTransaction($user_id)
@@ -589,6 +611,10 @@ class VouchersController extends AppController
 
     public function reset()
     {
+        if (!$this->request->is('post')) {
+            throw new MethodNotAllowedException();
+        }
+        
         $user = $this->_ap_right_check();
         if (!$user) {
             return;
@@ -598,7 +624,6 @@ class VouchersController extends AppController
             (isset($this->request->data['voucher_id'])) ||
             (isset($this->request->data['name'])) //Can also change by specifying name
         ) {
-            $single_field = false;
             if (isset($this->request->data['name'])) {
                 $entity = $this->{$this->main_model}->find()->where(['name' => $this->request->data['name']])->first();
             } else {
