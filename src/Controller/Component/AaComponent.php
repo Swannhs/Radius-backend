@@ -152,4 +152,17 @@ class AaComponent extends Component {
         }
     }
 
+    public function random_alpha_numeric($length = 10){
+        // define possible characters
+        $possible = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        
+        // if lenght is greather than possible characters then cap it to characters lenght - 1
+        if($length >= strlen($possible))
+            $length = strlen($possible)-1;
+
+        $v_value = substr(str_shuffle($possible), 0, $length);
+        
+        return $v_value;
+    }
+
 }
