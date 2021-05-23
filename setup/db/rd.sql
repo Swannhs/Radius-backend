@@ -21,17 +21,17 @@
 DROP TABLE IF EXISTS `servers`;
 CREATE TABLE `servers`
 (
-    `id`         INT         NOT NULL AUTO_INCREMENT,
-    `type`       VARCHAR(50) NOT NULL,
-    `name`       VARCHAR(50) NOT NULL,
-    `cc`       VARCHAR(50) NOT NULL,
-    `ip`       VARCHAR(50) NOT NULL,
-    `ssl_port`       VARCHAR(50) NOT NULL,
-    `proxy_port`       VARCHAR(50) NOT NULL,
-    `api_server_port`       VARCHAR(50) NOT NULL,
-    `note`       VARCHAR(50) NOT NULL,
-    `created`    DATETIME NULL,
-    `modified`   DATETIME NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `type`              VARCHAR(20)     NOT NULL,
+    `name`              VARCHAR(50)     NOT NULL,
+    `cc`                VARCHAR(10)     NOT NULL,
+    `ip`                VARCHAR(50)     NOT NULL,
+    `ssl_port`          INT             NOT NULL DEFAULT 0,
+    `proxy_port`        INT             NOT NULL DEFAULT 0,
+    `api_server_port`   INT             NOT NULL DEFAULT 0,
+    `note`              VARCHAR(50)     NOT NULL,
+    `created`           datetime        NOT NULL,
+    `modified`          datetime        NOT NULL,
     PRIMARY KEY (`id`)
 )ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -39,9 +39,11 @@ CREATE TABLE `servers`
 DROP TABLE IF EXISTS `server_realms`;
 CREATE TABLE `server_realms`
 (
-    `id`         INT         NOT NULL AUTO_INCREMENT,
-    `server_id`    INT NOT NULL,
-    `realm_id`    INT NOT NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `server_id`         INT             NOT NULL,
+    `realm_id`          INT             NOT NULL,
+    `created`           DATETIME        NOT NULL,
+    `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
 )ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -49,15 +51,15 @@ CREATE TABLE `server_realms`
 DROP TABLE IF EXISTS `tweaks`;
 CREATE TABLE `tweaks`
 (
-    `id`         INT         NOT NULL AUTO_INCREMENT,
-    `vendor`       VARCHAR(50) NOT NULL,
-    `name`       VARCHAR(50) NOT NULL,
-    `protocols`       VARCHAR(50) NOT NULL,
-    `injection_type`       VARCHAR(50) NOT NULL,
-    `payload`       VARCHAR(50) NOT NULL,
-    `note`       VARCHAR(50) NOT NULL,
-    `created`    DATETIME NULL,
-    `modified`   DATETIME NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `vendor`            VARCHAR(50)     NOT NULL,
+    `name`              VARCHAR(50)     NOT NULL,
+    `protocols`         VARCHAR(50)     NOT NULL,
+    `injection_type`    VARCHAR(50)     NOT NULL,
+    `payload`           TEXT,
+    `note`              VARCHAR(50)     NOT NULL,
+    `created`           DATETIME        NOT NULL,
+    `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
 )ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -65,9 +67,11 @@ CREATE TABLE `tweaks`
 DROP TABLE IF EXISTS `tweak_realms`;
 CREATE TABLE `tweak_realms`
 (
-    `id`         INT         NOT NULL AUTO_INCREMENT,
-    `tweak_id`    INT NOT NULL,
-    `realm_id`    INT NOT NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `tweak_id`          INT             NOT NULL,
+    `realm_id`          INT             NOT NULL,
+    `created`           DATETIME        NOT NULL,
+    `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
 )ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -75,14 +79,14 @@ CREATE TABLE `tweak_realms`
 DROP TABLE IF EXISTS `balance_transactions`;
 CREATE TABLE `balance_transactions`
 (
-    `id`         INT         NOT NULL AUTO_INCREMENT,
-    `user_id`    INT         NOT NULL,
-    `payable`    INT NULL,
-    `paid`       INT NULL,
-    `receivable` INT NULL,
-    `received`   INT NULL,
-    `created`    DATETIME NULL,
-    `modified`   DATETIME NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `user_id`           INT             NOT NULL,
+    `payable`           decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `paid`              decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `receivable`        decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `received`          decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `created`           DATETIME        NOT NULL,
+    `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -92,17 +96,17 @@ values (1, 44, 0, 0, 0, 0, CURRENT_DATE, CURRENT_DATE);
 DROP TABLE IF EXISTS `balance_transaction_details`;
 CREATE TABLE `balance_transaction_details`
 (
-    `id`         INT         NOT NULL AUTO_INCREMENT,
-    `transaction`            VARCHAR(50) NOT NULL,
-    `receiver_user_id`    INT         NOT NULL,
-    `user_id`    INT         NOT NULL,
-    `realm_id`   INT         NOT NULL,
-    `profile_id` INT         NOT NULL,
-    `vouchers`    INT NULL,
-    `quantity_rate` INT NULL,
-    `total` INT NULL,
-    `created`    DATETIME NULL,
-    `modified`   DATETIME NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `transaction`       VARCHAR(50)     NOT NULL,
+    `receiver_user_id`  INT             NOT NULL,
+    `user_id`           INT             NOT NULL,
+    `realm_id`          INT             NOT NULL,
+    `profile_id`        INT             NOT NULL,
+    `vouchers`          INT             NOT NULL,
+    `quantity_rate`     decimal(3,2)    NOT NULL DEFAULT 0.00,
+    `total`             decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `created`           DATETIME        NOT NULL,
+    `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -111,19 +115,19 @@ CREATE TABLE `balance_transaction_details`
 DROP TABLE IF EXISTS `balance_sender_details`;
 CREATE TABLE `balance_sender_details`
 (
-    `id`                INT         NOT NULL AUTO_INCREMENT,
-    `transaction`       VARCHAR(50) NOT NULL,
-    `sender_user_id`    INT         NOT NULL,
-    `user_id`           INT         NOT NULL,
-    `realm_id`          INT         NOT NULL,
-    `profile_id`        INT         NOT NULL,
-    `payable`           INT NULL,
-    `receivable`        INT NULL,
-    `sent`              INT NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `transaction`       VARCHAR(50)     NOT NULL,
+    `sender_user_id`    INT             NOT NULL,
+    `user_id`           INT             NOT NULL,
+    `realm_id`          INT             NOT NULL,
+    `profile_id`        INT             NOT NULL,
+    `payable`           decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `receivable`        decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `sent`              decimal(9,2)    NOT NULL DEFAULT 0.00,
     `status`            BOOLEAN,
     `reference`         INT NULL,
-    `created`           DATETIME NULL,
-    `modified`          DATETIME NULL,
+    `created`           DATETIME        NOT NULL,
+    `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -131,19 +135,19 @@ CREATE TABLE `balance_sender_details`
 DROP TABLE IF EXISTS `balance_receiver_details`;
 CREATE TABLE `balance_receiver_details`
 (
-    `id`                INT         NOT NULL AUTO_INCREMENT,
-    `transaction`       VARCHAR(50) NOT NULL,
-    `receiver_user_id`    INT         NOT NULL,
-    `user_id`           INT         NOT NULL,
-    `realm_id`          INT         NOT NULL,
-    `profile_id`        INT         NOT NULL,
-    `payable`           INT NULL,
-    `receivable`        INT NULL,
-    `received`          INT NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `transaction`       VARCHAR(50)     NOT NULL,
+    `receiver_user_id`  INT             NOT NULL,
+    `user_id`           INT             NOT NULL,
+    `realm_id`          INT             NOT NULL,
+    `profile_id`        INT             NOT NULL,
+    `payable`           decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `receivable`        decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `received`          decimal(9,2)    NOT NULL DEFAULT 0.00,
     `status`            BOOLEAN,
     `reference`         INT NULL,
-    `created`           DATETIME NULL,
-    `modified`          DATETIME NULL,
+    `created`           DATETIME        NOT NULL,
+    `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -153,18 +157,18 @@ CREATE TABLE `balance_receiver_details`
 DROP TABLE IF EXISTS `voucher_transaction_send_details`;
 CREATE TABLE `voucher_transaction_send_details`
 (
-    `id`                INT         NOT NULL AUTO_INCREMENT,
-    `transaction`       VARCHAR(50) NOT NULL,
-    `sender_user_id`   INT         NOT NULL,
-    `user_id`           INT         NOT NULL,
-    `realm_id`          INT         NOT NULL,
-    `profile_id`        INT         NOT NULL,
-    `credit`            INT NULL,
-    `debit`             INT NULL,
-    `quantity_rate`     INT NULL,
-    `balance`           INT NULL,
-    `created`           DATETIME NULL,
-    `modified`          DATETIME NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `transaction`       VARCHAR(50)     NOT NULL,
+    `sender_user_id`    INT             NOT NULL,
+    `user_id`           INT             NOT NULL,
+    `realm_id`          INT             NOT NULL,
+    `profile_id`        INT             NOT NULL,
+    `credit`            decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `debit`             decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `quantity_rate`     decimal(3,2)    NOT NULL DEFAULT 0.00,
+    `balance`           decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `created`           DATETIME        NOT NULL,
+    `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -172,18 +176,18 @@ CREATE TABLE `voucher_transaction_send_details`
 DROP TABLE IF EXISTS `voucher_transaction_received_details`;
 CREATE TABLE `voucher_transaction_received_details`
 (
-    `id`                INT         NOT NULL AUTO_INCREMENT,
-    `transaction`       VARCHAR(50) NOT NULL,
-    `receiver_user_id`  INT         NOT NULL,
-    `user_id`           INT         NOT NULL,
-    `realm_id`          INT         NOT NULL,
-    `profile_id`        INT         NOT NULL,
-    `credit`            INT NULL,
-    `debit`             INT NULL,
-    `quantity_rate`     INT NULL,
-    `balance`           INT NULL,
-    `created`           DATETIME NULL,
-    `modified`          DATETIME NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `transaction`       VARCHAR(50)     NOT NULL,
+    `receiver_user_id`  INT             NOT NULL,
+    `user_id`           INT             NOT NULL,
+    `realm_id`          INT             NOT NULL,
+    `profile_id`        INT             NOT NULL,
+    `credit`            decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `debit`             decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `quantity_rate`     decimal(3,2)    NOT NULL DEFAULT 0.00,
+    `balance`           decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `created`           DATETIME        NOT NULL,
+    `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -192,16 +196,16 @@ CREATE TABLE `voucher_transaction_received_details`
 DROP TABLE IF EXISTS `voucher_transactions`;
 CREATE TABLE `voucher_transactions`
 (
-    `id`        INT         NOT NULL AUTO_INCREMENT,
-    `user_id`   INT         NOT NULL,
-    `credit`    INT NULL,
-    `debit`     INT NULL,
-    `realm_id`          INT         NOT NULL,
-    `profile_id`        INT         NOT NULL,
-    `quantity_rate`        INT         NOT NULL,
-    `balance`   INT NULL,
-    `created`   DATETIME NULL,
-    `modified`  DATETIME NULL,
+    `id`                INT             NOT NULL AUTO_INCREMENT,
+    `user_id`           INT             NOT NULL,
+    `realm_id`          INT             NOT NULL,
+    `profile_id`        INT             NOT NULL,
+    `credit`            decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `debit`             decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `quantity_rate`     decimal(3,2)    NOT NULL DEFAULT 0.00,
+    `balance`           decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `created`           DATETIME        NOT NULL,
+    `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -7324,6 +7328,7 @@ CREATE TABLE `vouchers`
     `data_cap`            bigint(20)                               DEFAULT NULL,
     `time_used`           int(12)                                  DEFAULT NULL,
     `time_cap`            int(12)                                  DEFAULT NULL,
+    `activated_on`        datetime                                 DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `ak_vouchers` (`name`)
 ) ENGINE = InnoDB
