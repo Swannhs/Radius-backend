@@ -51,6 +51,7 @@ class DashboardController extends AppController
 
         $this->loadComponent('Aa');
         $this->loadComponent('WhiteLabel');
+        $this->loadComponent('Amount');
     }
 
 
@@ -174,33 +175,14 @@ class DashboardController extends AppController
     public function cash()
     {
         $this->request->allowMethod('get');
-        $cash = $this->BalanceTransactions->find()
-            ->where(['user_id' => $this->checkTokenCustom()]);
+        $query = $this->BalanceTransactions->find()
+            ->where(['user_id' => $this->checkTokenCustom()])->first();
 
-        $payable = 0;
-        $paid = 0;
-        $receivable = 0;
-        $received = 0;
-
-        foreach ($cash as $row) {
-            $payable = $row->payable;
-            $paid = $row->paid;
-            $receivable = $row->receivable;
-            $received = $row->received;
-        }
-        $item = array();
-        $row = array();
-
-        $row['payable'] = $payable;
-        $row['paid'] = $paid;
-        $row['receivable'] = $receivable;
-        $row['received'] = $received;
-
-        array_push($item, $row);
+        $item = $this->Amount->single_symbol_amount($query);
 
 
         $this->set([
-            'item' => $item[0],
+            'item' => $item,
             'success' => true,
             '_serialize' => ['success', 'item']
         ]);
