@@ -25,6 +25,7 @@ class BalanceTransactionsController extends AppController
         $this->loadModel('BalanceReceiverDetails');
 
         $this->loadComponent('Aa');
+        $this->loadComponent('Amount');
     }
 
     function checkToken()
@@ -33,39 +34,35 @@ class BalanceTransactionsController extends AppController
         return $user['id'];
     }
 
-    public function test()
-    {
 
-        $send_items = $this->BalanceSenderDetails
-            ->find()
-            ->where(['sender_user_id' => $this->checkToken()])
-            ->contain(['Users']);
-        $this->set([
-            'data' => $send_items,
-            '_serialize' => ['data']
-        ]);
-    }
 
     public function index()
     {
+
         $this->request->allowMethod('get');
         if ($this->checkToken()) {
 //            -----------------------------------------------Check for admin only-----------------------------
             $user = $this->Users->get($this->checkToken());
             if (!$user->get('parent_id')) {
-                $item = $this->BalanceTransactions
+                $query = $this->BalanceTransactions
                     ->find()
                     ->contain('Users');
+
+                $item = $this->Amount->symbol_amount($query);
+
                 $this->set([
                     'item' => $item,
                     'status' => true,
                     '_serialize' => ['item', 'status']
                 ]);
             } else {
-                $item = $this->BalanceTransactions
+                $query = $this->BalanceTransactions
                     ->find()
                     ->where(['user_id' => $this->checkToken()])
                     ->contain('Users');
+
+                $item = $this->Amount->symbol_amount($query);
+
                 $this->set([
                     'item' => $item,
                     'status' => true,
@@ -94,10 +91,15 @@ class BalanceTransactionsController extends AppController
                     ->where(['sender_user_id' => $key->get('user_id')])
                     ->contain(['Users']);
 
+                $send_items = $this->Amount->symbol_amount($send_items);
+
+
                 $received_items = $this->BalanceReceiverDetails
                     ->find()
                     ->where(['receiver_user_id' => $key->get('user_id')])
                     ->contain(['Users']);
+
+                $received_items = $this->Amount->symbol_amount($received_items);
 
 
                 $this->set([
@@ -110,10 +112,15 @@ class BalanceTransactionsController extends AppController
                     ->find()
                     ->where(['sender_user_id' => $this->checkToken()])
                     ->contain(['Users']);
+
+                $send_items = $this->Amount->symbol_amount($send_items);
+
                 $received_items = $this->BalanceReceiverDetails
                     ->find()
                     ->where(['receiver_user_id' => $this->checkToken()])
                     ->contain(['Users']);
+
+                $received_items = $this->Amount->symbol_amount($received_items);
 
                 $this->set([
                     'send' => $send_items,
