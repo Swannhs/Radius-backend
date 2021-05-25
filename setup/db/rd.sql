@@ -163,10 +163,10 @@ CREATE TABLE `voucher_transaction_send_details`
     `user_id`           INT             NOT NULL,
     `realm_id`          INT             NOT NULL,
     `profile_id`        INT             NOT NULL,
-    `credit`            decimal(9,2)    NOT NULL DEFAULT 0.00,
-    `debit`             decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `credit`            INT             NOT NULL,
+    `debit`             INT             NOT NULL,
+    `balance`           INT             NOT NULL,
     `quantity_rate`     decimal(3,2)    NOT NULL DEFAULT 0.00,
-    `balance`           decimal(9,2)    NOT NULL DEFAULT 0.00,
     `created`           DATETIME        NOT NULL,
     `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
@@ -182,10 +182,10 @@ CREATE TABLE `voucher_transaction_received_details`
     `user_id`           INT             NOT NULL,
     `realm_id`          INT             NOT NULL,
     `profile_id`        INT             NOT NULL,
-    `credit`            decimal(9,2)    NOT NULL DEFAULT 0.00,
-    `debit`             decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `credit`            INT             NOT NULL,
+    `debit`             INT             NOT NULL,
+    `balance`           INT             NOT NULL,
     `quantity_rate`     decimal(3,2)    NOT NULL DEFAULT 0.00,
-    `balance`           decimal(9,2)    NOT NULL DEFAULT 0.00,
     `created`           DATETIME        NOT NULL,
     `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
@@ -200,10 +200,10 @@ CREATE TABLE `voucher_transactions`
     `user_id`           INT             NOT NULL,
     `realm_id`          INT             NOT NULL,
     `profile_id`        INT             NOT NULL,
-    `credit`            decimal(9,2)    NOT NULL DEFAULT 0.00,
-    `debit`             decimal(9,2)    NOT NULL DEFAULT 0.00,
+    `credit`            INT             NOT NULL,
+    `debit`             INT             NOT NULL,
+    `balance`           INT             NOT NULL,
     `quantity_rate`     decimal(3,2)    NOT NULL DEFAULT 0.00,
-    `balance`           decimal(9,2)    NOT NULL DEFAULT 0.00,
     `created`           DATETIME        NOT NULL,
     `modified`          DATETIME        NOT NULL,
     PRIMARY KEY (`id`)
@@ -309,8 +309,8 @@ LOCK TABLES `acos` WRITE;
     DISABLE KEYS */;
 INSERT INTO `acos`
 VALUES (
-        29, NULL, NULL, NULL, 'Access Providers',
-        'A container with rights available to Access Providers - DO NOT DELETE!!', 1, 726),
+           29, NULL, NULL, NULL, 'Access Providers',
+           'A container with rights available to Access Providers - DO NOT DELETE!!', 1, 726),
        (30, NULL, NULL, NULL, 'Permanent Users', 'A container with rights for Permanent Users - DO NOT DELETE!!', 727,
         732),
        (31, 29, NULL, NULL, 'Controllers',
