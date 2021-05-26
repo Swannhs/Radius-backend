@@ -21,6 +21,7 @@ use Cake\Datasource\ConnectionManager;
  */
 class DashboardController extends AppController
 {
+    private $symbol = ' ৳';
 
     public $base = "Access Providers/Controllers/Dashboard/";
     //protected $ui   = 'toplevel';
@@ -178,11 +179,15 @@ class DashboardController extends AppController
         $query = $this->BalanceTransactions->find()
             ->where(['user_id' => $this->checkTokenCustom()])->first();
 
-        $item = $this->Amount->single_symbol_amount($query);
+
+        $query['paid'] = $this->Amount->add_symbol($query->paid , $this->symbol);
+        $query['payable'] = $this->Amount->add_symbol($query->payable , $this->symbol);
+        $query['receivable'] = $this->Amount->add_symbol($query->receivable , $this->symbol);
+        $query['received'] = $this->Amount->add_symbol($query->received , $this->symbol);
 
 
         $this->set([
-            'item' => $item,
+            'item' => $query,
             'success' => true,
             '_serialize' => ['success', 'item']
         ]);
