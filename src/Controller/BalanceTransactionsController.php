@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Controller\AppController;
+use Cake\Core\Configure;
 
 /**
  * BalanceTransactionDetails Controller
@@ -42,6 +43,7 @@ class BalanceTransactionsController extends AppController
 
         $this->request->allowMethod('get');
         if ($this->checkToken()) {
+            $currency = Configure::read('currency');
 //            -----------------------------------------------Check for admin only-----------------------------
             $user = $this->Users->get($this->checkToken());
             if (!$user->get('parent_id')) {
@@ -52,10 +54,10 @@ class BalanceTransactionsController extends AppController
                 $item = array();
 
                 foreach ($query as $row) {
-                    $row['paid'] = $this->Amount->add_symbol($row->paid, $this->symbol);
-                    $row['payable'] = $this->Amount->add_symbol($row->payable, $this->symbol);
-                    $row['receivable'] = $this->Amount->add_symbol($row->receivable, $this->symbol);
-                    $row['received'] = $this->Amount->add_symbol($row->received, $this->symbol);
+                    $row['paid'] = $this->Amount->add_symbol($row->paid, $currency);
+                    $row['payable'] = $this->Amount->add_symbol($row->payable, $currency);
+                    $row['receivable'] = $this->Amount->add_symbol($row->receivable, $currency);
+                    $row['received'] = $this->Amount->add_symbol($row->received, $currency);
 
 //                  $row['user'] = $row->user->username;          //This can be customize for user info
 
@@ -76,10 +78,10 @@ class BalanceTransactionsController extends AppController
                 $item = array();
 
                 foreach ($query as $row) {
-                    $row['paid'] = $this->Amount->add_symbol($row->paid, $this->symbol);
-                    $row['payable'] = $this->Amount->add_symbol($row->payable, $this->symbol);
-                    $row['receivable'] = $this->Amount->add_symbol($row->receivable, $this->symbol);
-                    $row['received'] = $this->Amount->add_symbol($row->received, $this->symbol);
+                    $row['paid'] = $this->Amount->add_symbol($row->paid, $currency);
+                    $row['payable'] = $this->Amount->add_symbol($row->payable, $currency);
+                    $row['receivable'] = $this->Amount->add_symbol($row->receivable, $currency);
+                    $row['received'] = $this->Amount->add_symbol($row->received, $currency);
 //            $row['user'] = $row->user->username;
                     array_push($item, $row);
                 }
