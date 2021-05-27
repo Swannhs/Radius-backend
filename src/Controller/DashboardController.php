@@ -9,6 +9,8 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 use Cake\Datasource\ConnectionManager;
 
+use Cake\Log\Log;
+
 /**
  * VoucherTransactions Controller
  * @property \App\Model\Table\UsersTable $Users
@@ -51,7 +53,7 @@ class DashboardController extends AppController
 
         $this->loadComponent('Aa');
         $this->loadComponent('WhiteLabel');
-        $this->loadComponent('Amount');
+        $this->loadComponent('Formatter');
     }
 
 
@@ -181,11 +183,12 @@ class DashboardController extends AppController
             ->where(['user_id' => $this->checkTokenCustom()])->first();
 
 
-        $query['paid'] = $this->Amount->add_symbol($query->paid , $currency);
-        $query['payable'] = $this->Amount->add_symbol($query->payable , $currency);
-        $query['receivable'] = $this->Amount->add_symbol($query->receivable , $currency);
-        $query['received'] = $this->Amount->add_symbol($query->received , $currency);
+        $query['paid'] = $this->Formatter->add_currency($query->paid , $currency);
+        $query['payable'] = $this->Formatter->add_currency($query->payable , $currency);
+        $query['receivable'] = $this->Formatter->add_currency($query->receivable , $currency);
+        $query['received'] = $this->Formatter->add_currency($query->received , $currency);
 
+        Log::write('debug', $query);
 
         $this->set([
             'item' => $query,

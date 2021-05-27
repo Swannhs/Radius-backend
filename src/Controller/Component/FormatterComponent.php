@@ -11,6 +11,7 @@ use Cake\Controller\Component;
 
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
+use Cake\Log\Log;
 
 class FormatterComponent extends Component {
 
@@ -132,6 +133,29 @@ class FormatterComponent extends Component {
 
         // done!
         return $hms.$negative;
+    }
+
+    private function decimal($number): string
+    {
+        return number_format($number, 2);
+    }
+
+    public function add_currency($number, $currency): string
+    {
+        return strval($this->decimal($number) . $currency);
+    }
+
+    public function random_alpha_numeric($length = 10){
+        // define possible characters
+        $possible = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        
+        // if lenght is greather than possible characters then cap it to characters lenght - 1
+        if($length >= strlen($possible))
+            $length = strlen($possible)-1;
+
+        $v_value = substr(str_shuffle($possible), 0, $length);
+        
+        return $v_value;
     }
 
 

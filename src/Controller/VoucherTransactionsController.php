@@ -43,6 +43,7 @@ class VoucherTransactionsController extends AppController
         $this->loadModel('VoucherTransactionReceivedDetails');
         $this->loadComponent('Aa');
         $this->loadComponent('RealmAcl');
+        $this->loadComponent('Formatter');
     }
 
 //------------------------------ Only for valid token----------------------------------
@@ -178,7 +179,7 @@ class VoucherTransactionsController extends AppController
 //    -------------------------------Configuring For voucher transaction Start----------------------------------------------
     private function generateDetails()
     {
-        $tnx_id = $this->Aa->random_alpha_numeric(10);
+        $tnx_id = $this->Formatter->random_alpha_numeric(10);
         $send = $this->VoucherTransactionSendDetails->newEntity();
         $send->set([
             'transaction' => $tnx_id,
@@ -207,7 +208,7 @@ class VoucherTransactionsController extends AppController
 
     private function generateDetailsAdmin()
     {
-        $tnx_id = $this->Aa->random_alpha_numeric(10);
+        $tnx_id = $this->Formatter->random_alpha_numeric(10);
         $received = $this->VoucherTransactionReceivedDetails->newEntity();
         $received->set([
             'transaction' => $tnx_id,
@@ -350,7 +351,7 @@ class VoucherTransactionsController extends AppController
     //-----------------------------------BalanceTransactionDetails---------------------------------------
     private function defineBalanceDetails()
     {
-        $tnx_id = $this->Aa->random_alpha_numeric(10);
+        $tnx_id = $this->Formatter->random_alpha_numeric(10);
 
         $balance = $this->BalanceTransactionDetails->newEntity();
         $balance->set([

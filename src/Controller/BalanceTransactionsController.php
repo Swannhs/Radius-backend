@@ -28,7 +28,7 @@ class BalanceTransactionsController extends AppController
         $this->loadModel('BalanceReceiverDetails');
 
         $this->loadComponent('Aa');
-        $this->loadComponent('Amount');
+        $this->loadComponent('Formatter');
     }
 
     function checkToken()
@@ -42,10 +42,11 @@ class BalanceTransactionsController extends AppController
     {
 
         $this->request->allowMethod('get');
-        if ($this->checkToken()) {
+        $user_id = $this->checkToken();
+        if ($user_id) {
             $currency = Configure::read('currency');
 //            -----------------------------------------------Check for admin only-----------------------------
-            $user = $this->Users->get($this->checkToken());
+            $user = $this->Users->get($user_id);
             if (!$user->get('parent_id')) {
                 $query = $this->BalanceTransactions
                     ->find()
@@ -54,10 +55,10 @@ class BalanceTransactionsController extends AppController
                 $item = array();
 
                 foreach ($query as $row) {
-                    $row['paid'] = $this->Amount->add_symbol($row->paid, $currency);
-                    $row['payable'] = $this->Amount->add_symbol($row->payable, $currency);
-                    $row['receivable'] = $this->Amount->add_symbol($row->receivable, $currency);
-                    $row['received'] = $this->Amount->add_symbol($row->received, $currency);
+                    $row['paid'] = $this->Formatter->add_currency($row->paid, $currency);
+                    $row['payable'] = $this->Formatter->add_currency($row->payable, $currency);
+                    $row['receivable'] = $this->Formatter->add_currency($row->receivable, $currency);
+                    $row['received'] = $this->Formatter->add_currency($row->received, $currency);
 
 //                  $row['user'] = $row->user->username;          //This can be customize for user info
 
@@ -72,16 +73,16 @@ class BalanceTransactionsController extends AppController
             } else {
                 $query = $this->BalanceTransactions
                     ->find()
-                    ->where(['user_id' => $this->checkToken()])
+                    ->where(['user_id' => $user_id])
                     ->contain('Users');
 
                 $item = array();
 
                 foreach ($query as $row) {
-                    $row['paid'] = $this->Amount->add_symbol($row->paid, $currency);
-                    $row['payable'] = $this->Amount->add_symbol($row->payable, $currency);
-                    $row['receivable'] = $this->Amount->add_symbol($row->receivable, $currency);
-                    $row['received'] = $this->Amount->add_symbol($row->received, $currency);
+                    $row['paid'] = $this->Formatter->add_currency($row->paid, $currency);
+                    $row['payable'] = $this->Formatter->add_currency($row->payable, $currency);
+                    $row['receivable'] = $this->Formatter->add_currency($row->receivable, $currency);
+                    $row['received'] = $this->Formatter->add_currency($row->received, $currency);
 //            $row['user'] = $row->user->username;
                     array_push($item, $row);
                 }
@@ -105,8 +106,9 @@ class BalanceTransactionsController extends AppController
     public function view()
     {
         $this->request->allowMethod('get');
-        if ($this->checkToken()) {
-            $user = $this->Users->get($this->checkToken());
+        $user_id = $this->checkToken();
+        if ($user_id) {
+            $user = $this->Users->get($user_id);
             if (!$user->get('parent_id')) {
                 $key = $this->BalanceTransactions->get($this->request->query('key'));
                 $send_items = $this->BalanceSenderDetails
@@ -114,7 +116,7 @@ class BalanceTransactionsController extends AppController
                     ->where(['sender_user_id' => $key->get('user_id')])
                     ->contain(['Users']);
 
-                $send_items = $this->Amount->symbol_amount($send_items);
+                $send_items = $this->_format_amount_with_currency($send_items);
 
 
                 $received_items = $this->BalanceReceiverDetails
@@ -122,7 +124,7 @@ class BalanceTransactionsController extends AppController
                     ->where(['receiver_user_id' => $key->get('user_id')])
                     ->contain(['Users']);
 
-                $received_items = $this->Amount->symbol_amount($received_items);
+                $received_items = $this->_format_amount_with_currency($received_items);
 
 
                 $this->set([
@@ -133,17 +135,17 @@ class BalanceTransactionsController extends AppController
             } else {
                 $send_items = $this->BalanceSenderDetails
                     ->find()
-                    ->where(['sender_user_id' => $this->checkToken()])
+                    ->where(['sender_user_id' => $user_id])
                     ->contain(['Users']);
 
-                $send_items = $this->Amount->symbol_amount($send_items);
+                $send_items = $this->_format_amount_with_currency($send_items);
 
                 $received_items = $this->BalanceReceiverDetails
                     ->find()
-                    ->where(['receiver_user_id' => $this->checkToken()])
+                    ->where(['receiver_user_id' => $user_id])
                     ->contain(['Users']);
 
-                $received_items = $this->Amount->symbol_amount($received_items);
+                $received_items = $this->_format_amount_with_currency($received_items);
 
                 $this->set([
                     'send' => $send_items,
@@ -158,6 +160,20 @@ class BalanceTransactionsController extends AppController
                 '_serialize' => ['status', 'message']
             ]);
         }
+    }
+
+    private function _format_amount_with_currency($items)
+    {
+        $currency = Configure::read('currency');
+        $formatted_items = array();
+        foreach ($items as $row) {
+            $row['payable'] = $this->Formatter->add_currency($row->payable, $currency);
+            $row['paid'] = $this->Formatter->add_currency($row->paid, $currency);
+            $row['receivable'] = $this->Formatter->add_currency($row->receivable, $currency);
+            $row['received'] = $this->Formatter->add_currency($row->received, $currency);
+            array_push($formatted_items, $row);
+        }
+        return $formatted_items;
     }
 
 
@@ -220,14 +236,15 @@ class BalanceTransactionsController extends AppController
 
     private function balanceTransactionDetails()
     {
-        $tnx_id = bin2hex(random_bytes(5));
+        $tnx_id = $this->Formatter->random_alpha_numeric(10);
+        $user_id = $this->checkToken();
 
         $balanceTransactionSender = $this->BalanceTransactions->get($this->checkSenderBalance());
         $balanceSenderDetails = $this->BalanceSenderDetails->newEntity();
         $balanceSenderDetails->set([
             'transaction' => $tnx_id,
             'user_id' => $this->request->getData('partner_user_id'),
-            'sender_user_id' => $this->checkToken(),
+            'sender_user_id' => $user_id,
             'sent' => $this->request->getData('paid'),
             'payable' => $balanceTransactionSender->get('payable'),
             'receivable' => $balanceTransactionSender->get('receivable'),
@@ -239,7 +256,7 @@ class BalanceTransactionsController extends AppController
         $balanceReceiverDetails->set([
             'transaction' => $tnx_id,
             'receiver_user_id' => $this->request->getData('partner_user_id'),
-            'user_id' => $this->checkToken(),
+            'user_id' => $user_id,
             'received' => $this->request->getData('paid'),
             'payable' => $balanceTransactionReceiver->get('payable'),
             'receivable' => $balanceTransactionReceiver->get('receivable'),

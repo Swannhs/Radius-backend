@@ -37,7 +37,7 @@ class VpnClientsController extends AppController
     public function login()
     {
         $this->request->allowMethod('post');
-        Log::write('debug', $this->request->data());
+        Log::info("login > {\"headers\": ".json_encode($this->request->getHeaders())."\n,\"body\": ".json_encode($this->request->data())."}", 'api');
 
         $user = $this->_ap_right_check();
         if (!$user) {
@@ -51,7 +51,7 @@ class VpnClientsController extends AppController
 
         $user_id = $user['id'];
 
-        if (isset($this->request->data['name']) && isset($this->request->data['password']) && isset($this->request->data['device_owner'])) {
+        if (isset($this->request->data['name']) && isset($this->request->data['password']) && isset($this->request->data['deviceId'])) {
             $voucher = $this->Vouchers->find()
                 ->where([
                     'name' => $this->request->data('name'),
@@ -73,15 +73,15 @@ class VpnClientsController extends AppController
                     }
 
                     if ($read) {
-                        //check device owner
+                        //check device id
                         if ($voucher->extra_value == '') {
                             //update activated_on to current date time for calculating validity 
                             if ($voucher->activated_on == NULL) {
                                 $voucher->activated_on = Time::now();
                             }
 
-                            //update device owner to extra_value
-                            $voucher->extra_value = $this->request->data['device_owner'];
+                            //update device id to extra_value
+                            $voucher->extra_value = $this->request->data['deviceId'];
                             if ($this->Vouchers->save($voucher)) {
                                 return $this->_getAppSettings($voucher);
                             } else {
@@ -91,7 +91,7 @@ class VpnClientsController extends AppController
                                     '_serialize' => ['success', 'message']
                                 ]);
                             }
-                        } else if ($voucher->extra_value != $this->request->data['device_owner']) {
+                        } else if ($voucher->extra_value != $this->request->data['deviceId']) {
                             $this->set([
                                 'message' => 'Unauthorized device, ask your agent to reset your voucher.',
                                 'success' => false,
@@ -102,7 +102,7 @@ class VpnClientsController extends AppController
                         }
                     } else {
                         $this->set([
-                            'message' => 'Invalid user & password.',
+                            'message' => 'Wrong user & password.',
                             'success' => false,
                             '_serialize' => ['success', 'message']
                         ]);
@@ -116,7 +116,7 @@ class VpnClientsController extends AppController
                 }
             } else {
                 $this->set([
-                    'message' => 'Invalid user & password.',
+                    'message' => 'Wrong user & password.',
                     'success' => false,
                     '_serialize' => ['success', 'message']
                 ]);
@@ -128,6 +128,68 @@ class VpnClientsController extends AppController
                 '_serialize' => ['success', 'message']
             ]);
         }
+    }
+
+
+    public function validity()
+    {
+        $this->request->allowMethod('post');
+        Log::info("validity > {\"headers\": ".json_encode($this->request->getHeaders())."\n,\"body\": ".json_encode($this->request->data())."}", 'api');
+
+        $user = $this->_ap_right_check();
+        if (!$user) {
+            $this->set([
+                'message' => 'Unauthorized application!',
+                'success' => false,
+                '_serialize' => ['success', 'message']
+            ]);
+            return;
+        }
+
+        $user_id = $user['id'];
+
+        if (isset($this->request->data['name']) && isset($this->request->data['password'])) {
+            $voucher = $this->Vouchers->find()
+                ->where([
+                    'name' => $this->request->data('name'),
+                    'password' => $this->request->data('password')
+                ])
+                ->first();
+
+            if ($voucher) {
+                if ($voucher->status == 'new' || $voucher->status == 'used') {
+                    $responseStr = '{"validity":"expired"}';
+                    $responseObject = json_decode($responseStr);
+
+                    $responseObject->validity = $this->_getValidity($voucher);
+
+                    $this->set(array(
+                        'data' => $responseObject,
+                        'success' => true,
+                        '_serialize' => ['success', 'data']
+                    ));
+                } else {
+                    $this->set([
+                        'message' => 'Your voucher is expired!',
+                        'success' => false,
+                        '_serialize' => ['success', 'message']
+                    ]);
+                }
+            } else {
+                $this->set([
+                    'message' => 'Wrong user & password.',
+                    'success' => false,
+                    '_serialize' => ['success', 'message']
+                ]);
+            }
+        } else {
+            $this->set([
+                'message' => 'Missing required parameters.',
+                'success' => false,
+                '_serialize' => ['success', 'message']
+            ]);
+        }
+
     }
 
 
@@ -143,9 +205,9 @@ class VpnClientsController extends AppController
         Log::write('debug', json_encode($responseObject));
 
         $this->set(array(
-            'message' => $responseObject,
+            'data' => $responseObject,
             'success' => true,
-            '_serialize' => ['success', 'message']
+            '_serialize' => ['success', 'data']
         ));
     }
 
