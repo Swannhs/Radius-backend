@@ -52,18 +52,7 @@ class BalanceTransactionsController extends AppController
                     ->find()
                     ->contain('Users');
 
-                $item = array();
-
-                foreach ($query as $row) {
-                    $row['paid'] = $this->Formatter->add_currency($row->paid, $currency);
-                    $row['payable'] = $this->Formatter->add_currency($row->payable, $currency);
-                    $row['receivable'] = $this->Formatter->add_currency($row->receivable, $currency);
-                    $row['received'] = $this->Formatter->add_currency($row->received, $currency);
-
-//                  $row['user'] = $row->user->username;          //This can be customize for user info
-
-                    array_push($item, $row);
-                }
+                $item = $this->_format_amount_with_currency($query);
 
                 $this->set([
                     'item' => $item,
@@ -76,16 +65,7 @@ class BalanceTransactionsController extends AppController
                     ->where(['user_id' => $user_id])
                     ->contain('Users');
 
-                $item = array();
-
-                foreach ($query as $row) {
-                    $row['paid'] = $this->Formatter->add_currency($row->paid, $currency);
-                    $row['payable'] = $this->Formatter->add_currency($row->payable, $currency);
-                    $row['receivable'] = $this->Formatter->add_currency($row->receivable, $currency);
-                    $row['received'] = $this->Formatter->add_currency($row->received, $currency);
-//            $row['user'] = $row->user->username;
-                    array_push($item, $row);
-                }
+                $item = $this->_format_amount_with_currency($query);
 
                 $this->set([
                     'item' => $item,
@@ -171,6 +151,7 @@ class BalanceTransactionsController extends AppController
             $row['paid'] = $this->Formatter->add_currency($row->paid, $currency);
             $row['receivable'] = $this->Formatter->add_currency($row->receivable, $currency);
             $row['received'] = $this->Formatter->add_currency($row->received, $currency);
+            $row['user'] = $row->user->username;
             array_push($formatted_items, $row);
         }
         return $formatted_items;
