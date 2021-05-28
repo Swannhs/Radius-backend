@@ -654,6 +654,12 @@ class VouchersController extends AppController
                     '_serialize' => ['success', 'message']
                 ]);
             }
+        } else {
+            $this->set([
+                'message' => 'Missing required parameters.',
+                'success' => false,
+                '_serialize' => ['success', 'message']
+            ]);
         }
     }
 

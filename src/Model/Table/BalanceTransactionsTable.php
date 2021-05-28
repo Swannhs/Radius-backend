@@ -59,15 +59,15 @@ class BalanceTransactionsTable extends Table
             ->allowEmptyString('id', null, 'create');
 
         $validator
-            ->integer('payable')
+            ->decimal('payable')
             ->allowEmptyString('payable');
 
         $validator
-            ->integer('receivable')
+            ->decimal('receivable')
             ->allowEmptyString('receivable');
 
         $validator
-            ->integer('received')
+            ->decimal('received')
             ->allowEmptyString('received');
 
         return $validator;

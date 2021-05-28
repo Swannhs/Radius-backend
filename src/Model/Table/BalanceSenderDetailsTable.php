@@ -75,19 +75,19 @@ class BalanceSenderDetailsTable extends Table
             ->notEmptyString('transaction');
 
         $validator
-            ->integer('payable')
+            ->decimal('payable')
             ->allowEmptyString('payable');
 
         $validator
-            ->integer('receivable')
+            ->decimal('receivable')
             ->allowEmptyString('receivable');
 
         $validator
-            ->integer('received')
+            ->decimal('received')
             ->allowEmptyString('received');
 
         $validator
-            ->integer('sent')
+            ->decimal('sent')
             ->allowEmptyString('sent');
 
         $validator

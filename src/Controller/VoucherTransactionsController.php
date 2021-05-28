@@ -43,6 +43,7 @@ class VoucherTransactionsController extends AppController
         $this->loadModel('VoucherTransactionReceivedDetails');
         $this->loadComponent('Aa');
         $this->loadComponent('RealmAcl');
+        $this->loadComponent('Formatter');
     }
 
 //------------------------------ Only for valid token----------------------------------
@@ -178,7 +179,7 @@ class VoucherTransactionsController extends AppController
 //    -------------------------------Configuring For voucher transaction Start----------------------------------------------
     private function generateDetails()
     {
-        $tnx_id = bin2hex(random_bytes(5));
+        $tnx_id = $this->Formatter->random_alpha_numeric(10);
         $send = $this->VoucherTransactionSendDetails->newEntity();
         $send->set([
             'transaction' => $tnx_id,
@@ -186,10 +187,9 @@ class VoucherTransactionsController extends AppController
             'sender_user_id' => $this->checkToken(),
             'profile_id' => $this->request->getData('profile_id'),
             'realm_id' => $this->request->getData('realm_id'),
-            'credit' => 0,
-            'balance' => $this->request->data('quantity_rate') * $this->request->getData('transfer_amount'),
-            'debit' => $this->request->getData('transfer_amount'),
-            'quantity_rate' => $this->request->data('quantity_rate')
+            'balance' => sprintf('%0.2f', ($this->request->data('quantity_rate') * $this->request->getData('transfer_amount'))),
+            'debit' => sprintf('%0.2f', $this->request->getData('transfer_amount')),
+            'quantity_rate' => sprintf('%0.2f', $this->request->data('quantity_rate'))
         ]);
 
         $received = $this->VoucherTransactionReceivedDetails->newEntity();
@@ -199,18 +199,16 @@ class VoucherTransactionsController extends AppController
             'user_id' => $this->checkToken(),
             'profile_id' => $this->request->getData('profile_id'),
             'realm_id' => $this->request->getData('realm_id'),
-            'credit' => $this->request->getData('transfer_amount'),
-            'balance' => $this->request->data('quantity_rate') * $this->request->getData('transfer_amount'),
-            'debit' => 0,
-            'quantity_rate' => $this->request->data('quantity_rate')
+            'credit' => sprintf('%0.2f', $this->request->getData('transfer_amount')),
+            'balance' => sprintf('%0.2f', $this->request->data('quantity_rate') * $this->request->getData('transfer_amount')),
+            'quantity_rate' => sprintf('%0.2f', $this->request->data('quantity_rate'))
         ]);
         return $this->VoucherTransactionReceivedDetails->save($received) && $this->VoucherTransactionSendDetails->save($send);
     }
 
     private function generateDetailsAdmin()
     {
-        $tnx_id = bin2hex(random_bytes(5));
-
+        $tnx_id = $this->Formatter->random_alpha_numeric(10);
         $received = $this->VoucherTransactionReceivedDetails->newEntity();
         $received->set([
             'transaction' => $tnx_id,
@@ -218,10 +216,9 @@ class VoucherTransactionsController extends AppController
             'user_id' => $this->checkToken(),
             'profile_id' => $this->request->getData('profile_id'),
             'realm_id' => $this->request->getData('realm_id'),
-            'credit' => $this->request->getData('transfer_amount'),
-            'balance' => $this->request->data('quantity_rate') * $this->request->getData('transfer_amount'),
-            'debit' => 0,
-            'quantity_rate' => $this->request->data('quantity_rate')
+            'credit' => sprintf('%0.2f', $this->request->getData('transfer_amount')),
+            'balance' => sprintf('%0.2f', ($this->request->data('quantity_rate') * $this->request->getData('transfer_amount'))),
+            'quantity_rate' => sprintf('%0.2f', $this->request->data('quantity_rate'))
         ]);
         return $this->VoucherTransactionReceivedDetails->save($received);
     }
@@ -235,9 +232,9 @@ class VoucherTransactionsController extends AppController
             'user_id' => $this->checkToken(),
             'realm_id' => $this->request->getData('realm_id'),
             'profile_id' => $this->request->getData('profile_id'),
-            'debit' => $send_amount->get('debit') + $this->request->getData('transfer_amount'),
-            'balance' => $send_amount->get('balance') - $this->request->getData('transfer_amount'),
-            'quantity_rate' => $this->request->getData('quantity_rate')
+            'debit' => sprintf('%0.2f', ($send_amount->get('debit') + $this->request->getData('transfer_amount'))),
+            'balance' => sprintf('%0.2f', ($send_amount->get('balance') - $this->request->getData('transfer_amount'))),
+            'quantity_rate' => sprintf('%0.2f', $this->request->getData('quantity_rate'))
         ]);
 
         $receive = $this->VoucherTransactions->get($this->checkReceiverVoucher());
@@ -246,9 +243,9 @@ class VoucherTransactionsController extends AppController
             'user_id' => $this->request->getData('partner_user_id'),
             'realm_id' => $this->request->getData('realm_id'),
             'profile_id' => $this->request->getData('profile_id'),
-            'credit' => $receive_amount->get('credit') + $this->request->getData('transfer_amount'),
-            'balance' => $receive_amount->get('balance') + $this->request->getData('transfer_amount'),
-            'quantity_rate' => $this->request->getData('quantity_rate')
+            'credit' => sprintf('%0.2f', ($receive_amount->get('credit') + $this->request->getData('transfer_amount'))),
+            'balance' => sprintf('%0.2f', ($receive_amount->get('balance') + $this->request->getData('transfer_amount'))),
+            'quantity_rate' => sprintf('%0.2f', $this->request->getData('quantity_rate'))
         ]);
 
 //            ------------------------Balance should be greater tha 50 for activating the user----------------------
@@ -263,13 +260,6 @@ class VoucherTransactionsController extends AppController
     {
 
         if (isset($this->request->data['partner_user_id'])) {
-
-            //Make sure the $ap_id is a child of $user_id - perhaps we should sub-class the Behaviour...
-            //TODO Complete this check
-
-            $temp_debug = Configure::read('debug');
-            Configure::write('debug', 0); // turn off debugging
-
 
             $ap_id = $this->request->data('partner_user_id');
             $id = $this->request->data['id'];
@@ -297,7 +287,6 @@ class VoucherTransactionsController extends AppController
             } catch (\Exception $e) {
                 return false;
             }
-//            Configure::write('debug', $temp_debug); // turn off debugging
         }
     }
 
@@ -326,12 +315,11 @@ class VoucherTransactionsController extends AppController
             $receive_amount = $this->VoucherTransactions->newEntity();
             $receive_amount->set([
                 'user_id' => $this->request->getData('partner_user_id'),
-                'debit' => 0,
-                'credit' => $receive_amount->get('credit') + $this->request->getData('transfer_amount'),
-                'balance' => $this->request->getData('transfer_amount'),
                 'realm_id' => $this->request->getData('realm_id'),
                 'profile_id' => $this->request->getData('profile_id'),
-                'quantity_rate' => $this->request->getData('quantity_rate')
+                'credit' => sprintf('%0.2f', ($receive_amount->get('credit') + $this->request->getData('transfer_amount'))),
+                'balance' => sprintf('%0.2f', $this->request->getData('transfer_amount')),
+                'quantity_rate' => sprintf('%0.2f', $this->request->getData('quantity_rate'))
             ]);
 
 //          --------------------------Checking for new user for activate---------------------------
@@ -346,11 +334,11 @@ class VoucherTransactionsController extends AppController
             $send_amount = $this->VoucherTransactions->patchEntity($send, $this->request->getData());
             $send_amount->set([
                 'user_id' => $this->checkToken(),
-                'debit' => $send_amount->get('debit') + $this->request->getData('transfer_amount'),
-                'balance' => $send_amount->get('balance') - $this->request->getData('transfer_amount'),
                 'realm_id' => $this->request->getData('realm_id'),
                 'profile_id' => $this->request->getData('profile_id'),
-                'quantity_rate' => $this->request->getData('quantity_rate')
+                'debit' => sprintf('%0.2f', ($send_amount->get('debit') + $this->request->getData('transfer_amount'))),
+                'balance' => sprintf('%0.2f', ($send_amount->get('balance') - $this->request->getData('transfer_amount'))),
+                'quantity_rate' => sprintf('%0.2f', $this->request->getData('quantity_rate'))
             ]);
 
             return $this->VoucherTransactions->save($receive_amount) && $this->VoucherTransactions->save($send_amount);
@@ -363,7 +351,7 @@ class VoucherTransactionsController extends AppController
     //-----------------------------------BalanceTransactionDetails---------------------------------------
     private function defineBalanceDetails()
     {
-        $tnx_id = bin2hex(random_bytes(5));
+        $tnx_id = $this->Formatter->random_alpha_numeric(10);
 
         $balance = $this->BalanceTransactionDetails->newEntity();
         $balance->set([
@@ -373,8 +361,8 @@ class VoucherTransactionsController extends AppController
             'profile_id' => $this->request->getData('profile_id'),
             'realm_id' => $this->request->getData('realm_id'),
             'vouchers' => $this->request->getData('transfer_amount'),
-            'quantity_rate' => $this->request->getData('quantity_rate'),
-            'total' => $this->request->getData('transfer_amount') * $this->request->getData('quantity_rate')
+            'quantity_rate' => sprintf('%0.2f', $this->request->getData('quantity_rate')),
+            'total' => sprintf('%0.2f', ($this->request->getData('transfer_amount') * $this->request->getData('quantity_rate')))
         ]);
 
         return $this->BalanceTransactionDetails->save($balance);
@@ -397,9 +385,9 @@ class VoucherTransactionsController extends AppController
         $balanceTransactionSender = $this->BalanceTransactions->get($this->checkSenderBalance());
 
         $balanceTransactionSender->set([
-            'receivable' => $this->request->getData('transfer_amount') * $this->request->getData('quantity_rate')
-                + $balanceTransactionSender->get('receivable'),
-            'payable' => $balanceTransactionSender->get('payable'),
+            'receivable' => sprintf('%0.2f', ($this->request->getData('transfer_amount') * $this->request->getData('quantity_rate')
+                + $balanceTransactionSender->get('receivable'))),
+            'payable' => sprintf('%0.2f', $balanceTransactionSender->get('payable')),
         ]);
 
         $balanceTransactionReceiver = $this->BalanceTransactions->get($this->checkReceiverBalance());
@@ -407,9 +395,8 @@ class VoucherTransactionsController extends AppController
         $balanceTransactionReceiver->set([
             'payable' => $this->request->getData('transfer_amount') * $this->request->getData('quantity_rate')
                 + $balanceTransactionReceiver->get('payable'),
-            'receivable' => $balanceTransactionReceiver->get('receivable')
+            'receivable' => sprintf('%0.2f', $balanceTransactionReceiver->get('receivable'))
         ]);
-
 
         return $this->BalanceTransactions->save($balanceTransactionSender) && $this->BalanceTransactions->save($balanceTransactionReceiver);
     }
@@ -435,7 +422,6 @@ class VoucherTransactionsController extends AppController
                     ->find()
                     ->where(['Users.id' => $this->checkToken()])
                     ->contain(['Users', 'Profiles', 'Realms']);
-
 
                 $this->set([
                     'item' => $item,
@@ -619,10 +605,10 @@ class VoucherTransactionsController extends AppController
                     'user_id' => $this->checkToken(),
                     'profile_id' => $this->request->data('profile_id'),
                     'realm_id' => $this->request->data('realm_id'),
-                    'credit' => $this->request->data('transfer_amount') + $updateVoucher->get('credit'),
-                    'debit' => 0,
-                    'balance' => $this->request->data('transfer_amount') + $updateVoucher->get('balance'),
-                    'quantity_rate' => $this->request->data('quantity_rate')
+                    'credit' => sprintf('%0.2f', ($this->request->data('transfer_amount') + $updateVoucher->get('credit'))),
+                    'debit' => sprintf('%0.2f', $updateVoucher->get('debit')),
+                    'balance' => sprintf('%0.2f', ($this->request->data('transfer_amount') + $updateVoucher->get('balance'))),
+                    'quantity_rate' => sprintf('%0.2f', $this->request->data('quantity_rate'))
                 ]);
                 if ($this->VoucherTransactions->save($newBalance) && $this->generateDetailsAdmin()) {
                     $this->set([
@@ -646,10 +632,9 @@ class VoucherTransactionsController extends AppController
                     'user_id' => $this->checkToken(),
                     'profile_id' => $this->request->data('profile_id'),
                     'realm_id' => $this->request->data('realm_id'),
-                    'credit' => $this->request->data('transfer_amount') + $updateVoucher->get('credit'),
-                    'debit' => 0,
-                    'balance' => $this->request->data('transfer_amount') + $updateVoucher->get('balance'),
-                    'quantity_rate' => $this->request->data('quantity_rate')
+                    'credit' => sprintf('%0.2f', ($this->request->data('transfer_amount') + $updateVoucher->get('credit'))),
+                    'balance' => sprintf('%0.2f', ($this->request->data('transfer_amount') + $updateVoucher->get('balance'))),
+                    'quantity_rate' => sprintf('%0.2f', $this->request->data('quantity_rate'))
                 ]);
                 if ($this->VoucherTransactions->save($newBalance) && $this->generateDetailsAdmin()) {
                     $this->set([

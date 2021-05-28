@@ -79,11 +79,11 @@ class BalanceTransactionDetailsTable extends Table
             ->allowEmptyString('vouchers');
 
         $validator
-            ->integer('quantity_rate')
+            ->decimal('quantity_rate')
             ->allowEmptyString('quantity_rate');
 
         $validator
-            ->integer('total')
+            ->decimal('total')
             ->allowEmptyString('total');
 
         return $validator;

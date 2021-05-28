@@ -9,6 +9,8 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 use Cake\Datasource\ConnectionManager;
 
+use Cake\Log\Log;
+
 /**
  * VoucherTransactions Controller
  * @property \App\Model\Table\UsersTable $Users
@@ -51,6 +53,7 @@ class DashboardController extends AppController
 
         $this->loadComponent('Aa');
         $this->loadComponent('WhiteLabel');
+        $this->loadComponent('Formatter');
     }
 
 
@@ -174,40 +177,27 @@ class DashboardController extends AppController
     public function cash()
     {
         $this->request->allowMethod('get');
-        $cash = $this->BalanceTransactions->find()
-            ->where(['user_id' => $this->checkTokenCustom()]);
 
-        $payable = 0;
-        $paid = 0;
-        $receivable = 0;
-        $received = 0;
+        $currency = Configure::read('currency');
+        $query = $this->BalanceTransactions->find()
+            ->where(['user_id' => $this->checkTokenCustom()])->first();
 
-        foreach ($cash as $row){
-            $payable = $row->payable;
-            $paid = $row->paid;
-            $receivable = $row->receivable;
-            $received = $row->received;
-        }
-        $item = array();
-        $row = array();
 
-        $row['payable'] = $payable;
-        $row['paid'] = $paid;
-        $row['receivable'] = $receivable;
-        $row['received'] = $received;
+        $query['paid'] = $this->Formatter->add_currency($query->paid , $currency);
+        $query['payable'] = $this->Formatter->add_currency($query->payable , $currency);
+        $query['receivable'] = $this->Formatter->add_currency($query->receivable , $currency);
+        $query['received'] = $this->Formatter->add_currency($query->received , $currency);
 
-        array_push($item, $row);
-
+        Log::write('debug', $query);
 
         $this->set([
-            'item' => $item[0],
+            'item' => $query,
             'success' => true,
             '_serialize' => ['success', 'item']
         ]);
     }
 
 //    --------------------------------------Cash End-----------------------------------------
-
 
 
 //---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
@@ -279,6 +269,7 @@ class DashboardController extends AppController
         }
     }
 
+
     public function authenticate()
     {
 
@@ -344,7 +335,7 @@ class DashboardController extends AppController
                     'success' => false,
                     '_serialize' => array('errors', 'success')
                 ));
-            }else {
+            } else {
                 $this->set([
                     'user' => $user,
                     'success' => true,
@@ -787,15 +778,16 @@ class DashboardController extends AppController
     }
 
 
-    public function serverCount(){
-        if ($this->checkTokenCustom()){
+    public function serverCount()
+    {
+        if ($this->checkTokenCustom()) {
             $servers = $this->Servers->find()->count();
             $this->set([
                 'servers' => $servers,
                 'success' => true,
                 '_serialize' => ['success', 'servers']
             ]);
-        }else{
+        } else {
             $this->set([
                 'message' => 'Invalid token',
                 'success' => false,

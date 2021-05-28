@@ -357,6 +357,14 @@ return [
             'url' => env('LOG_QUERIES_URL', null),
             'scopes' => ['queriesLog'],
         ],
+        'api' => [
+            'className' => FileLog::class,
+            'path' => LOGS,
+            'file' => 'api.log',
+            'url' => env('LOG_APIS_URL', null),
+            'scopes' => ['api'],
+            'levels' => [],
+        ],
     ],
 
     /*
