@@ -44,7 +44,6 @@ class BalanceTransactionsController extends AppController
         $this->request->allowMethod('get');
         $user_id = $this->checkToken();
         if ($user_id) {
-            $currency = Configure::read('currency');
 //            -----------------------------------------------Check for admin only-----------------------------
             $user = $this->Users->get($user_id);
             if (!$user->get('parent_id')) {
