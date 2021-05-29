@@ -126,7 +126,6 @@ class BalanceTransactionsController extends AppController
                 $received_item = $this->_format_amount_with_currency($query_received);
 
 
-
                 $this->set([
                     'send' => $send_item,
                     'send_total' => $send_total,
@@ -140,19 +139,29 @@ class BalanceTransactionsController extends AppController
                     ->where(['sender_user_id' => $user_id])
                     ->contain(['Users']);
 
-                $send_items = $this->_format_amount_with_currency($send_items);
+                $send_total = $send_items->count();
+
+                $query_send = $this->Formatter->pagination($send_items);
+
+                $send_item = $this->_format_amount_with_currency($query_send);
 
                 $received_items = $this->BalanceReceiverDetails
                     ->find()
                     ->where(['receiver_user_id' => $user_id])
                     ->contain(['Users']);
 
-                $received_items = $this->_format_amount_with_currency($received_items);
+                $received_total = $received_items->count();
+
+                $query_received = $this->Formatter->pagination($received_items);
+
+                $received_item = $this->_format_amount_with_currency($query_received);
 
                 $this->set([
-                    'send' => $send_items,
-                    'received' => $received_items,
-                    '_serialize' => ['send', 'received']
+                    'send' => $send_item,
+                    'send_total' => $send_total,
+                    'received' => $received_item,
+                    'received_total' => $received_total,
+                    '_serialize' => ['send', 'send_total', 'received', 'received_total']
                 ]);
             }
         } else {
