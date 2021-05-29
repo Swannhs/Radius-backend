@@ -167,7 +167,7 @@ class FormatterComponent extends Component
         return $v_value;
     }
 
-    public function pagination($query)
+    public function pagination($query): array
     {
         $limit = 50;
         $page = 1;

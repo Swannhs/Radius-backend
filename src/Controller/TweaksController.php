@@ -22,6 +22,7 @@ class TweaksController extends AppController
         $this->loadModel('TweakRealms');
         $this->loadModel('Users');
         $this->loadComponent('Aa');
+        $this->loadComponent('Formatter');
     }
 
     function checkToken()
@@ -42,10 +43,15 @@ class TweaksController extends AppController
         if (!$user->get('parent_id')) {
             $tweaks = $this->Tweaks->find();
 
+            $total = $tweaks->count();
+
+            $item = $this->Formatter->pagination($tweaks);
+
             $this->set([
-                'tweaks' => $tweaks,
+                'tweaks' => $item,
+                'totalCount' => $total,
                 'status' => true,
-                '_serialize' => ['status', 'tweaks']
+                '_serialize' => ['status', 'tweaks', 'totalCount']
             ]);
         } else {
             $this->set([
