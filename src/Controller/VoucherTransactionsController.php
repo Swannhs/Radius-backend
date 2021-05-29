@@ -468,6 +468,11 @@ class VoucherTransactionsController extends AppController
                     ])
                     ->contain(['Users', 'Realms', 'Profiles']);
 
+                $send_total = $send_items->count();
+
+                $send_item = $this->Formatter->pagination($send_items);
+
+
                 $received_items = $this->VoucherTransactionReceivedDetails
                     ->find()
                     ->where([
@@ -477,26 +482,43 @@ class VoucherTransactionsController extends AppController
                     ])
                     ->contain(['Users', 'Realms', 'Profiles']);
 
+                $received_total = $received_items->count();
+
+                $received_item = $this->Formatter->pagination($received_items);
+
                 $this->set([
-                    'send' => $send_items,
-                    'received' => $received_items,
-                    'success' => true,
-                    '_serialize' => ['send', 'received', 'success']
+                    'send' => $send_item,
+                    'send_total' => $send_total,
+                    'received' => $received_item,
+                    'received_total' => $received_total,
+                    '_serialize' => ['send', 'send_total', 'received', 'received_total']
                 ]);
+
             } else {
                 $send_items = $this->VoucherTransactionSendDetails
                     ->find()
                     ->where(['sender_user_id' => $this->checkToken()])
                     ->contain(['Users', 'Realms', 'Profiles']);
+
+                $send_total = $send_items->count();
+
+                $send_item = $this->Formatter->pagination($send_items);
+
                 $received_items = $this->VoucherTransactionReceivedDetails
                     ->find()
                     ->where(['receiver_user_id' => $this->checkToken()])
                     ->contain(['Users', 'Realms', 'Profiles']);
 
+                $received_total = $received_items->count();
+
+                $received_item = $this->Formatter->pagination($received_items);
+
                 $this->set([
-                    'send' => $send_items,
-                    'received' => $received_items,
-                    '_serialize' => ['send', 'received']
+                    'send' => $send_item,
+                    'send_total' => $send_total,
+                    'received' => $received_item,
+                    'received_total' => $received_total,
+                    '_serialize' => ['send', 'send_total', 'received', 'received_total']
                 ]);
             }
         } else {
