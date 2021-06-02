@@ -100,7 +100,7 @@ class DashboardController extends AppController
                 ])->count();
 
             $conn = ConnectionManager::get('default');
-            $stmt = $conn->execute('SELECT count(vc.id) FROM rd.vouchers
+            $stmt = $conn->execute('SELECT count(vc.id) as online FROM rd.vouchers
                 vc INNER JOIN rd.radacct rac ON vc.name = rac.username
                 WHERE vc.user_id = :user_id AND rac.acctstarttime
                 IS NOT NULL AND rac.acctstoptime IS NULL', ['user_id' => $user_id]);
@@ -110,9 +110,11 @@ class DashboardController extends AppController
             $item = array();
             $row = array();
 
+            $online = intval($online{'online'});
+
             $row['active'] = $active;
             $row['total'] = $vouchers;
-            $row['online'] = $online{'count(vc.id)'};
+            $row['online'] = $online;
 
             array_push($item, $row);
 
