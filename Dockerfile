@@ -56,6 +56,7 @@ RUN cd $APP_HOME && composer update
 
 # create required directories
 RUN mkdir -p  $APP_HOME/logs \
+    && chmod -R 0755 $APP_HOME/logs \
     && mkdir -p $APP_HOME/tmp \
     && mkdir -p $APP_HOME/webroot/files/imagecache
 

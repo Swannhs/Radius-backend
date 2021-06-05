@@ -5,6 +5,8 @@ namespace App\Controller;
 use Cake\Core\Configure;
 use Cake\Utility\Inflector;
 
+use Cake\Log\Log;
+
 class RadacctsController extends AppController {
 
     protected $main_model = 'Radaccts';
@@ -440,10 +442,8 @@ class RadacctsController extends AppController {
                 if($qr){
                     if($qr->acctstoptime == null){
                         $now = date('Y-m-d h:i:s');
-                        $d['acctstoptime'] = $now;
-                        $radacctEntity = $this->{$this->main_model}->newEntity($d);
-
-                        $this->{$this->main_model}->save($radacctEntity);
+                        $qr['acctstoptime'] = $now;
+                        $this->{$this->main_model}->save($qr);
                     }
                 }
             }
