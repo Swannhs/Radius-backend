@@ -25,6 +25,7 @@ class ServerRealmsController extends AppController
         $this->loadModel('Servers');
 
         $this->loadComponent('Aa');
+        $this->loadComponent('Formatter');
     }
 
     function checkToken()
@@ -41,14 +42,21 @@ class ServerRealmsController extends AppController
     public function index()
     {
         $this->request->allowMethod('get');
-        $user = $this->Users->get($this->checkToken());
-        if (!$user->get('parent_id')) {
-            $this->paginate = [
-                'contain' => ['Servers', 'Realms'],
-            ];
-            $serverRealms = $this->paginate($this->ServerRealms);
+        if ($this->Aa->admin_check($this)) {
+            $serverRealms = $this->ServerRealms->find()
+                ->contain(['Servers', 'Realms']);
 
-            $this->set(compact('serverRealms'));
+            $total = $serverRealms->count();
+
+            $item = $this->Formatter->pagination($serverRealms);
+
+
+            $this->set([
+                'serverRealms' => $item,
+                'totalCount' => $total,
+                'success' => true,
+                '_serialize' => ['serverRealms', 'success', 'totalCount']
+            ]);
         } else {
             $this->set([
                 'message' => 'Invalid account',
@@ -57,7 +65,6 @@ class ServerRealmsController extends AppController
             ]);
         }
     }
-
 
     public function servers()
     {
@@ -69,6 +76,7 @@ class ServerRealmsController extends AppController
         ]);
     }
 
+
     /**
      * Add method
      *
@@ -77,8 +85,7 @@ class ServerRealmsController extends AppController
     public function add()
     {
         $this->request->allowMethod('post');
-        $user = $this->Users->get($this->checkToken());
-        if (!$user->get('parent_id')) {
+        if ($this->Aa->admin_check($this)) {
             $serverRealm = $this->ServerRealms->newEntity();
 
             $serverRealm->set([
@@ -111,8 +118,7 @@ class ServerRealmsController extends AppController
     public function delete()
     {
         $this->request->allowMethod('post');
-        $user = $this->Users->get($this->checkToken());
-        if (!$user->get('parent_id')) {
+        if ($this->Aa->admin_check($this)) {
             $delete = $this->ServerRealms->get($this->request->data('id'));
 
             if ($this->ServerRealms->delete($delete)) {

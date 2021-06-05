@@ -23,6 +23,7 @@ class TweakRealmsController extends AppController
         $this->loadModel('TweakRealms');
 
         $this->loadComponent('Aa');
+        $this->loadComponent('Formatter');
     }
 
 
@@ -40,29 +41,28 @@ class TweakRealmsController extends AppController
     public function index()
     {
         $this->request->allowMethod('get');
+        if ($this->Aa->admin_check($this)) {
+            $tweakRealms = $this->TweakRealms->find()
+                ->contain(['Tweaks', 'Realms']);
 
-        if ($this->checkToken() == 44){
-            $this->paginate = [
-                'contain' => ['Tweaks', 'Realms'],
-            ];
-            $tweakRealms = $this->paginate($this->TweakRealms);
+            $total = $tweakRealms->count();
+
+            $item = $this->Formatter->pagination($tweakRealms);
 
             $this->set([
-                'tweakRealms' => $tweakRealms,
-                'status' => true,
-                '_serialize' => ['status', 'tweakRealms']
+                'tweakRealms' => $item,
+                'totalCount' => $total,
+                'success' => true,
+                '_serialize' => ['tweakRealms', 'success', 'totalCount']
             ]);
-        }else{
+        } else {
             $this->set([
-                'message' => 'Invalid token',
-                'status' => false,
-                '_serialize' => ['status', 'message']
+                'message' => 'Invalid account',
+                'success' => false,
+                '_serialize' => ['success', 'message']
             ]);
         }
-
     }
-
-
 
     public function tweaks()
     {
@@ -75,7 +75,6 @@ class TweakRealmsController extends AppController
     }
 
 
-
     /**
      * Add method
      *
@@ -83,23 +82,33 @@ class TweakRealmsController extends AppController
      */
     public function add()
     {
+
         $this->request->allowMethod('post');
-        $serverRealm = $this->TweakRealms->newEntity();
 
-        $serverRealm->set([
-            'tweak_id' => $this->request->getData('tweak'),
-            'realm_id' => $this->request->getData('realm')
-        ]);
+        if ($this->Aa->admin_check($this)) {
+            $serverRealm = $this->TweakRealms->newEntity();
 
-        if ($this->TweakRealms->save($serverRealm)) {
-            $this->set([
-                'message' => 'Generated successful',
-                'success' => true,
-                '_serialize' => ['success', 'message']
+            $serverRealm->set([
+                'tweak_id' => $this->request->getData('tweak'),
+                'realm_id' => $this->request->getData('realm')
             ]);
+
+            if ($this->TweakRealms->save($serverRealm)) {
+                $this->set([
+                    'message' => 'Generated successful',
+                    'success' => true,
+                    '_serialize' => ['success', 'message']
+                ]);
+            } else {
+                $this->set([
+                    'message' => 'failed to generate',
+                    'success' => false,
+                    '_serialize' => ['success', 'message']
+                ]);
+            }
         } else {
             $this->set([
-                'message' => 'failed to generate',
+                'message' => 'Invalid account',
                 'success' => false,
                 '_serialize' => ['success', 'message']
             ]);
@@ -109,29 +118,28 @@ class TweakRealmsController extends AppController
     public function delete()
     {
         $this->request->allowMethod('post');
-        $user = $this->Users->get($this->checkToken());
-        if (!$user->get('parent_id')){
+        if ($this->Aa->admin_check($this)) {
             $delete = $this->TweakRealms->get($this->request->data('id'));
 
-            if ($this->TweakRealms->delete($delete)){
+            if ($this->TweakRealms->delete($delete)) {
                 $this->set([
                     'message' => 'Tweak Realms is removed successfully',
                     'success' => true,
-                    '_serialize' => ['success','message']
+                    '_serialize' => ['success', 'message']
                 ]);
-            }else{
+            } else {
                 $this->set([
                     'message' => 'Something is went wrong with database',
                     'success' => false,
-                    '_serialize' => ['success','message']
+                    '_serialize' => ['success', 'message']
                 ]);
             }
 
-        }else{
+        } else {
             $this->set([
                 'message' => 'Invalid account',
                 'success' => false,
-                '_serialize' => ['success','message']
+                '_serialize' => ['success', 'message']
             ]);
         }
     }

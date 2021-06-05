@@ -81,9 +81,14 @@ class DashboardController extends AppController
 //    --------------------------------------Voucher Start-----------------------------------------
     public function voucher()
     {
-        $user_id = $this->checkTokenCustom();
-        if ($user_id) {
+        $user = $this->Aa->user_for_token($this);
+        if (!$user) {   //If not a valid user
+            return;
+        }
 
+        $user_id = $user['id'];
+
+        if ($user['group_name'] != 'Administrators') {
             $vouchers = $this->Vouchers->find()
                 ->where(['user_id' => $user_id])
                 ->count();
@@ -95,7 +100,7 @@ class DashboardController extends AppController
                 ])->count();
 
             $conn = ConnectionManager::get('default');
-            $stmt = $conn->execute('SELECT count(vc.id) FROM rd.vouchers
+            $stmt = $conn->execute('SELECT count(vc.id) as online FROM rd.vouchers
                 vc INNER JOIN rd.radacct rac ON vc.name = rac.username
                 WHERE vc.user_id = :user_id AND rac.acctstarttime
                 IS NOT NULL AND rac.acctstoptime IS NULL', ['user_id' => $user_id]);
@@ -105,9 +110,11 @@ class DashboardController extends AppController
             $item = array();
             $row = array();
 
+            $online = intval($online{'online'});
+
             $row['active'] = $active;
             $row['total'] = $vouchers;
-            $row['online'] = $online{'count(vc.id)'};
+            $row['online'] = $online;
 
             array_push($item, $row);
 
@@ -117,14 +124,49 @@ class DashboardController extends AppController
                 '_serialize' => ['success', 'item']
             ]);
         } else {
+            $vouchers = $this->Vouchers->find()
+                ->count();
+
+            $active = $this->Vouchers->find()
+                ->where([
+                    'status' => 'used'
+                ])
+                ->count();
+
+//                $conn = ConnectionManager::get('default');
+//                $stmt = $conn->execute('SELECT count(vc.id) FROM rd.vouchers
+//                vc INNER JOIN rd.radacct rac ON vc.name = rac.username
+//                WHERE vc.user_id = :user_id AND rac.acctstarttime
+//                IS NOT NULL AND rac.acctstoptime IS NULL', ['user_id' => $user_id]);
+//                $onlinePack = $stmt->fetchAll('assoc');
+//                $online = $onlinePack[0];
+
+            $online = $this->Radaccts->find()
+                ->where([
+                    'acctstarttime' !== null,
+                    'acctstoptime' => null
+                ])
+                ->count();
+
+            $item = array();
+            $row = array();
+
+            $row['active'] = $active;
+            $row['total'] = $vouchers;
+            $row['online'] = $online;
+
+            array_push($item, $row);
+
             $this->set([
-                'message' => 'Invalid user account',
-                'success' => false,
-                '_serialize' => ['message', 'success']
+                'item' => $item[0],
+                'success' => true,
+                '_serialize' => ['success', 'item']
             ]);
         }
 
+
     }
+
 
 //    --------------------------------------Voucher End-----------------------------------------
 

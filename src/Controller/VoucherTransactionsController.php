@@ -407,26 +407,36 @@ class VoucherTransactionsController extends AppController
 
         if ($this->checkToken()) {
             $user = $this->Users->get($this->checkToken());
-            if (!$user->get('parent_id')){
-                $item = $this->VoucherTransactions
+            if (!$user->get('parent_id')) {
+                $voucher_tx = $this->VoucherTransactions
                     ->find()
                     ->contain(['Users', 'Profiles', 'Realms']);
 
+                $total = $voucher_tx->count();
+
+                $item = $this->Formatter->pagination($voucher_tx);
+
                 $this->set([
                     'item' => $item,
+                    'totalCount' => $total,
                     'success' => true,
-                    '_serialize' => ['item', 'success']
+                    '_serialize' => ['item', 'totalCount', 'success']
                 ]);
             } else {
-                $item = $this->VoucherTransactions
+                $voucher_tx = $this->VoucherTransactions
                     ->find()
                     ->where(['Users.id' => $this->checkToken()])
                     ->contain(['Users', 'Profiles', 'Realms']);
 
+                $total = $voucher_tx->count();
+
+                $item = $this->Formatter->pagination($voucher_tx);
+
                 $this->set([
                     'item' => $item,
+                    'totalCount' => $total,
                     'success' => true,
-                    '_serialize' => ['item', 'success']
+                    '_serialize' => ['item', 'totalCount', 'success']
                 ]);
             }
         } else {
@@ -446,7 +456,7 @@ class VoucherTransactionsController extends AppController
         $this->request->allowMethod('get');
         if ($this->checkToken()) {
             $user = $this->Users->get($this->checkToken());
-            if ($user->get('parent_id')){
+            if ($user->get('parent_id')) {
                 $key = $this->VoucherTransactions->get($this->request->query('key'));
 
                 $send_items = $this->VoucherTransactionSendDetails
@@ -458,6 +468,11 @@ class VoucherTransactionsController extends AppController
                     ])
                     ->contain(['Users', 'Realms', 'Profiles']);
 
+                $send_total = $send_items->count();
+
+                $send_item = $this->Formatter->pagination($send_items);
+
+
                 $received_items = $this->VoucherTransactionReceivedDetails
                     ->find()
                     ->where([
@@ -467,26 +482,43 @@ class VoucherTransactionsController extends AppController
                     ])
                     ->contain(['Users', 'Realms', 'Profiles']);
 
+                $received_total = $received_items->count();
+
+                $received_item = $this->Formatter->pagination($received_items);
+
                 $this->set([
-                    'send' => $send_items,
-                    'received' => $received_items,
-                    'success' => true,
-                    '_serialize' => ['send', 'received', 'success']
+                    'send' => $send_item,
+                    'send_total' => $send_total,
+                    'received' => $received_item,
+                    'received_total' => $received_total,
+                    '_serialize' => ['send', 'send_total', 'received', 'received_total']
                 ]);
+
             } else {
                 $send_items = $this->VoucherTransactionSendDetails
                     ->find()
                     ->where(['sender_user_id' => $this->checkToken()])
                     ->contain(['Users', 'Realms', 'Profiles']);
+
+                $send_total = $send_items->count();
+
+                $send_item = $this->Formatter->pagination($send_items);
+
                 $received_items = $this->VoucherTransactionReceivedDetails
                     ->find()
                     ->where(['receiver_user_id' => $this->checkToken()])
                     ->contain(['Users', 'Realms', 'Profiles']);
 
+                $received_total = $received_items->count();
+
+                $received_item = $this->Formatter->pagination($received_items);
+
                 $this->set([
-                    'send' => $send_items,
-                    'received' => $received_items,
-                    '_serialize' => ['send', 'received']
+                    'send' => $send_item,
+                    'send_total' => $send_total,
+                    'received' => $received_item,
+                    'received_total' => $received_total,
+                    '_serialize' => ['send', 'send_total', 'received', 'received_total']
                 ]);
             }
         } else {
@@ -596,7 +628,7 @@ class VoucherTransactionsController extends AppController
     {
         $this->request->allowMethod('post');
         $user = $this->Users->get($this->checkToken());
-        if (!$user->get('parent_id')){
+        if (!$user->get('parent_id')) {
             if ($this->checkSenderVoucher()) {
                 $updateVoucher = $this->VoucherTransactions->get($this->checkSenderVoucher());
                 $updateVoucher = $this->VoucherTransactions->patchEntity($updateVoucher, $this->request->getData());

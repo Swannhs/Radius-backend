@@ -44,7 +44,6 @@ class BalanceTransactionsController extends AppController
         $this->request->allowMethod('get');
         $user_id = $this->checkToken();
         if ($user_id) {
-            $currency = Configure::read('currency');
 //            -----------------------------------------------Check for admin only-----------------------------
             $user = $this->Users->get($user_id);
             if (!$user->get('parent_id')) {
@@ -52,12 +51,17 @@ class BalanceTransactionsController extends AppController
                     ->find()
                     ->contain('Users');
 
-                $item = $this->_format_amount_with_currency($query);
+                $total = $query->count();
+
+                $query_pg = $this->Formatter->pagination($query);
+
+                $item = $this->_format_amount_with_currency($query_pg);
 
                 $this->set([
                     'item' => $item,
+                    'totalCount' => $total,
                     'status' => true,
-                    '_serialize' => ['item', 'status']
+                    '_serialize' => ['item', 'totalCount', 'status']
                 ]);
             } else {
                 $query = $this->BalanceTransactions
@@ -65,12 +69,17 @@ class BalanceTransactionsController extends AppController
                     ->where(['user_id' => $user_id])
                     ->contain('Users');
 
-                $item = $this->_format_amount_with_currency($query);
+                $total = $query->count();
+
+                $query_pg = $this->Formatter->pagination($query);
+
+                $item = $this->_format_amount_with_currency($query_pg);
 
                 $this->set([
                     'item' => $item,
+                    'totalCount' => $total,
                     'status' => true,
-                    '_serialize' => ['item', 'status']
+                    '_serialize' => ['item', 'totalCount', 'status']
                 ]);
             }
 
@@ -96,7 +105,13 @@ class BalanceTransactionsController extends AppController
                     ->where(['sender_user_id' => $key->get('user_id')])
                     ->contain(['Users']);
 
-                $send_items = $this->_format_amount_with_currency($send_items);
+                $send_total = $send_items->count();
+
+                $query_send = $this->Formatter->pagination($send_items);
+
+                $send_item = $this->_format_amount_with_currency($query_send);
+
+
 
 
                 $received_items = $this->BalanceReceiverDetails
@@ -104,13 +119,19 @@ class BalanceTransactionsController extends AppController
                     ->where(['receiver_user_id' => $key->get('user_id')])
                     ->contain(['Users']);
 
-                $received_items = $this->_format_amount_with_currency($received_items);
+                $received_total = $received_items->count();
+
+                $query_received = $this->Formatter->pagination($received_items);
+
+                $received_item = $this->_format_amount_with_currency($query_received);
 
 
                 $this->set([
-                    'send' => $send_items,
-                    'received' => $received_items,
-                    '_serialize' => ['send', 'received']
+                    'send' => $send_item,
+                    'send_total' => $send_total,
+                    'received' => $received_item,
+                    'received_total' => $received_total,
+                    '_serialize' => ['send', 'send_total', 'received', 'received_total']
                 ]);
             } else {
                 $send_items = $this->BalanceSenderDetails
@@ -118,19 +139,29 @@ class BalanceTransactionsController extends AppController
                     ->where(['sender_user_id' => $user_id])
                     ->contain(['Users']);
 
-                $send_items = $this->_format_amount_with_currency($send_items);
+                $send_total = $send_items->count();
+
+                $query_send = $this->Formatter->pagination($send_items);
+
+                $send_item = $this->_format_amount_with_currency($query_send);
 
                 $received_items = $this->BalanceReceiverDetails
                     ->find()
                     ->where(['receiver_user_id' => $user_id])
                     ->contain(['Users']);
 
-                $received_items = $this->_format_amount_with_currency($received_items);
+                $received_total = $received_items->count();
+
+                $query_received = $this->Formatter->pagination($received_items);
+
+                $received_item = $this->_format_amount_with_currency($query_received);
 
                 $this->set([
-                    'send' => $send_items,
-                    'received' => $received_items,
-                    '_serialize' => ['send', 'received']
+                    'send' => $send_item,
+                    'send_total' => $send_total,
+                    'received' => $received_item,
+                    'received_total' => $received_total,
+                    '_serialize' => ['send', 'send_total', 'received', 'received_total']
                 ]);
             }
         } else {

@@ -342,7 +342,7 @@ class AccessProvidersController extends AppController
 
             //Unset password and token fields
             unset($row["password"]);
-            if ($user['group_name'] != 'Administrators'){
+            if ($user['group_name'] != 'Administrators') {
                 unset($row["token"]);
             }
 
