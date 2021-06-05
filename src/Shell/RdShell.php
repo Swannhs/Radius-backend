@@ -10,7 +10,7 @@ use Cake\Console\ConsoleOptionParser;
 
 class RdShell extends Shell {
 
-    public $tasks = ['Monitor','Debug','AutoClose','MonitorDynamic'];
+    public $tasks = ['Monitor','Debug','AutoClose','MonitorDynamic','AutoClean'];
 
     public function main() {
 
@@ -43,6 +43,11 @@ class RdShell extends Shell {
         if($this->args[0] == 'mon_dynamic'){
             $this->MonitorDynamic->execute();      
         }
+
+        //Clean unnecessary session info from radaccts table.
+        if($this->args[0] == 'auto_clean'){
+            $this->AutoClean->clean();     
+        }
          
     }
     
@@ -63,7 +68,7 @@ class RdShell extends Shell {
         $parser->addArgument('action', array(
             'help' => 'The action to do',
             'required' => true,
-            'choices' => array('mon','restart_check','debug_check','auto_close','mon_dynamic')
+            'choices' => array('mon','restart_check','debug_check','auto_close','mon_dynamic','auto_clean')
         ));
         
         $parser->epilog('Have alot of fun....');

@@ -1,6 +1,7 @@
 * * * * * /usr/local/bin/php /usr/share/nginx/html/cake3/rd_cake/bin/cake.php rd mon >> /var/log/cron.log 2>&1
 * * * * * /usr/local/bin/php /usr/share/nginx/html/cake3/rd_cake/bin/cake.php rd debug_check >> /var/log/cron.log 2>&1
 * * * * * /usr/local/bin/php /usr/share/nginx/html/cake3/rd_cake/bin/cake.php rd auto_close >> /var/log/cron.log 2>&1
+* * * * * /usr/local/bin/php /usr/share/nginx/html/cake3/rd_cake/bin/cake.php rd auto_clean >> /var/log/cron.log 2>&1
 * * * * * /usr/local/bin/php /usr/share/nginx/html/cake3/rd_cake/bin/cake.php accounting >> /var/log/cron.log 2>&1
 */15 * * * * /usr/local/bin/php /usr/share/nginx/html/cake3/rd_cake/bin/cake.php voucher >> /var/log/cron.log 2>&1
 */10 * * * * /usr/local/bin/php /usr/share/nginx/html/cake3/rd_cake/bin/cake.php update_user_stats >> /var/log/cron.log 2>&1
