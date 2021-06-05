@@ -146,8 +146,6 @@ class VpnClientsController extends AppController
             return;
         }
 
-        $user_id = $user['id'];
-
         if (isset($this->request->data['name']) && isset($this->request->data['password'])) {
             $voucher = $this->Vouchers->find()
                 ->where([
