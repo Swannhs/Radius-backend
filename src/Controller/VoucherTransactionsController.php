@@ -767,15 +767,23 @@ class VoucherTransactionsController extends AppController
                         'quantity_rate' => 0
                     ]);
 
-                    if ($this->VoucherTransactions->save($newOwnerCredit) && $this->VoucherTransactions->save($newSenderCredit)) {
-                        $this->set([
-                            'message' => 'Your refund is successful',
-                            'success' => true,
-                            '_serialize' => ['success', 'message']
-                        ]);
+                    if ($this->generateDetails()) {
+                        if ($this->VoucherTransactions->save($newOwnerCredit) && $this->VoucherTransactions->save($newSenderCredit)) {
+                            $this->set([
+                                'message' => 'Your refund is successful',
+                                'success' => true,
+                                '_serialize' => ['success', 'message']
+                            ]);
+                        } else {
+                            $this->set([
+                                'message' => 'Failed to refund',
+                                'success' => false,
+                                '_serialize' => ['success', 'message']
+                            ]);
+                        }
                     } else {
                         $this->set([
-                            'message' => 'Failed to refund',
+                            'message' => 'Generate details unsuccessful',
                             'success' => false,
                             '_serialize' => ['success', 'message']
                         ]);
