@@ -225,10 +225,10 @@ class DashboardController extends AppController
             ->where(['user_id' => $this->checkTokenCustom()])->first();
 
 
-        $query['paid'] = $this->Formatter->add_currency($query->paid , $currency);
-        $query['payable'] = $this->Formatter->add_currency($query->payable , $currency);
-        $query['receivable'] = $this->Formatter->add_currency($query->receivable , $currency);
-        $query['received'] = $this->Formatter->add_currency($query->received , $currency);
+        $query['paid'] = $this->Formatter->add_currency($query->paid, $currency);
+        $query['payable'] = $this->Formatter->add_currency($query->payable, $currency);
+        $query['receivable'] = $this->Formatter->add_currency($query->receivable, $currency);
+        $query['received'] = $this->Formatter->add_currency($query->received, $currency);
 
         Log::write('debug', $query);
 
@@ -392,6 +392,25 @@ class DashboardController extends AppController
             ]);
         }
     }
+
+
+//    ----------------------------Working----------------------
+
+    public function checkOwner()
+    {
+        $this->request->allowMethod('GET');
+        $user_id = $this->checkTokenCustom();
+
+        $user = $this->Users->get($user_id);
+        $owner = $this->Users->get($user['parent_id']);
+        $this->set([
+            'owner' => $owner['username'],
+            '_serialize' => ['owner']
+        ]);
+
+    }
+
+//    -----------------------------Working-------------------
 
     public function checkToken()
     {
