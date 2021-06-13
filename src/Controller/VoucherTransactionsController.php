@@ -405,11 +405,16 @@ class VoucherTransactionsController extends AppController
     {
         $this->request->allowMethod('get');
 
-        if ($this->checkToken()) {
-            $user = $this->Users->get($this->checkToken());
+        $user_id = $this->checkToken();
+
+        if ($user_id) {
+            $user = $this->Users->get($user_id);
             if (!$user->get('parent_id')) {
                 $voucher_tx = $this->VoucherTransactions
                     ->find()
+                    ->where([
+                        'Users.id' => $user_id
+                    ])
                     ->contain(['Users', 'Profiles', 'Realms']);
 
                 $total = $voucher_tx->count();
@@ -454,15 +459,15 @@ class VoucherTransactionsController extends AppController
     public function view()
     {
         $this->request->allowMethod('get');
-        if ($this->checkToken()) {
-            $user = $this->Users->get($this->checkToken());
-            if ($user->get('parent_id')) {
+        $user_id = $this->checkToken();
+        if ($user_id) {
+            $user = $this->Users->get($user_id);
+            if (!$user->get('parent_id')) {
                 $key = $this->VoucherTransactions->get($this->request->query('key'));
 
                 $send_items = $this->VoucherTransactionSendDetails
                     ->find()
                     ->where([
-                        'sender_user_id' => $key->get('user_id'),
                         'realm_id' => $key->get('realm_id'),
                         'profile_id' => $key->get('profile_id')
                     ])
@@ -495,9 +500,15 @@ class VoucherTransactionsController extends AppController
                 ]);
 
             } else {
+                $key = $this->VoucherTransactions->get($this->request->query('key'));
+
                 $send_items = $this->VoucherTransactionSendDetails
                     ->find()
-                    ->where(['sender_user_id' => $this->checkToken()])
+                    ->where([
+                        'sender_user_id' => $user_id,
+                        'realm_id' => $key->get('realm_id'),
+                        'profile_id' => $key->get('profile_id')
+                    ])
                     ->contain(['Users', 'Realms', 'Profiles']);
 
                 $send_total = $send_items->count();
@@ -506,7 +517,11 @@ class VoucherTransactionsController extends AppController
 
                 $received_items = $this->VoucherTransactionReceivedDetails
                     ->find()
-                    ->where(['receiver_user_id' => $this->checkToken()])
+                    ->where([
+                        'receiver_user_id' => $key->get('user_id'),
+                        'realm_id' => $key->get('realm_id'),
+                        'profile_id' => $key->get('profile_id')
+                    ])
                     ->contain(['Users', 'Realms', 'Profiles']);
 
                 $received_total = $received_items->count();
@@ -692,5 +707,112 @@ class VoucherTransactionsController extends AppController
         }
     }
 //-----------------------------------Generate voucher for admin only End-------------------------------------------
+
+
+//---------------------------------- Refund ---------------------------------------------
+
+    public function refund()
+    {
+        $this->request->allowMethod('POST');
+
+        $user_id = $this->checkToken();
+        if ($user_id) {
+            $data = $this->request->data();
+
+            $owner = $this->Users->get($data['partner_user_id']);
+
+            if ($owner) {
+                $sender = $this->VoucherTransactions
+                    ->find()
+                    ->where([
+                        'user_id' => $user_id,
+                        'realm_id' => $data['realm_id'],
+                        'profile_id' => $data['profile_id']
+                    ])
+                    ->first();
+
+                if ($data['transfer_amount'] <= $sender['balance']) {
+                    $receiver = $this->VoucherTransactions
+                        ->find()
+                        ->where([
+                            'user_id' => $owner['id'],
+                            'realm_id' => $data['realm_id'],
+                            'profile_id' => $data['profile_id']
+                        ])
+                        ->first();
+
+                    $updateOwnerVoucher = $this->VoucherTransactions->get($receiver['id']);
+                    $updateOwnerCredit = $this->VoucherTransactions->patchEntity($updateOwnerVoucher, $data);
+
+                    $newOwnerCredit = $updateOwnerCredit->set([
+                        'user_id' => $updateOwnerVoucher->user_id,
+                        'profile_id' => $updateOwnerVoucher->profile_id,
+                        'realm_id' => $updateOwnerVoucher->realm_id,
+                        'credit' => $data['transfer_amount'] + $updateOwnerVoucher->credit,
+                        'debit' => $updateOwnerVoucher->debit - $data['transfer_amount'],
+                        'balance' => $updateOwnerVoucher->balance + $data['transfer_amount'],
+                        'quantity_rate' => 0
+                    ]);
+
+                    $updateSellerVoucher = $this->VoucherTransactions->get($sender['id']);
+                    $updateSenderCredit = $this->VoucherTransactions->patchEntity($updateSellerVoucher, $data);
+
+                    $newSenderCredit = $updateSenderCredit->set([
+                        'user_id' => $updateSenderCredit->user_id,
+                        'profile_id' => $updateSenderCredit->profile_id,
+                        'realm_id' => $updateSenderCredit->realm_id,
+                        'credit' => $updateSenderCredit->credit - $data['transfer_amount'],
+                        'debit' => $updateSenderCredit->debit + $data['transfer_amount'],
+                        'balance' => $updateSenderCredit->balance - $data['transfer_amount'],
+                        'quantity_rate' => 0
+                    ]);
+
+                    if ($this->generateDetails()) {
+                        if ($this->VoucherTransactions->save($newOwnerCredit) && $this->VoucherTransactions->save($newSenderCredit)) {
+                            $this->set([
+                                'message' => 'Your refund is successful',
+                                'success' => true,
+                                '_serialize' => ['success', 'message']
+                            ]);
+                        } else {
+                            $this->set([
+                                'message' => 'Failed to refund',
+                                'success' => false,
+                                '_serialize' => ['success', 'message']
+                            ]);
+                        }
+                    } else {
+                        $this->set([
+                            'message' => 'Generate details unsuccessful',
+                            'success' => false,
+                            '_serialize' => ['success', 'message']
+                        ]);
+                    }
+
+
+                } else {
+                    $this->set([
+                        'message' => 'You don not have enough credit',
+                        'success' => false,
+                        '_serialize' => ['success', 'message']
+                    ]);
+                }
+
+            } else {
+                $this->set([
+                    'message' => 'Your owner is not available',
+                    'success' => false,
+                    '_serialize' => ['success', 'message']
+                ]);
+            }
+
+        } else {
+            $this->set([
+                'message' => 'Invalid token',
+                'success' => false,
+                '_serialize' => ['success', 'message']
+            ]);
+        }
+    }
 
 }

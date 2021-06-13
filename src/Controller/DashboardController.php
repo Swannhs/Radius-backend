@@ -185,9 +185,9 @@ class DashboardController extends AppController
             $credit = 0;
             $debit = 0;
             foreach ($voucherBalance as $row) {
-                $balance = $row->balance;
-                $credit = $row->credit;
-                $debit = $row->debit;
+                $balance += $row->balance;
+                $credit += $row->credit;
+                $debit += $row->debit;
             }
             $item = array();
             $row = array();
