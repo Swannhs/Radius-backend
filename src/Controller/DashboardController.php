@@ -393,24 +393,31 @@ class DashboardController extends AppController
         }
     }
 
-
-//    ----------------------------Working----------------------
-
     public function checkOwner()
     {
         $this->request->allowMethod('GET');
-        $user_id = $this->checkTokenCustom();
+        $user = $this->Aa->user_for_token($this);
+        if(!$user){
+            return;
+        }
 
-        $user = $this->Users->get($user_id);
-        $owner = $this->Users->get($user['parent_id']);
-        $this->set([
-            'owner' => $owner['username'],
-            '_serialize' => ['owner']
-        ]);
+        $user = $this->Users->get($user['id']);
 
+        if(!$user['parent_id']){
+            $this->set([
+                'owner' => $user['username'],
+                'success' => true,
+                '_serialize' => ['owner', 'success']
+            ]);
+        } else {
+            $owner = $this->Users->get($user['parent_id']);
+            $this->set([
+                'owner' => $owner['username'],
+                'success' => true,
+                '_serialize' => ['owner', 'success']
+            ]);
+        }
     }
-
-//    -----------------------------Working-------------------
 
     public function checkToken()
     {
