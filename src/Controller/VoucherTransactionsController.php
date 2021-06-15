@@ -422,7 +422,6 @@ class VoucherTransactionsController extends AppController
                 }
 
 
-
                 $voucher_tx = $this->VoucherTransactions
                     ->find()
                     ->whereInList('Users.id', $users)
@@ -461,6 +460,64 @@ class VoucherTransactionsController extends AppController
 
     //    -------------------------------Configuring For balance transaction End----------------------------------------------
 
+
+    public function sendCredit()
+    {
+        $this->request->allowMethod('GET');
+        $user = $this->Aa->user_for_token($this);
+        if (!$user) {
+            return;
+        }
+        $key = $this->VoucherTransactions->get($this->request->query('key'));
+
+        $send_items = $this->VoucherTransactionSendDetails
+            ->find()
+            ->where([
+                'sender_user_id' => $key->get('user_id'),
+                'realm_id' => $key->get('realm_id'),
+                'profile_id' => $key->get('profile_id')
+            ])
+            ->contain(['Users', 'Realms', 'Profiles']);
+
+        $send_total = $send_items->count();
+
+        $item = $this->Formatter->pagination($send_items);
+        $this->set([
+            'success' => true,
+            'item' => $item,
+            'total' => $send_total,
+            '_serialize' => ['success', 'item', 'total']
+        ]);
+    }
+
+    public function receivedCredit(){
+        $this->request->allowMethod('GET');
+        $user = $this->Aa->user_for_token($this);
+        if (!$user) {
+            return;
+        }
+        $key = $this->VoucherTransactions->get($this->request->query('key'));
+
+        $received_items = $this->VoucherTransactionReceivedDetails
+            ->find()
+            ->where([
+                'receiver_user_id' => $key->get('user_id'),
+                'realm_id' => $key->get('realm_id'),
+                'profile_id' => $key->get('profile_id')
+            ])
+            ->contain(['Users', 'Realms', 'Profiles']);
+
+        $received_total = $received_items->count();
+
+        $item = $this->Formatter->pagination($received_items);
+        $this->set([
+            'success' => true,
+            'item' => $item,
+            'total' => $received_total,
+            '_serialize' => ['success', 'item', 'total']
+        ]);
+    }
+/*
     public function view()
     {
         $this->request->allowMethod('get');
@@ -552,6 +609,7 @@ class VoucherTransactionsController extends AppController
             ]);
         }
     }
+*/
 
 
     /**
@@ -565,7 +623,7 @@ class VoucherTransactionsController extends AppController
         $this->request->allowMethod('post');
 
         $user = $this->Aa->user_for_token($this);
-        if(!$user) {
+        if (!$user) {
             return;
         }
 
@@ -577,13 +635,13 @@ class VoucherTransactionsController extends AppController
         if ($sender_transaction) {
             //Check available blance
             if ($sender_transaction->get('balance') >= $this->request->getData('transfer_amount')) {
-                //Validate Receiver 
+                //Validate Receiver
                 if ($this->validateTransferReceiver($this->request->getData('partner_user_id'), $user_id)) {
                     // Checking existing credits for same realm & profile
                     $receiver_transaction = $this->checkReceiverCredits($this->request->getData('partner_user_id'));
                     if ($receiver_transaction) {
                         if ($this->updateTransfer($sender_transaction, $receiver_transaction)) {
-                            //todo: need to add balance details later 
+                            //todo: need to add balance details later
                             $this->set([
                                 'message' => 'Transaction successful',
                                 'success' => true,
@@ -643,7 +701,7 @@ class VoucherTransactionsController extends AppController
         $this->request->allowMethod('post');
 
         $user = $this->Aa->user_for_token($this);
-        if(!$user){
+        if (!$user) {
             return;
         }
         $user_id = $user['id'];
@@ -690,7 +748,8 @@ class VoucherTransactionsController extends AppController
         }
     }
 
-    private function updateAdminCredits($user_id, $receiver_transaction){
+    private function updateAdminCredits($user_id, $receiver_transaction)
+    {
 
         $this->saveAdminDetailsTransactions($user_id);
 
@@ -731,7 +790,7 @@ class VoucherTransactionsController extends AppController
         $this->request->allowMethod('post');
 
         $user = $this->Aa->user_for_token($this);
-        if(!$user) {
+        if (!$user) {
             return;
         }
 
@@ -745,15 +804,15 @@ class VoucherTransactionsController extends AppController
         if ($sender_transaction) {
             //Check available blance
             if ($sender_transaction->get('balance') >= $this->request->getData('transfer_amount')) {
-                //Validate Receiver 
+                //Validate Receiver
                 if ($this->validateRefundReceiver($user_id, $this->request->getData('partner_user_id'))) {
                     // Checking existing credits for same realm & profile
                     $receiver_transaction = $this->checkReceiverCredits($user_id);
                     if ($receiver_transaction) {
                         if ($this->updateTransfer($sender_transaction, $receiver_transaction)) {
-                            //todo: need to add balance details later 
+                            //todo: need to add balance details later
                             $this->set([
-                                'message' => 'Transaction successful',
+                                'message' => 'Refund successful',
                                 'success' => true,
                                 '_serialize' => ['success', 'message']
                             ]);
