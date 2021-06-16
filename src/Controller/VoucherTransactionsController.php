@@ -867,9 +867,9 @@ class VoucherTransactionsController extends AppController
             ->where([
                 'Users.id' => $user['id']
             ])
-            ->contain(['Users', 'Profiles'])
-//            ->select(['profile_id', 'profile_name'])
-        ;
+            ->select(['Profiles.id', 'Profiles.name'])
+            ->contain(['Users', 'Profiles']);
+
         foreach ($transactions as $i){
             array_push($item, $i->profile);
         }
