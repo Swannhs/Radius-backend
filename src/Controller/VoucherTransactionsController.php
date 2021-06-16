@@ -490,7 +490,8 @@ class VoucherTransactionsController extends AppController
         ]);
     }
 
-    public function receivedCredit(){
+    public function receivedCredit()
+    {
         $this->request->allowMethod('GET');
         $user = $this->Aa->user_for_token($this);
         if (!$user) {
@@ -517,99 +518,99 @@ class VoucherTransactionsController extends AppController
             '_serialize' => ['success', 'item', 'total']
         ]);
     }
-/*
-    public function view()
-    {
-        $this->request->allowMethod('get');
-        $user_id = $this->checkToken();
-        if ($user_id) {
-            $user = $this->Users->get($user_id);
-            if (!$user->get('parent_id')) {
-//                ------------For Admin Section-----------------
-                $key = $this->VoucherTransactions->get($this->request->query('key'));
+    /*
+        public function view()
+        {
+            $this->request->allowMethod('get');
+            $user_id = $this->checkToken();
+            if ($user_id) {
+                $user = $this->Users->get($user_id);
+                if (!$user->get('parent_id')) {
+    //                ------------For Admin Section-----------------
+                    $key = $this->VoucherTransactions->get($this->request->query('key'));
 
-                $send_items = $this->VoucherTransactionSendDetails
-                    ->find()
-                    ->where([
-                        'sender_user_id' => $key->get('user_id'),
-                        'realm_id' => $key->get('realm_id'),
-                        'profile_id' => $key->get('profile_id')
-                    ])
-                    ->contain(['Users', 'Realms', 'Profiles']);
+                    $send_items = $this->VoucherTransactionSendDetails
+                        ->find()
+                        ->where([
+                            'sender_user_id' => $key->get('user_id'),
+                            'realm_id' => $key->get('realm_id'),
+                            'profile_id' => $key->get('profile_id')
+                        ])
+                        ->contain(['Users', 'Realms', 'Profiles']);
 
-                $send_total = $send_items->count();
+                    $send_total = $send_items->count();
 
-                $send_item = $this->Formatter->pagination($send_items);
+                    $send_item = $this->Formatter->pagination($send_items);
 
 
-                $received_items = $this->VoucherTransactionReceivedDetails
-                    ->find()
-                    ->where([
-                        'Users.id' => $user_id,
-                        'receiver_user_id' => $key->get('user_id'),
-                        'realm_id' => $key->get('realm_id'),
-                        'profile_id' => $key->get('profile_id')
-                    ])
-                    ->contain(['Users', 'Realms', 'Profiles']);
+                    $received_items = $this->VoucherTransactionReceivedDetails
+                        ->find()
+                        ->where([
+                            'Users.id' => $user_id,
+                            'receiver_user_id' => $key->get('user_id'),
+                            'realm_id' => $key->get('realm_id'),
+                            'profile_id' => $key->get('profile_id')
+                        ])
+                        ->contain(['Users', 'Realms', 'Profiles']);
 
-                $received_total = $received_items->count();
+                    $received_total = $received_items->count();
 
-                $received_item = $this->Formatter->pagination($received_items);
+                    $received_item = $this->Formatter->pagination($received_items);
 
-                $this->set([
-                    'send' => $send_item,
-                    'send_total' => $send_total,
-                    'received' => $received_item,
-                    'received_total' => $received_total,
-                    '_serialize' => ['send', 'send_total', 'received', 'received_total']
-                ]);
+                    $this->set([
+                        'send' => $send_item,
+                        'send_total' => $send_total,
+                        'received' => $received_item,
+                        'received_total' => $received_total,
+                        '_serialize' => ['send', 'send_total', 'received', 'received_total']
+                    ]);
 
+                } else {
+                    $key = $this->VoucherTransactions->get($this->request->query('key'));
+
+                    $send_items = $this->VoucherTransactionSendDetails
+                        ->find()
+                        ->where([
+                            'sender_user_id' => $user_id,
+                            'realm_id' => $key->get('realm_id'),
+                            'profile_id' => $key->get('profile_id')
+                        ])
+                        ->contain(['Users', 'Realms', 'Profiles']);
+
+                    $send_total = $send_items->count();
+
+                    $send_item = $this->Formatter->pagination($send_items);
+
+                    $received_items = $this->VoucherTransactionReceivedDetails
+                        ->find()
+                        ->where([
+                            'receiver_user_id' => $key->get('user_id'),
+                            'realm_id' => $key->get('realm_id'),
+                            'profile_id' => $key->get('profile_id')
+                        ])
+                        ->contain(['Users', 'Realms', 'Profiles']);
+
+                    $received_total = $received_items->count();
+
+                    $received_item = $this->Formatter->pagination($received_items);
+
+                    $this->set([
+                        'send' => $send_item,
+                        'send_total' => $send_total,
+                        'received' => $received_item,
+                        'received_total' => $received_total,
+                        '_serialize' => ['send', 'send_total', 'received', 'received_total']
+                    ]);
+                }
             } else {
-                $key = $this->VoucherTransactions->get($this->request->query('key'));
-
-                $send_items = $this->VoucherTransactionSendDetails
-                    ->find()
-                    ->where([
-                        'sender_user_id' => $user_id,
-                        'realm_id' => $key->get('realm_id'),
-                        'profile_id' => $key->get('profile_id')
-                    ])
-                    ->contain(['Users', 'Realms', 'Profiles']);
-
-                $send_total = $send_items->count();
-
-                $send_item = $this->Formatter->pagination($send_items);
-
-                $received_items = $this->VoucherTransactionReceivedDetails
-                    ->find()
-                    ->where([
-                        'receiver_user_id' => $key->get('user_id'),
-                        'realm_id' => $key->get('realm_id'),
-                        'profile_id' => $key->get('profile_id')
-                    ])
-                    ->contain(['Users', 'Realms', 'Profiles']);
-
-                $received_total = $received_items->count();
-
-                $received_item = $this->Formatter->pagination($received_items);
-
                 $this->set([
-                    'send' => $send_item,
-                    'send_total' => $send_total,
-                    'received' => $received_item,
-                    'received_total' => $received_total,
-                    '_serialize' => ['send', 'send_total', 'received', 'received_total']
+                    'message' => 'Invalid token',
+                    'status' => false,
+                    '_serialize' => ['status', 'message']
                 ]);
             }
-        } else {
-            $this->set([
-                'message' => 'Invalid token',
-                'status' => false,
-                '_serialize' => ['status', 'message']
-            ]);
         }
-    }
-*/
+    */
 
 
     /**
@@ -852,6 +853,32 @@ class VoucherTransactionsController extends AppController
                     '_serialize' => ['success', 'message']]
             );
         }
+    }
+
+    public function profileAp()
+    {
+        $user = $this->_ap_right_check();
+        if (!$user) {
+            return;
+        }
+
+        $item = array();
+        $transactions = $this->VoucherTransactions->find()
+            ->where([
+                'Users.id' => $user['id']
+            ])
+            ->contain(['Users', 'Profiles'])
+//            ->select(['profile_id', 'profile_name'])
+        ;
+        foreach ($transactions as $i){
+            array_push($item, $i->profile);
+        }
+
+        $this->set(array(
+            'items' => $item,
+            'success' => true,
+            '_serialize' => array('items', 'success')
+        ));
     }
 
 }
