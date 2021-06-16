@@ -294,7 +294,7 @@ class VouchersController extends AppController
         }
 
         $this->_getVouchers($user, $query);
-        
+
     }
 
 
@@ -516,6 +516,10 @@ class VouchersController extends AppController
                 // generate batch name adding suffix of realm as prefix of batch name
                 $this->request->data['batch'] = $this->VoucherGenerator->generateBatchName($s);
 
+//                ---------------------------------Swann----------------------------------------
+                $batch = $this->request->data['batch'];
+//                ---------------------------------Swann----------------------------------------
+
                 // if active_on_first login is not selected from UI then find Rd-Voucher values from profile
                 if(!$this->request->data['activate_on_login']){
                     $this->request->data['activate_on_login'] = 1;
@@ -526,7 +530,7 @@ class VouchersController extends AppController
                 $qty = 1;//Default value
                 $counter = 0;
                 $repl_fields = [
-                    'id', 'name', 'batch', 'created', 'extra_name', 'extra_value',
+                    'id', 'name','password', 'status', 'batch', 'created', 'extra_name', 'extra_value',
                     'realm', 'realm_id', 'profile', 'profile_id', 'expire', 'time_valid'
                 ];
 
@@ -586,7 +590,8 @@ class VouchersController extends AppController
                 $this->set(array(
                     'success' => true,
                     'data' => $created,
-                    '_serialize' => array('success', 'data')
+                    'batch' => $batch,
+                    '_serialize' => array('success', 'data', 'batch')
                 ));
             } else {
                 $this->set([
@@ -614,7 +619,7 @@ class VouchersController extends AppController
         if (!$this->request->is('post')) {
             throw new MethodNotAllowedException();
         }
-        
+
         $user = $this->_ap_right_check();
         if (!$user) {
             return;
