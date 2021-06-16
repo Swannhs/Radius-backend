@@ -202,6 +202,12 @@ class VpnClientsController extends AppController
 
         Log::write('debug', json_encode($responseObject));
 
+        //set voucher status to used if new
+        if($voucher->status == 'new'){
+            $voucher->status = 'used';
+            $this->Vouchers->save($voucher);
+        }
+
         $this->set(array(
             'data' => $responseObject,
             'success' => true,
