@@ -640,10 +640,14 @@ class VouchersController extends AppController
                 $this->request->data['password'] = $pwd;
                 $entity->extra_value = ''; //reset device owner
                 $this->{$this->main_model}->patchEntity($entity, $this->request->data());
+
+                $item = array();
+                array_push($item, $entity);
                 if ($this->{$this->main_model}->save($entity)) {
                     $this->set(array(
                         'success' => true,
-                        '_serialize' => array('success')
+                        'data' => $item,
+                        '_serialize' => array('success', 'data')
                     ));
                 } else {
                     $this->set([
