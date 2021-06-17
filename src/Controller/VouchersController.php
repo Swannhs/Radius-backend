@@ -430,12 +430,12 @@ class VouchersController extends AppController
     }
 
 //    --------------------------Checking Sender Balance -------------------------------
-    private function _checkSenderTransaction($user_id)
+    private function _checkCredits($user_id)
     {
         return $this->VoucherTransactions
             ->find()
             ->where([
-                'user_id' => $user_id == 0 ? $this->checkToken() : $user_id,
+                'user_id' => $user_id,
                 'profile_id' => $this->request->data('profile_id'),
                 'realm_id' => $this->request->data('realm_id')
             ])
@@ -452,19 +452,16 @@ class VouchersController extends AppController
 
         $user_id = $user['id'];
 
-        $transaction = $this->_checkSenderTransaction($this->request->getData('user_id'));
-        // Log::write('debug', 'transaction: '.((string)$transaction));
+        //Get the owner's id
+        if ($this->request->data['user_id'] == '0') { //This is the holder of the token - override '0'
+            $this->request->data['user_id'] = $user_id;
+        }
+
+        $transaction = $this->_checkCredits($this->request->data['user_id']);
+
         if ($transaction) {
-            if ($transaction->balance >= $this->request->getData('quantity')) {
-                $transaction->balance = $transaction->balance - $this->request->getData('quantity');
-                $transaction->debit = $transaction->debit + $this->request->getData('quantity');
-                $this->VoucherTransactions->save($transaction);
-
-                //Get the owner's id
-                if ($this->request->data['user_id'] == '0') { //This is the holder of the token - override '0'
-                    $this->request->data['user_id'] = $user_id;
-                }
-
+            $quantity = $this->request->data['quantity'];
+            if ($transaction->balance >= $quantity) {
                 $check_items = array(
                     'activate_on_login',
                     'never_expire'
@@ -516,9 +513,7 @@ class VouchersController extends AppController
                 // generate batch name adding suffix of realm as prefix of batch name
                 $this->request->data['batch'] = $this->VoucherGenerator->generateBatchName($s);
 
-//                ---------------------------------Swann----------------------------------------
                 $batch = $this->request->data['batch'];
-//                ---------------------------------Swann----------------------------------------
 
                 // if active_on_first login is not selected from UI then find Rd-Voucher values from profile
                 if(!$this->request->data['activate_on_login']){
@@ -586,6 +581,10 @@ class VouchersController extends AppController
 
                 }
 
+                //debit amount from transaction
+                $transaction->balance = $transaction->balance - $quantity;
+                $transaction->debit = $transaction->debit + $quantity;
+                $this->VoucherTransactions->save($transaction);
 
                 $this->set(array(
                     'success' => true,

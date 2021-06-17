@@ -56,31 +56,16 @@ class DashboardController extends AppController
         $this->loadComponent('Formatter');
     }
 
-
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-
-
     function checkTokenCustom()
     {
         $user = $this->Aa->user_for_token($this);
         return $user['id'];
     }
 
-
-//    --------------------------------------Voucher Start-----------------------------------------
     public function voucher()
     {
+        $this->request->allowMethod('get');
+        
         $user = $this->Aa->user_for_token($this);
         if (!$user) {   //If not a valid user
             return;
@@ -88,94 +73,52 @@ class DashboardController extends AppController
 
         $user_id = $user['id'];
 
-        if ($user['group_name'] != 'Administrators') {
-            $vouchers = $this->Vouchers->find()
+        $vouchers = $this->Vouchers->find()
                 ->where(['user_id' => $user_id])
                 ->count();
 
-            $active = $this->Vouchers->find()
-                ->where([
-                    'user_id' => $user_id,
-                    'status' => 'used'
-                ])->count();
+        $active = $this->Vouchers->find()
+            ->where([
+                'user_id' => $user_id,
+                'status' => 'used'
+            ])->count();
 
-            $conn = ConnectionManager::get('default');
-            $stmt = $conn->execute('SELECT count(vc.id) as online FROM rd.vouchers
-                vc INNER JOIN rd.radacct rac ON vc.name = rac.username
-                WHERE vc.user_id = :user_id AND rac.acctstarttime
-                IS NOT NULL AND rac.acctstoptime IS NULL', ['user_id' => $user_id]);
-            $onlinePack = $stmt->fetchAll('assoc');
-            $online = $onlinePack[0];
+        $conn = ConnectionManager::get('default');
+        $stmt = $conn->execute('SELECT count(vc.id) as online FROM rd.vouchers
+            vc INNER JOIN rd.radacct rac ON vc.name = rac.username
+            WHERE vc.user_id = :user_id AND rac.acctstarttime
+            IS NOT NULL AND rac.acctstoptime IS NULL', ['user_id' => $user_id]);
+        $onlinePack = $stmt->fetchAll('assoc');
+        $online = $onlinePack[0];
 
-            $item = array();
-            $row = array();
+        $item = array();
+        $row = array();
 
-            $online = intval($online{'online'});
+        $online = intval($online{'online'});
 
-            $row['active'] = $active;
-            $row['total'] = $vouchers;
-            $row['online'] = $online;
+        $row['active'] = $active;
+        $row['total'] = $vouchers;
+        $row['online'] = $online;
 
-            array_push($item, $row);
+        array_push($item, $row);
 
-            $this->set([
-                'item' => $item[0],
-                'success' => true,
-                '_serialize' => ['success', 'item']
-            ]);
-        } else {
-            $vouchers = $this->Vouchers->find()
-                ->count();
-
-            $active = $this->Vouchers->find()
-                ->where([
-                    'status' => 'used'
-                ])
-                ->count();
-
-//                $conn = ConnectionManager::get('default');
-//                $stmt = $conn->execute('SELECT count(vc.id) FROM rd.vouchers
-//                vc INNER JOIN rd.radacct rac ON vc.name = rac.username
-//                WHERE vc.user_id = :user_id AND rac.acctstarttime
-//                IS NOT NULL AND rac.acctstoptime IS NULL', ['user_id' => $user_id]);
-//                $onlinePack = $stmt->fetchAll('assoc');
-//                $online = $onlinePack[0];
-
-            $online = $this->Radaccts->find()
-                ->where([
-                    'acctstarttime' !== null,
-                    'acctstoptime' => null
-                ])
-                ->count();
-
-            $item = array();
-            $row = array();
-
-            $row['active'] = $active;
-            $row['total'] = $vouchers;
-            $row['online'] = $online;
-
-            array_push($item, $row);
-
-            $this->set([
-                'item' => $item[0],
-                'success' => true,
-                '_serialize' => ['success', 'item']
-            ]);
-        }
-
-
+        $this->set([
+            'item' => $item[0],
+            'success' => true,
+            '_serialize' => ['success', 'item']
+        ]);
     }
 
-
-//    --------------------------------------Voucher End-----------------------------------------
-
-
-//    -------------------------------------Credit Start----------------------------------------
     public function credit()
     {
         $this->request->allowMethod('get');
-        $user_id = $this->checkTokenCustom();
+
+        $user = $this->Aa->user_for_token($this);
+        if (!$user) {   //If not a valid user
+            return;
+        }
+
+        $user_id = $user['id'];
 
         if ($user_id) {
             $voucherBalance = $this->VoucherTransactions->find()
@@ -213,12 +156,17 @@ class DashboardController extends AppController
 
 
     }
-//    -------------------------------------Credit End----------------------------------------
 
-//    --------------------------------------Cash Start-----------------------------------------
     public function cash()
     {
         $this->request->allowMethod('get');
+
+        $user = $this->Aa->user_for_token($this);
+        if (!$user) {   //If not a valid user
+            return;
+        }
+
+        $user_id = $user['id'];
 
         $currency = Configure::read('currency');
         $query = $this->BalanceTransactions->find()
@@ -239,22 +187,21 @@ class DashboardController extends AppController
         ]);
     }
 
-//    --------------------------------------Cash End-----------------------------------------
+    public function serverCount()
+    {
+        $this->request->allowMethod('get');
 
+        if(!$this->Aa->admin_check($this)){   //Only for admin users!
+            return;
+        } 
 
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
-//---------------+++++++++++++++++++++++++++++Customize++++++++++++++++++++------------------
+        $servers = $this->Servers->find()->count();
+        $this->set([
+            'servers' => $servers,
+            'success' => true,
+            '_serialize' => ['success', 'servers']
+        ]);
+    }
 
 
     public function getToken()
@@ -843,25 +790,6 @@ class DashboardController extends AppController
             'white_label' => $white_label,
             'show_wizard' => $show_wizard
         ];
-    }
-
-
-    public function serverCount()
-    {
-        if ($this->checkTokenCustom()) {
-            $servers = $this->Servers->find()->count();
-            $this->set([
-                'servers' => $servers,
-                'success' => true,
-                '_serialize' => ['success', 'servers']
-            ]);
-        } else {
-            $this->set([
-                'message' => 'Invalid token',
-                'success' => false,
-                '_serialize' => ['message', 'success']
-            ]);
-        }
     }
 
     private function _build_admin_tabs($user_id, $style = 'take_setting')

@@ -10,10 +10,8 @@ use Cake\Core\Configure\Engine\PhpConfig;
 use Cake\Utility\Inflector;
 
 /**
- * BalanceTransactions Controller
+ * AccessProvidersController
  *
- * @property \App\Model\Table\VoucherTransactionsTable $VoucherTransactions
- * @property \App\Model\Table\BalanceTransactionsTable $BalanceTransactions
  * @property \App\Model\Table\UsersTable $Users
  *
  */
@@ -49,8 +47,6 @@ class AccessProvidersController extends AppController
         $this->loadModel('Groups');
         $this->loadModel('TreeTags');
         $this->loadModel('UserSettings');
-        $this->loadModel('VoucherTransactions');
-        $this->loadModel('BalanceTransactions');
 
         $this->loadComponent('Aa');
         $this->loadComponent('GridButtons');
@@ -73,24 +69,6 @@ class AccessProvidersController extends AppController
         $user = $this->Aa->user_for_token($this);
         return $user['id'];
     }
-
-    public function test()
-    {
-
-        $node = $this->{$this->main_model}->find()->where(['Users.id' => 51])->first();
-
-        if ($node) {
-            $this->{$this->main_model}->patchEntity($node, ['parent_id' => 50]);
-            $this->{$this->main_model}->save($node);
-        };
-
-        $this->set([
-            'success' => true,
-            '_serialize' => ['success']
-        ]);
-        return;
-    }
-
 
     public function exportCsv()
     {
@@ -483,9 +461,7 @@ class AccessProvidersController extends AppController
         $this->request->data['language_id'] = $language;
         $this->request->data['country_id'] = $country;
 
-        if (!$this->request->data('role')) {
-            $this->request->data['role'] = 'agent';
-        }
+        $this->request->data['role'] = 'agent';
 
         //Get the group ID for AP's
         $ap_name = Configure::read('group.ap');
@@ -499,47 +475,9 @@ class AccessProvidersController extends AppController
         //The rest of the attributes should be same as the form..
         $entity = $this->{$this->main_model}->newEntity($this->request->data());
         if ($this->{$this->main_model}->save($entity)) {
-
-
             $new_id = $entity->id; // The new id
             // Now set the notification threshold and frequency
             //$this->UserSettings->deleteAll(['user_id' => $new_id,'name' => 'notif_threshold']);
-
-
-//----------------------------------------Voucher Transactions-----------------------------------------
-//            $voucherTransaction = $this->VoucherTransactions->newEntity();
-//            $voucherTransaction->set([
-//                'user_id' => $new_id,
-//                'user_name' => $entity->username,
-//                'credit' => 0,
-//                'debit' => 0,
-//                'balance' => 0
-//            ]);
-//            if ($this->VoucherTransactions->save($voucherTransaction)) {
-//                $message = 'Voucher balance generated successful';
-//            } else {
-//                $message = 'Generate Voucher balance failed';
-//            }
-
-//----------------------------------------Voucher Transactions END-----------------------------------------
-
-
-//----------------------------------------Balance Transactions---------------------------------------------
-            $balanceTransaction = $this->BalanceTransactions->newEntity();
-            $balanceTransaction->set([
-                'user_id' => $new_id,
-                'user_name' => $entity->username,
-                'payable' => 0,
-                'paid' => 0,
-                'receivable' => 0,
-                'received' => 0,
-            ]);
-            if ($this->BalanceTransactions->save($balanceTransaction)) {
-                $message = 'User is created successful';
-            }
-//----------------------------------------Balance Transactions END-----------------------------------------
-
-
             $us_entity = $this->UserSettings->newEntity();
             $us_entity->user_id = $new_id;
             $us_entity->name = 'notif_threshold';
@@ -553,9 +491,8 @@ class AccessProvidersController extends AppController
             $us_entity->value = 1;
             $this->UserSettings->save($us_entity);
             $this->set(array(
-                'message' => $message,
                 'success' => true,
-                '_serialize' => ['message', 'success']
+                '_serialize' => ['success']
             ));
         } else {
             $message = 'Error';

@@ -857,7 +857,7 @@ class VoucherTransactionsController extends AppController
 
     public function profileAp()
     {
-        $user = $this->_ap_right_check();
+        $user = $this->Aa->user_for_token($this);
         if (!$user) {
             return;
         }
