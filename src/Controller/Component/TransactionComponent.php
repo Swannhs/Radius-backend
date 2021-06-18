@@ -85,7 +85,7 @@ class TransactionComponent extends Component {
 						return [
 							'message' => 'Transaction successful',
 							'success' => true,
-                            'type' => 'insert',
+                            'type' => 'update',
 							'_serialize' => ['success', 'message']
 						];
 
@@ -101,7 +101,7 @@ class TransactionComponent extends Component {
 						return [
 							'message' => 'Transaction successful',
 							'success' => true,
-                            'type' => 'update',
+                            'type' => 'insert',
 							'_serialize' => ['success', 'message']
 						];
 

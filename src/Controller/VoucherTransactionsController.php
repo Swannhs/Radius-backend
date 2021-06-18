@@ -48,46 +48,12 @@ class VoucherTransactionsController extends AppController
         $this->loadComponent('Transaction');
     }
 
-//------------------------------ Only for valid token----------------------------------
     function checkToken()
     {
         $user = $this->Aa->user_for_token($this);
         return $user['id'];
     }
-//------------------------------ Only for valid token----------------------------------
 
-
-//    ------------------------------ Checking for all validation voucher sender Start----------------------------------
-    private function checkSenderCredits($sender_id)
-    {
-        return $this->VoucherTransactions
-            ->find()
-            ->where([
-                'user_id' => $sender_id,
-                'profile_id' => $this->request->data('profile_id'),
-                'realm_id' => $this->request->data('realm_id')
-            ])->first();
-    }
-//    ------------------------------ Checking for all validation voucher sender End----------------------------------
-
-
-//    ------------------------------ Checking for exact voucher receiver Start----------------------------------
-
-
-    private function checkReceiverCredits($receiver_id)
-    {
-        return $this->VoucherTransactions
-            ->find()
-            ->where([
-                'user_id' => $receiver_id,
-                'profile_id' => $this->request->data('profile_id'),
-                'realm_id' => $this->request->data('realm_id')
-            ])->first();
-    }
-//    ------------------------------ Checking for exact voucher receiver End----------------------------------
-
-
-//-------------------------------Not needed any more---------------------------
     public function getUsers()
     {
         $this->request->allowMethod('get');
@@ -103,7 +69,6 @@ class VoucherTransactionsController extends AppController
         ]);
     }
 
-// ----------------------------------Check for valid user Start---------------------------------
     function validateTransferPartners($sender_id, $receiver_id)
     {
         return $this->Users->find()->select('id')
@@ -121,10 +86,7 @@ class VoucherTransactionsController extends AppController
                 'parent_id' => $receiver_id
             ]);
     }
-// ----------------------------------Check for valid user End---------------------------------
 
-
-//    ---------------------------Is not necessary at this moment------------------------------
     function getUsername($user_id)
     {
         $user = $this->Users->find()->select('username')
