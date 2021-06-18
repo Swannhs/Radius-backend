@@ -269,14 +269,7 @@ class VoucherGeneratorComponent extends Component {
     }
 
 	private function _random_number(){
-		$duplicate_flag = true;
-		while($duplicate_flag){		
-			$v_value = rand ( 100000,999999);
-			if(!in_array("v_value", $this->voucherNames)){
-				$duplicate_flag = false; //Break the loop - we ar unique;
-				array_push($this->voucherNames, $v_value);
-			}
-		}
+		$v_value = rand(100000, 999999);
 		return $v_value; //We are unique and we added ourselves to the existing list
 	}
 

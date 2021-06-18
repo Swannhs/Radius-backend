@@ -51,6 +51,7 @@ class VouchersController extends AppController
         $this->loadComponent('JsonErrors');
         $this->loadComponent('VoucherGenerator');
         $this->loadComponent('TimeCalculations');
+        $this->loadComponent('Transaction');
 
     }
 
@@ -429,19 +430,6 @@ class VouchersController extends AppController
         return 'Few seconds left!';
     }
 
-//    --------------------------Checking Sender Balance -------------------------------
-    private function _checkCredits($user_id)
-    {
-        return $this->VoucherTransactions
-            ->find()
-            ->where([
-                'user_id' => $user_id,
-                'profile_id' => $this->request->data('profile_id'),
-                'realm_id' => $this->request->data('realm_id')
-            ])
-            ->first();
-    }
-
     public function add()
     {
         //__ Authentication + Authorization __
@@ -457,10 +445,22 @@ class VouchersController extends AppController
             $this->request->data['user_id'] = $user_id;
         }
 
-        $transaction = $this->_checkCredits($this->request->data['user_id']);
+        $transaction = $this->Transaction->checkBalance($this->request->data['user_id']);
 
         if ($transaction) {
+            $sender_id = $transaction->user_id;
+            $receiver_id = $this->Transaction->get_app_id_for_realm($this->request->data['realm_id']);
+            if(!$receiver_id){
+                $this->set([
+                    'success' => false,
+                    'message' => 'Something went wrong! Ask your upline to add your Application.',
+                    '_serialize' => ['success', 'message']
+                ]);
+                return;
+            }
+
             $quantity = $this->request->data['quantity'];
+
             if ($transaction->balance >= $quantity) {
                 $check_items = array(
                     'activate_on_login',
@@ -569,7 +569,6 @@ class VouchersController extends AppController
                     $entity = $this->{$this->main_model}->newEntity($this->request->data());
                     $this->{$this->main_model}->save($entity);
 
-
                     if (!$entity->errors()) { //Hopefully taking care of duplicates is as simple as this :-)
                         $counter = $counter + 1;
                         $row = array();
@@ -581,17 +580,25 @@ class VouchersController extends AppController
 
                 }
 
-                //debit amount from transaction
-                $transaction->balance = $transaction->balance - $quantity;
-                $transaction->debit = $transaction->debit + $quantity;
-                $this->VoucherTransactions->save($transaction);
+                $this->request->data['transfer_amount'] = $quantity;
+                $this->request->data['quantity_rate'] = 0;
 
-                $this->set(array(
-                    'success' => true,
-                    'data' => $created,
-                    'batch' => $batch,
-                    '_serialize' => array('success', 'data', 'batch')
-                ));
+                //debit amount from transaction
+                $transaction_response = $this->Transaction->transfer($sender_id, $receiver_id);
+                if($transaction_response['success']){
+                    $this->set(array(
+                        'success' => true,
+                        'data' => $created,
+                        'batch' => $batch,
+                        '_serialize' => array('success', 'data', 'batch')
+                    ));
+                } else {
+                    $this->set([
+                        'success' => false,
+                        'message' => 'Something went wrong! Your transaction may might be terminated.',
+                        '_serialize' => ['success', 'message']
+                    ]);
+                }
             } else {
                 $this->set([
                     'success' => false,
