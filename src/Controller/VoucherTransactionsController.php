@@ -510,6 +510,7 @@ class VoucherTransactionsController extends AppController
                 'Users.id' => $user['id']
             ])
             ->select(['Profiles.id', 'Profiles.name'])
+            ->group('Profiles.id')
             ->contain(['Users', 'Profiles']);
 
         foreach ($transactions as $i){
